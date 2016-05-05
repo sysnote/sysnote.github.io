@@ -261,6 +261,132 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/05/flashcachegroup/" itemprop="url">
+                  flashcachegroup浅析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-05T16:02:35+08:00" content="2016-05-05">
+              2016-05-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/05/flashcachegroup/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/05/flashcachegroup/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="&#x7B80;&#x4ECB;"><a href="#&#x7B80;&#x4ECB;" class="headerlink" title="&#x7B80;&#x4ECB;"></a>&#x7B80;&#x4ECB;</h1><p>flashcachegroup&#x80FD;&#x591F;&#x4F7F;&#x7528;&#x4E00;&#x5757;&#x6216;&#x591A;&#x5757;ssd&#x6765;&#x7F13;&#x5B58;&#x4E00;&#x7EC4;hdd&#x786C;&#x76D8;&#xFF0C;&#x786C;&#x76D8;&#x7EC4;&#x80FD;&#x591F;&#x52A8;&#x6001;&#x589E;&#x52A0;&#x5220;&#x9664;&#x786C;&#x76D8;&#xFF0C;ssd&#x7F13;&#x5B58;&#x80FD;&#x591F;&#x6574;&#x4E2A;&#x786C;&#x76D8;&#x7EC4;&#x800C;&#x4E0D;&#x4EC5;&#x4EC5;&#x662F;&#x4E00;&#x5757;&#x786C;&#x76D8;&#x3002;<br>&#x5176;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF0C;&#x53C2;&#x8003;&#x5B98;&#x65B9;&#x8BF4;&#x660E;<a href="https://github.com/lihuiba/flashcachegroup&#xFF0C;&#x8FD9;&#x91CC;&#x501F;&#x7528;&#x4ECB;&#x7ECD;&#x91CC;&#x7684;&#x7ED3;&#x6784;&#x56FE;">https://github.com/lihuiba/flashcachegroup&#xFF0C;&#x8FD9;&#x91CC;&#x501F;&#x7528;&#x4ECB;&#x7ECD;&#x91CC;&#x7684;&#x7ED3;&#x6784;&#x56FE;</a>.<br><img src="/2016/05/05/flashcachegroup/fcg.png" alt="fcg"></p>
+<h1 id="1-&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup"><a href="#1-&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup" class="headerlink" title="1.&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup"></a>1.&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup</h1><h2 id="1&#xFF09;-&#x5B89;&#x88C5;flashcache"><a href="#1&#xFF09;-&#x5B89;&#x88C5;flashcache" class="headerlink" title="1&#xFF09; &#x5B89;&#x88C5;flashcache"></a>1&#xFF09; &#x5B89;&#x88C5;flashcache</h2><p>&#x9996;&#x5148;&#x9700;&#x8981;&#x5B89;&#x88C5;flashcache&#xFF0C;&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x6E90;&#x7801;&#x5B89;&#x88C5;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#git clone https://github.com/facebook/flashcache.git</span></span><br><span class="line"><span class="comment">#cd flashcache</span></span><br></pre></td></tr></table></figure></p>
+<p>&#x5207;&#x6362;&#x5230;&#x7A33;&#x5B9A;&#x7248;stable_v3.1.1<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#git checkout stable_v3.1.1</span></span><br></pre></td></tr></table></figure></p>
+<p>flashcache&#x7F16;&#x8BD1;&#x9700;&#x8981;&#x4F9D;&#x8D56;KERNE_TREE<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#make KERNEL_TREE=/usr/src/linux-headers-3.10.11-openstack-amd64/</span></span><br><span class="line"><span class="comment">#make install</span></span><br></pre></td></tr></table></figure></p>
+<p>&#x52A0;&#x8F7D;flashcache&#x6A21;&#x5757;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#modprobe flashcache</span></span><br><span class="line"><span class="comment">#lsmod | grep flashcache</span></span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/05/flashcachegroup/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/05/sheepdog-erasure-code/" itemprop="url">
                   sheepdog中的erasure code实现机制
                 </a>
@@ -647,7 +773,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
