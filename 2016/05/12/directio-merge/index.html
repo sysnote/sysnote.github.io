@@ -1,0 +1,705 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="kernel,directio," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="System Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5728;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x300A;&amp;#x5757;&amp;#x8BBE;&amp;#x5907;&amp;#x5185;&amp;#x6838;&amp;#x53C2;&amp;#x6570;max_segments&amp;#x548C;max_sectors_kb&amp;#x89E3;&amp;#x6790;&amp;#x300B;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E86;max_sectors_kb&amp;#x8FD9;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="direct IO中io合并的奇怪现象分析">
+<meta property="og:url" content="http://yoursite.com/2016/05/12/directio-merge/index.html">
+<meta property="og:site_name" content="System Notes">
+<meta property="og:description" content="&amp;#x5728;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x300A;&amp;#x5757;&amp;#x8BBE;&amp;#x5907;&amp;#x5185;&amp;#x6838;&amp;#x53C2;&amp;#x6570;max_segments&amp;#x548C;max_sectors_kb&amp;#x89E3;&amp;#x6790;&amp;#x300B;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E86;max_sectors_kb&amp;#x8FD9;">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat1.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat2.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat3.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat4.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat5.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat6.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/blk_queue_bio_3.2.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/blk_queue_bio_3.10.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/generic_file_aio_write.png">
+<meta property="og:image" content="http://yoursite.com/2016/05/12/directio-merge/do_blockdev_direct_IO.png">
+<meta property="og:updated_time" content="2016-05-12T09:30:09.435Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="direct IO中io合并的奇怪现象分析">
+<meta name="twitter:description" content="&amp;#x5728;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x300A;&amp;#x5757;&amp;#x8BBE;&amp;#x5907;&amp;#x5185;&amp;#x6838;&amp;#x53C2;&amp;#x6570;max_segments&amp;#x548C;max_sectors_kb&amp;#x89E3;&amp;#x6790;&amp;#x300B;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E86;max_sectors_kb&amp;#x8FD9;">
+<meta name="twitter:image" content="http://yoursite.com/2016/05/12/directio-merge/iostat1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> direct IO中io合并的奇怪现象分析 | System Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">System Notes</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                direct IO中io合并的奇怪现象分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-12T17:07:13+08:00" content="2016-05-12">
+              2016-05-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/12/directio-merge/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/directio-merge/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x300A;&#x5757;&#x8BBE;&#x5907;&#x5185;&#x6838;&#x53C2;&#x6570;max_segments&#x548C;max_sectors_kb&#x89E3;&#x6790;&#x300B;&#x4ECB;&#x7ECD;&#x4E86;max_sectors_kb&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x5BF9;device mapper&#x8BBE;&#x5907;&#x548C;&#x8F6F;raid&#x8BBE;&#x5907;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x5B9E;&#x9645;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#xFF0C;&#x53D1;&#x73B0;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x73B0;&#x8C61;&#xFF1A;&#x4E00;&#x5757;&#x7269;&#x7406;&#x76D8;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x76D8;&#x4E0A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;device mapper&#x8BBE;&#x5907;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x8FD9;&#x4E2A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;direct IO&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5927;&#x5757;&#x5199;&#x6216;&#x8005;&#x987A;&#x5E8F;&#x5927;&#x5757;&#x5199;&#xFF08;&#x968F;&#x673A;&#x8BFB;&#x548C;&#x987A;&#x5E8F;&#x8BFB;&#x6CA1;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x8981;&#x5927;&#x4E8E;dm&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#xFF0C;&#x4F46;&#x662F;&#x5C0F;&#x4E8E;dm&#x5E95;&#x5C42;&#x8BBE;&#x5907;&#xFF08;&#x8FD9;&#x91CC;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF09;&#x7684;max_sectors_kb&#xFF0C;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x53D1;&#x73B0;&#x5728;3.2&#x5185;&#x6838;&#x91CC;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x5E76;&#x6CA1;&#x6709;&#x5408;&#x5E76;&#xFF0C;&#x4F46;&#x662F;&#x5728;3.10&#x5185;&#x6838;&#x4E0B;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x786E;&#x662F;&#x5408;&#x5E76;&#x4E86;&#xFF08;&#x5408;&#x5E76;&#x540E;&#x7684;&#x5927;&#x5C0F;&#x4E3A;&#x7528;&#x6237;&#x53D1;&#x7684;io&#x5757;&#x5927;&#x5C0F;&#xFF09;&#x3002;&#x5177;&#x4F53;&#x73B0;&#x8C61;&#x4E0B;&#x9762;&#x4EE5;&#x4F8B;&#x5B50;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
+<h1 id="1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"><a href="#1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;" class="headerlink" title="1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"></a>1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;</h1><p>&#x8FD9;&#x91CC;&#x9009;&#x53D6;3.2.57&#x5185;&#x6838;&#x548C;3.10.11&#x5185;&#x6838;&#x4F5C;&#x4E3A;&#x5BF9;&#x6BD4;&#x3002;</p>
+<h2 id="1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"><a href="#1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;" class="headerlink" title="1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"></a>1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;</h2><p>&#x7269;&#x7406;&#x76D8;sdg&#xFF0C;&#x5728;&#x5176;&#x4E0A;&#x521B;&#x5EFA;&#x7684;10G&#x7684;device mapper&#x8BBE;&#x5907;dmtest1&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x8BBE;&#x5907;&#x4E3A;dm-71<br>1&#xFF09;&#x9ED8;&#x8BA4;&#x7684;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_segments</span></span><br><span class="line">128</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_segments</span></span><br><span class="line">128</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>&#x4F7F;&#x7528;fio&#x6D4B;&#x8BD5;&#xFF0C;&#x914D;&#x7F6E;&#x5982;&#x4E0B;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">rw=randwrite</span><br><span class="line">direct=1</span><br><span class="line">numjobs=1</span><br><span class="line">ioengine=sync</span><br><span class="line">bsrange=256k-256k</span><br><span class="line">rate_iops=10</span><br><span class="line">runtime=120</span><br><span class="line">group_reporting</span><br><span class="line">[disk00]</span><br><span class="line">filename=/dev/dm-71</span><br></pre></td></tr></table></figure></p>
+<p>&#x7136;&#x540E;iostat&#x67E5;&#x770B;io&#x72B6;&#x6001;<br><img src="/2016/05/12/directio-merge/iostat1.png" alt="iostat1"><br>&#x53EF;&#x4EE5;&#x770B;&#x5230;dm&#x8BBE;&#x5907;&#x548C;sdg&#x4E0A;&#x7684;io&#x5927;&#x5C0F;&#x90FD;&#x662F;256KB&#x3002;</p>
+<p>2&#xFF09;&#x4FEE;&#x6539;dm&#x8BBE;&#x5907;max_sectors_kb&#x53C2;&#x6570;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># echo 64 &gt; /sys/block/dm-71/queue/max_sectors_kb</span></span><br></pre></td></tr></table></figure></p>
+<p>&#x540C;&#x6837;&#x4F7F;&#x7528;fio&#x6D4B;&#x8BD5;&#xFF0C;iostat&#x67E5;&#x770B;<br><img src="/2016/05/12/directio-merge/iostat2.png" alt="iostat2"><br>&#x53EA;&#x8C03;&#x6574;&#x4E86;dm&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#x53C2;&#x6570;&#xFF0C;&#x6CA1;&#x6709;&#x8C03;&#x6574;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x7684;&#xFF08;&#x8FD8;&#x662F;512&#xFF09;&#xFF0C;&#x671F;&#x671B;&#x7684;&#x7ED3;&#x679C;&#x662F;dm&#x8BBE;&#x5907;&#x4E0A;&#x5E73;&#x5747;io&#x5927;&#x5C0F;&#x662F;64kb&#xFF0C;&#x7136;&#x540E;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x4E0A;&#x5E02;256kb&#xFF0C;&#x4F46;&#x662F;&#x7ED3;&#x679C;&#x843D;&#x5230;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x4E0A;&#x7684;io&#x5E76;&#x6CA1;&#x6709;&#x5408;&#x5E76;&#x3002;</p>
+<h2 id="1-2-3-10-11&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"><a href="#1-2-3-10-11&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;" class="headerlink" title="1.2  3.10.11&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"></a>1.2  3.10.11&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;</h2><p>&#x7269;&#x7406;&#x76D8;sdg&#xFF0C;&#x5728;&#x5176;&#x4E0A;&#x521B;&#x5EFA;&#x7684;10G&#x7684;device mapper&#x8BBE;&#x5907;dmtest1&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x8BBE;&#x5907;&#x4E3A;dm-65<br>1&#xFF09;&#x9ED8;&#x8BA4;&#x7684;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_segments</span></span><br><span class="line">128</span><br><span class="line"><span class="comment"># cat /sys/block/dm-65/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/dm-65/queue/max_segments</span></span><br><span class="line">128</span><br></pre></td></tr></table></figure></p>
+<p>fio&#x6D4B;&#x8BD5;&#x662F;&#x548C;&#x4E0A;&#x9762;&#x914D;&#x7F6E;&#x4E00;&#x6837;&#xFF0C;<br>iostat&#x67E5;&#x770B;io&#x60C5;&#x51B5;&#x5982;&#x4E0B;<br><img src="/2016/05/12/directio-merge/iostat3.png" alt="iostat3"></p>
+<p>2&#xFF09;&#x4FEE;&#x6539;dm&#x8BBE;&#x5907;max_sectors_kb&#x53C2;&#x6570;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># echo 64 &gt; /sys/block/dm-65/queue/max_sectors_kb</span></span><br></pre></td></tr></table></figure></p>
+<p>&#x540C;&#x6837;&#x7684;fio&#x6D4B;&#x8BD5;&#xFF0C;iostat&#x7ED3;&#x679C;<br><img src="/2016/05/12/directio-merge/iostat4.png" alt="iostat4"><br>&#x7ED3;&#x679C;dm&#x8BBE;&#x5907;&#x4E0A;io&#x53D8;&#x6210;64KB&#xFF0C;&#x800C;&#x6700;&#x540E;&#x843D;&#x5230;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x4E0A;&#x786E;&#x662F;&#x5408;&#x5E76;&#x540E;&#x7684;&#x7ED3;&#x679C;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7528;&#x6237;&#x53D1;&#x7684;256KB&#x3002;&#x8DDF;&#x671F;&#x671B;&#x7684;&#x7ED3;&#x679C;&#x4E00;&#x81F4;&#x3002;<br>&#x90A3;&#x4E48;&#x5728;&#x8FD9;&#x4E24;&#x4E2A;&#x5185;&#x6838;&#x4E0B;&#x5230;&#x5E95;&#x662F;&#x4EC0;&#x4E48;&#x5730;&#x65B9;&#x5BFC;&#x81F4;&#x4E86;&#x7ED3;&#x679C;&#x7684;&#x4E0D;&#x540C;&#x5462;&#xFF1F;</p>
+<h1 id="2-&#x4F7F;&#x7528;systemtap&#x5206;&#x6790;"><a href="#2-&#x4F7F;&#x7528;systemtap&#x5206;&#x6790;" class="headerlink" title="2.&#x4F7F;&#x7528;systemtap&#x5206;&#x6790;"></a>2.&#x4F7F;&#x7528;systemtap&#x5206;&#x6790;</h1><p>&#x9996;&#x5148;&#x7B80;&#x5355;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;direct io&#x65F6;&#x7684;io&#x8C03;&#x7528;&#x8DEF;&#x5F84;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5;write&#x4E3A;&#x4F8B;&#x3002;<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sys_write&#x7CFB;&#x7EDF;&#x8C03;&#x7528;  --&gt;  vfs_write() --&gt; do_sync_write() --&gt; blkdev_aio_write() --&gt; __generic_file_aio_write() --&gt; generic_file_direct_write() --&gt; blkdev_direct_IO() --&gt; __blockdev_direct_IO()  --&gt;  dio_bio_submit()  -&gt;  submit_bio()  --&gt; generic_make_request() --&gt; &#x4F1A;&#x8C03;&#x7528;q-&gt;make_request_fn()  --&gt; blk_queue_bio()&#xFF0C;&#x5728;&#x521D;&#x59CB;&#x5316;scsi&#x78C1;&#x76D8;&#x65F6;&#x6CE8;&#x518C;&#x7684;&#xFF0C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x5904;&#x7406;io&#x5408;&#x5E76;&#x7684;&#xFF08;&#x5305;&#x542B;&#x5404;&#x4E2A;&#x8C03;&#x5EA6;&#x7B97;&#x6CD5;&#x7684;&#x8C03;&#x7528;&#xFF09;  --&gt;  &#x6700;&#x540E;&#x4F1A;&#x89E6;&#x53D1;&#x8C03;&#x7528;scsi_request_fn()&#xFF0C;&#x8FD9;&#x4E2A;&#x4E5F;&#x662F;&#x5728;&#x521D;&#x59CB;&#x5316;scsi&#x78C1;&#x76D8;&#x7684;&#x65F6;&#x5019;&#x6CE8;&#x518C;&#x7684;&#xFF0C;&#x6709;&#x591A;&#x4E2A;&#x5730;&#x65B9;&#x89E6;&#x53D1;scsi_request_fn  --&gt; scsi_dispatch_cmd&#x4E0B;&#x53D1;&#x5230;&#x5E95;&#x5C42;&#x8BBE;&#x5907;</span><br></pre></td></tr></table></figure></p>
+<p>&#x7136;&#x540E;&#x4F7F;&#x7528;systemtap&#x5728;&#x5173;&#x952E;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x5904;&#x63A2;&#x6D4B;&#xFF0C;&#x4E3A;&#x4E86;&#x65B9;&#x4FBF;&#x7EDF;&#x8BA1;&#xFF0C;fio&#x5757;&#x5927;&#x5C0F;&#x8BBE;&#x7F6E;&#x4E3A;32KB&#xFF0C;device mapper&#x7684;max_sectors_kb&#x8BBE;&#x7F6E;&#x4E3A;16&#x3002;</p>
+<h2 id="2-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;"><a href="#2-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;" class="headerlink" title="2.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;"></a>2.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># echo 16 &gt; /sys/block/dm-71/queue/max_sectors_kb</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2016/05/12/directio-merge/iostat5.png" alt="iostat5"><br>stap&#x7ED3;&#x679C;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[generic_file_direct_write] size:32768</span><br><span class="line">[__blockdev_direct_IO] nr_segs:1, iov:{.iov_base=0x17ad000, .iov_len=32768}</span><br><span class="line">[submit_page_section] bi_sector:11221952, size:4096</span><br><span class="line">[dio_send_cur_page] bi_sector:11221952, size:4096</span><br><span class="line">[submit_page_section] bi_sector:11221952, size:8192</span><br><span class="line">[dio_send_cur_page] bi_sector:11221952, size:8192</span><br><span class="line">[submit_page_section] bi_sector:11221952, size:12288</span><br><span class="line">[dio_send_cur_page] bi_sector:11221952, size:12288</span><br><span class="line">[submit_page_section] bi_sector:11221952, size:16384</span><br><span class="line">[dio_send_cur_page] bi_sector:11221952, size:16384</span><br><span class="line">[dio_bio_submit] bi_sector:11221952, size:16384</span><br><span class="line">[submit_bio] bi_sector:11221952, size:16384</span><br><span class="line">[blk_queue_bio] bi_sector:179006400, size:16384</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[submit_page_section] bi_sector:11221984, size:4096</span><br><span class="line">[dio_send_cur_page] bi_sector:11221984, size:4096</span><br><span class="line">[submit_page_section] bi_sector:11221984, size:8192</span><br><span class="line">[dio_send_cur_page] bi_sector:11221984, size:8192</span><br><span class="line">[dio_send_cur_page] bi_sector:11221984, size:12288</span><br><span class="line">[dio_bio_submit] bi_sector:11221984, size:16384</span><br><span class="line">[submit_bio] bi_sector:11221984, size:16384</span><br><span class="line">[blk_queue_bio] bi_sector:179006432, size:16384</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[__generic_file_aio_write] nr_segs:1, iov:{.iov_base=0x17ad000, .iov_len=32768}</span><br><span class="line">[generic_file_direct_write] size:32768</span><br><span class="line">[__blockdev_direct_IO] nr_segs:1, iov:{.iov_base=0x17ad000, .iov_len=32768}</span><br></pre></td></tr></table></figure></p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5728;&#x8C03;&#x7528;blk_queue_bio&#x4E4B;&#x540E;&#x5C31;&#x7ACB;&#x5373;&#x8C03;&#x7528;&#x4E86;scsi_request_fn<br>&#x628A;scsi_request_fn&#x7684;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x6808;&#x6253;&#x5370;&#x51FA;&#x6765;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x786E;&#x5B9E;&#x662F;&#x7531;blk_queue_bio&#x89E6;&#x53D1;&#x7684;scsi_request_fn&#x3002;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">0xffffffffa000798a : scsi_request_fn+0x35/0x51e [scsi_mod]</span><br><span class="line">0xffffffff8119ac61 : blk_queue_bio+0x26f/0x28a [kernel]</span><br><span class="line">0xffffffff8119969e : generic_make_request+0x90/0xcf [kernel]</span><br><span class="line">0xffffffff811997b0 : submit_bio+0xd3/0xf1 [kernel]</span><br><span class="line">0xffffffff811238a0 : dio_bio_submit+0x6e/0x8d [kernel]</span><br><span class="line">0xffffffff811246f8 : __blockdev_direct_IO+0x8ee/0xa67 [kernel]</span><br><span class="line">0xffffffff8112250e : blkdev_direct_IO+0x4e/0x53 [kernel]</span><br><span class="line">0xffffffff810b5ed8 : generic_file_direct_write+0xdc/0x14c [kernel]</span><br><span class="line">0xffffffff810b60dc : __generic_file_aio_write+0x194/0x278 [kernel]</span><br><span class="line">0xffffffff81122825 : blkdev_aio_write+0x1f/0x61 [kernel]</span><br><span class="line">0xffffffff810fa560 : <span class="keyword">do</span>_sync_write+0xb4/0xec [kernel]</span><br><span class="line">0xffffffff810fac51 : vfs_write+0xa2/0xe9 [kernel]</span><br><span class="line">0xffffffff810fae2e : sys_write+0x45/0x6b [kernel]</span><br><span class="line">0xffffffff81354a12 : system_call_fastpath+0x16/0x1b [kernel]</span><br></pre></td></tr></table></figure></p>
+<p>&#x4E3A;&#x4E86;&#x5BF9;&#x6BD4;&#xFF0C;&#x4E0B;&#x9762;&#x770B;&#x770B;3.10.11&#x5185;&#x6838;&#x4E0B;&#x7684;stap&#x7ED3;&#x679C;&#x3002;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">===========================</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line"> 0xffffffffa000798a : scsi_request_fn+0x35/0x51e [scsi_mod]</span><br><span class="line"> 0xffffffff81197599 : blk_run_queue+0x1d/0x2f [kernel]</span><br><span class="line"> 0xffffffffa0006abd : scsi_run_queue+0x1c5/0x241 [scsi_mod]</span><br><span class="line"> 0xffffffffa000850a : scsi_next_<span class="built_in">command</span>+0x2d/0x39 [scsi_mod]</span><br><span class="line"> 0xffffffffa00089a7 : scsi_io_completion+0x450/0x4ca [scsi_mod]</span><br><span class="line"> 0xffffffff8119dcd4 : blk_<span class="keyword">done</span>_softirq+0x65/0x74 [kernel]</span><br><span class="line"> 0xffffffff8104c36e : __<span class="keyword">do</span>_softirq+0xb9/0x177 [kernel]</span><br><span class="line"> 0xffffffff81356c6c : call_softirq+0x1c/0x30 [kernel]</span><br><span class="line"> 0xffffffff8100fa21 : <span class="keyword">do</span>_softirq+0x3c/0x7b [kernel]</span><br><span class="line"> 0xffffffff8104c5d6 : irq_<span class="built_in">exit</span>+0x3c/0x99 [kernel]</span><br><span class="line"> 0xffffffff813566de : call_<span class="keyword">function</span>_single_interrupt+0x6e/0x80 [kernel]</span><br><span class="line">===========================</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line"> 0xffffffffa000798a : scsi_request_fn+0x35/0x51e [scsi_mod]</span><br><span class="line"> 0xffffffff81197599 : blk_run_queue+0x1d/0x2f [kernel]</span><br><span class="line"> 0xffffffffa0006abd : scsi_run_queue+0x1c5/0x241 [scsi_mod]</span><br><span class="line"> 0xffffffffa000850a : scsi_next_<span class="built_in">command</span>+0x2d/0x39 [scsi_mod]</span><br><span class="line"> 0xffffffffa00089a7 : scsi_io_completion+0x450/0x4ca [scsi_mod]</span><br><span class="line"> 0xffffffff8119dcd4 : blk_<span class="keyword">done</span>_softirq+0x65/0x74 [kernel]</span><br><span class="line"> 0xffffffff8104c36e : __<span class="keyword">do</span>_softirq+0xb9/0x177 [kernel]</span><br><span class="line"> 0xffffffff81356c6c : call_softirq+0x1c/0x30 [kernel]</span><br><span class="line"> 0xffffffff8100fa21 : <span class="keyword">do</span>_softirq+0x3c/0x7b [kernel]</span><br><span class="line"> 0xffffffff8104c5d6 : irq_<span class="built_in">exit</span>+0x3c/0x99 [kernel]</span><br><span class="line"> 0xffffffff813566de : call_<span class="keyword">function</span>_single_interrupt+0x6e/0x80 [kernel]</span><br><span class="line">===========================</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line"> 0xffffffffa000798a : scsi_request_fn+0x35/0x51e [scsi_mod]</span><br><span class="line"> 0xffffffff811a58c6 : cfq_kick_queue+0x25/0x34 [kernel]</span><br><span class="line"> 0xffffffff8105b5cf : process_one_work+0x161/0x269 [kernel]</span><br><span class="line"> 0xffffffff8105c598 : worker_thread+0xc2/0x145 [kernel]</span><br><span class="line"> 0xffffffff8105f6d9 : kthread+0x76/0x7e [kernel]</span><br><span class="line"> 0xffffffff81356b74 : kernel_thread_helper+0x4/0x10 [kernel]</span><br><span class="line"> 0xffffffff8105f663 : kthread+0x0/0x7e [kernel] (inexact)</span><br><span class="line"> 0xffffffff81356b70 : kernel_thread_helper+0x0/0x10 [kernel] (inexact)</span><br><span class="line">===========================</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-2-3-10-11&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;"><a href="#2-2-3-10-11&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;" class="headerlink" title="2.2  3.10.11&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;"></a>2.2  3.10.11&#x5185;&#x6838;&#x4E0B;&#x5206;&#x6790;</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># echo 16 &gt; /sys/block/dm-65/queue/max_sectors_kb</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2016/05/12/directio-merge/iostat6.png" alt="iostat6"><br>stap&#x7ED3;&#x679C;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[generic_file_direct_write] size:32768</span><br><span class="line">[__blockdev_direct_IO] nr_segs:1, iov:{.iov_base=0x1753000, .iov_len=32768}</span><br><span class="line">[submit_page_section] size:4096</span><br><span class="line">[dio_send_cur_page] size:4096</span><br><span class="line">[submit_page_section] size:8192</span><br><span class="line">[dio_send_cur_page] size:8192</span><br><span class="line">[submit_page_section] size:12288</span><br><span class="line">[dio_send_cur_page] size:12288</span><br><span class="line">[submit_page_section] size:16384</span><br><span class="line">[dio_send_cur_page] size:16384</span><br><span class="line">[dio_bio_submit] size:16384</span><br><span class="line">[submit_bio] size:16384</span><br><span class="line">[blk_queue_bio] bi_sector:175962944, size:16384</span><br><span class="line">[submit_page_section] size:4096</span><br><span class="line">[dio_send_cur_page] size:4096</span><br><span class="line">[submit_page_section] size:8192</span><br><span class="line">[dio_send_cur_page] size:8192</span><br><span class="line">[dio_send_cur_page] size:12288</span><br><span class="line">[dio_bio_submit] size:16384</span><br><span class="line">[submit_bio] size:16384</span><br><span class="line">[blk_queue_bio] bi_sector:175962976, size:16384</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line">[generic_file_direct_write] size:32768</span><br><span class="line">[__blockdev_direct_IO] nr_segs:1, iov:{.iov_base=0x1753000, .iov_len=32768}</span><br></pre></td></tr></table></figure></p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x7B2C;&#x4E00;&#x6B21;blk_queue_bio&#x540E;&#xFF08;&#x4E5F;&#x5C31;&#x662F;&#x521A;&#x597D;16kb&#x65F6;&#xFF09;&#x5E76;&#x6CA1;&#x6709;&#x7ACB;&#x5373;&#x8C03;&#x7528;scsi_request_fn&#xFF0C;&#x800C;&#x662F;&#x5728;&#x7B2C;&#x4E8C;&#x6B21;&#xFF08;&#x4E5F;&#x5C31;&#x662F;&#x7B2C;&#x4E8C;&#x4E2A;16kb&#xFF0C;&#x5408;&#x5E76;&#x8D77;&#x6765;&#x5C31;&#x662F;&#x7528;&#x6237;&#x53D1;&#x7684;32kb&#xFF09;blk_queue_bio&#x4E4B;&#x540E;&#x518D;&#x89E6;&#x53D1;&#x7684;scsi_request_fn&#xFF0C;&#x800C;&#x4E14;&#x4E0B;&#x9762;&#x5217;&#x51FA;scsi_request_fn&#x7684;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x6808;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x5E76;&#x4E0D;&#x662F;blk_queue_bio&#x89E6;&#x53D1;&#x7684;scsi_request_fn&#x3002;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"> 0xffffffffa00070b6 : scsi_request_fn+0x39/0x4f4 [scsi_mod]</span><br><span class="line"> 0xffffffff811b21c3 : __blk_run_queue_uncond+0x1e/0x26 [kernel]</span><br><span class="line"> 0xffffffff811b229c : queue_unplugged+0x54/0x78 [kernel]</span><br><span class="line"> 0xffffffff811b2de1 : blk_flush_plug_list+0x1b1/0x1c8 [kernel]</span><br><span class="line"> 0xffffffff81395748 : io_schedule+0x41/0x6c [kernel]</span><br><span class="line"> 0xffffffff8113bbb6 : <span class="keyword">do</span>_blockdev_direct_IO+0xa14/0xae8 [kernel]</span><br><span class="line"> 0xffffffff81138fac : blkdev_direct_IO+0x4e/0x53 [kernel]</span><br><span class="line"> 0xffffffff810c645e : generic_file_direct_write+0xe3/0x14a [kernel]</span><br><span class="line"> 0xffffffff810c65e0 : __generic_file_aio_write+0x11b/0x1ff [kernel]</span><br><span class="line"> 0xffffffff811394db : blkdev_aio_write+0x44/0x93 [kernel]</span><br><span class="line"> 0xffffffff811100bf : <span class="keyword">do</span>_sync_write+0x55/0x7c [kernel]</span><br><span class="line"> 0xffffffff81110abc : vfs_write+0x9d/0x103 [kernel]</span><br><span class="line"> 0xffffffff81110dae : sys_write+0x51/0x80 [kernel]</span><br><span class="line"> 0xffffffff8139b529 : system_call_fastpath+0x16/0x1b [kernel]</span><br><span class="line"> </span><br><span class="line">==========================</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line"> 0xffffffffa00070b6 : scsi_request_fn+0x39/0x4f4 [scsi_mod]</span><br><span class="line"> 0xffffffff811b21c3 : __blk_run_queue_uncond+0x1e/0x26 [kernel]</span><br><span class="line"> 0xffffffff811b260f : blk_run_queue+0x1d/0x2f [kernel]</span><br><span class="line"> 0xffffffffa0006f08 : scsi_run_queue+0x1c3/0x249 [scsi_mod]</span><br><span class="line"> 0xffffffffa0007e88 : scsi_next_<span class="built_in">command</span>+0x2d/0x39 [scsi_mod]</span><br><span class="line"> 0xffffffffa00082f0 : scsi_io_completion+0x41b/0x48a [scsi_mod]</span><br><span class="line"> 0xffffffff811b697d : blk_<span class="keyword">done</span>_softirq+0x65/0x74 [kernel]</span><br><span class="line"> 0xffffffff8104262a : __<span class="keyword">do</span>_softirq+0xec/0x209 [kernel]</span><br><span class="line"> 0xffffffff81042812 : irq_<span class="built_in">exit</span>+0x3f/0x83 [kernel]</span><br><span class="line"> 0xffffffff8139c39d : call_<span class="keyword">function</span>_single_interrupt+0x6d/0x80 [kernel]</span><br><span class="line">==========================</span><br><span class="line">[scsi_request_fn] id:6, lun:0, channel:0</span><br><span class="line"> 0xffffffffa00070b6 : scsi_request_fn+0x39/0x4f4 [scsi_mod]</span><br><span class="line"> 0xffffffff811b21c3 : __blk_run_queue_uncond+0x1e/0x26 [kernel]</span><br><span class="line"> 0xffffffff811c4ffa : cfq_kick_queue+0x25/0x34 [kernel]</span><br><span class="line"> 0xffffffff81053638 : process_one_work+0x191/0x294 [kernel]</span><br><span class="line"> 0xffffffff81053aea : worker_thread+0x121/0x1e7 [kernel]</span><br><span class="line"> 0xffffffff81057fd9 : kthread+0x81/0x89 [kernel]</span><br><span class="line"> 0xffffffff8139b47c : ret_from_fork+0x7c/0xb0 [kernel]</span><br></pre></td></tr></table></figure></p>
+<h1 id="3-&#x5206;&#x6790;blk-queue-bio&#x4EE3;&#x7801;"><a href="#3-&#x5206;&#x6790;blk-queue-bio&#x4EE3;&#x7801;" class="headerlink" title="3.&#x5206;&#x6790;blk_queue_bio&#x4EE3;&#x7801;"></a>3.&#x5206;&#x6790;blk_queue_bio&#x4EE3;&#x7801;</h1><p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x5206;&#x6790;&#x770B;&#x51FA;&#x95EE;&#x9898;&#x51FA;&#x5728;blk_queue_bio&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#xFF0C;&#x4E0B;&#x9762;&#x5C31;&#x770B;&#x770B;&#x5DEE;&#x522B;&#x5728;&#x54EA;&#x3002;<br><strong>3.2.57&#x5185;&#x6838;&#x4E2D;blk_queue_bio</strong><br><img src="/2016/05/12/directio-merge/blk_queue_bio_3.2.png" alt="blk_queue_bio_3.2"></p>
+<p><strong>3.10.11&#x5185;&#x6838;&#x4E2D;blk_queue_bio</strong><br><img src="/2016/05/12/directio-merge/blk_queue_bio_3.10.png" alt="blk_queue_bio_3.10"></p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8DDF;plug=current-&gt;plug&#x8FD9;&#x4E2A;&#x6709;&#x5173;&#xFF0C;plug&#x662F;blk_plug&#x7ED3;&#x6784;&#x3002;<br>blk_plug&#x5141;&#x8BB8;&#x6784;&#x5EFA;&#x4E00;&#x4E2A;&#x7F13;&#x5B58;&#x788E;&#x7247;IO&#x7684;&#x8BF7;&#x6C42;&#x961F;&#x5217;&#xFF0C;&#x80FD;&#x591F;&#x4FDD;&#x6301;io&#x788E;&#x7247;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x80FD;&#x5C06;&#x987A;&#x5E8F;&#x8BF7;&#x6C42;&#x5408;&#x5E76;&#x6210;&#x4E00;&#x4E2A;&#x5927;&#x7684;&#x8BF7;&#x6C42;&#x3002; &#x5408;&#x5E76;&#x540E;&#x8BF7;&#x6C42;&#x6279;&#x91CF;&#x4ECE;per-task&#x94FE;&#x8868;&#x79FB;&#x52A8;&#x5230;&#x8BBE;&#x5907;&#x8BF7;&#x6C42;&#x961F;&#x5217;&#xFF0C;&#x51CF;&#x5C11;&#x4E86;&#x8BBE;&#x5907;&#x8BF7;&#x6C42;&#x961F;&#x5217;&#x9501;&#x7ADE;&#x4E89;&#xFF0C; &#x4ECE;&#x800C;&#x63D0;&#x9AD8;&#x4E86;&#x6548;&#x7387;&#x3002;<br>blk_plug&#x7684;&#x4F7F;&#x7528;&#x5F88;&#x7B80;&#x5355;&#xFF1A;<br>a&#xFF09;&#x8BBE;&#x7F6E;&#x8BE5;&#x7EBF;&#x7A0B;&#x5F00;&#x542F;&#x8BF7;&#x6C42;&#x5408;&#x5E76;&#x6A21;&#x5F0F; blk_start_plug<br>b&#xFF09;&#x5173;&#x95ED;&#x7EBF;&#x7A0B;&#x8BF7;&#x6C42;&#x5408;&#x5E76; blk_finish_plug<br>&#x90A3;&#x4E48;&#x4E0A;&#x9762;&#x63CF;&#x8FF0;&#x7684;&#x95EE;&#x9898;&#x4F1A;&#x4E0D;&#x4F1A;&#x4E0E;blk_start_plug()&#x6709;&#x5173;&#x5462;&#xFF1F;</p>
+<p><strong>3.2.57&#x5185;&#x6838;&#x4E2D;</strong>&#x5728;generic_file_aio_write&#x548C;generic_file_aio_read&#x4E2D;&#x90FD;&#x6709;&#x8C03;&#x7528;blk_start_plug()<br><img src="/2016/05/12/directio-merge/generic_file_aio_write.png" alt="generic_file_aio_write"><br>&#x5B9E;&#x9645;&#x4E0A;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#x7684;io&#x4E0D;&#x662F;&#x7531;generic_file_aio_write&#x53BB;&#x8C03;&#x7528;__generic_file_aio_write&#x7684;&#xFF0C;&#x800C;&#x662F;&#x5728;blkdev_aio_write&#x4E2D;&#x8C03;&#x7528;&#x7684;&#xFF0C;<br>&#x8FD9;&#x6761;io&#x8DEF;&#x5F84;&#x7684;&#x8C03;&#x7528;&#x51FD;&#x6570;&#x6808;&#x5982;&#x4E0B;&#xFF0C;&#x5728;<strong>&#x8FD9;&#x6761;&#x8DEF;&#x5F84;&#x4E0A;&#x5E76;&#x6CA1;&#x6709;&#x8C03;&#x7528;blk_start_plug&#xFF0C;&#x6240;&#x4EE5;blk_queue_bio&#x4E2D;&#x5C31;&#x6CA1;&#x6709;&#x8FDB;&#x5165;if (plug)&#x7684;&#x6761;&#x4EF6;&#x8BED;&#x53E5;&#x4E2D;</strong>&#x3002;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">0xffffffff811993d2 : generic_make_request+0x90/0xcf [kernel]</span><br><span class="line"> 0xffffffff811994e4 : submit_bio+0xd3/0xf1 [kernel]</span><br><span class="line"> 0xffffffff811236a4 : dio_bio_submit+0x6e/0x8d [kernel]</span><br><span class="line"> 0xffffffff8112399d : dio_send_cur_page+0x79/0xa4 [kernel]</span><br><span class="line"> 0xffffffff81123a6b : submit_page_section+0xa3/0xf8 [kernel]</span><br><span class="line"> 0xffffffff8112435f : __blockdev_direct_IO+0x751/0xa67 [kernel]</span><br><span class="line"> 0xffffffff81122312 : blkdev_direct_IO+0x4e/0x53 [kernel]</span><br><span class="line"> 0xffffffff810b5e1c : generic_file_direct_write+0xdc/0x14c [kernel]</span><br><span class="line"> 0xffffffff810b6020 : __generic_file_aio_write+0x194/0x278 [kernel]</span><br><span class="line"> 0xffffffff81122629 : blkdev_aio_write+0x1f/0x61 [kernel]</span><br><span class="line"> 0xffffffff810fa378 : <span class="keyword">do</span>_sync_write+0xb4/0xec [kernel]</span><br><span class="line"> 0xffffffff810faa69 : vfs_write+0xa2/0xe9 [kernel]</span><br><span class="line"> 0xffffffff810fac46 : sys_write+0x45/0x6b [kernel]</span><br><span class="line"> 0xffffffff81354d92 : system_call_fastpath+0x16/0x1b [kernel]</span><br></pre></td></tr></table></figure></p>
+<p>&#x800C;<strong>3.10.11&#x5185;&#x6838;</strong>&#x4E2D;&#x5728;generic_file_aio_write&#x548C;generic_file_aio_read&#x4E2D;&#x90FD;&#x6CA1;&#x6709;&#x8C03;&#x7528;&#x8FD9;&#x4E2A;start plug&#x7684;&#x51FD;&#x6570;&#x4E86;&#xFF0C;<br>&#x800C;&#x662F;&#x5728;do_blockdev_direct_IO&#x51FD;&#x6570;&#x4E2D;&#x8C03;&#x7528;&#x7684;&#x3002;<br><img src="/2016/05/12/directio-merge/do_blockdev_direct_IO.png" alt="do_blockdev_direct_IO"><br>&#x6253;&#x5370;blk_start_plug&#x7684;&#x51FD;&#x6570;&#x6808;&#xFF0C;&#x53EF;&#x89C1;&#x786E;&#x5B9E;&#x662F;&#x5728;do_blockdev_direct_IO&#x4E2D;&#x8C03;&#x7528;&#x7684;&#x3002;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">0xffffffff811ae2a6 : blk_start_plug+0x1d/0x3b [kernel]</span><br><span class="line">0xffffffff8113b4e2 : <span class="keyword">do</span>_blockdev_direct_IO+0x340/0xae8 [kernel]</span><br><span class="line">0xffffffff81138fac : blkdev_direct_IO+0x4e/0x53 [kernel]</span><br><span class="line">0xffffffff810c645e : generic_file_direct_write+0xe3/0x14a [kernel]</span><br><span class="line">0xffffffff810c65e0 : __generic_file_aio_write+0x11b/0x1ff [kernel]</span><br><span class="line">0xffffffff811394db : blkdev_aio_write+0x44/0x93 [kernel]</span><br><span class="line">0xffffffff811100bf : <span class="keyword">do</span>_sync_write+0x55/0x7c [kernel]</span><br><span class="line">0xffffffff81110abc : vfs_write+0x9d/0x103 [kernel]</span><br><span class="line">0xffffffff81110dae : sys_write+0x51/0x80 [kernel]</span><br><span class="line">0xffffffff8139b529 : system_call_fastpath+0x16/0x1b [kernel]</span><br></pre></td></tr></table></figure></p>
+<h1 id="4-&#x5185;&#x6838;patch&#x53D8;&#x66F4;"><a href="#4-&#x5185;&#x6838;patch&#x53D8;&#x66F4;" class="headerlink" title="4.&#x5185;&#x6838;patch&#x53D8;&#x66F4;"></a>4.&#x5185;&#x6838;patch&#x53D8;&#x66F4;</h1><p>&#x540E;&#x6765;google&#x4E86;&#x4E00;&#x4E0B;&#xFF0C;&#x4ECE;3.6-rc3&#x7248;&#x672C;&#x5C31;&#x4FEE;&#x590D;&#x4E86;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x628A;blk_start_plug&#x4ECE;generic_file_aio_write&#x548C;generic_file_aio_read&#x4E2D;&#x79FB;&#x5230;&#x4E86;do_blockdev_direct_IO&#x3002;<br>&#x5BF9;&#x5E94;&#x7684;patch&#x201C;block: remove plugging at buffered write time&#x201D; <a href="http://www.kernelhub.org/?p=2&amp;msg=16336" target="_blank" rel="external">http://www.kernelhub.org/?p=2&amp;msg=16336</a><br>&#x5173;&#x4E8E;&#x8FD9;&#x4E2A;patch&#x7684;&#x8BA8;&#x8BBA;&#x53C2;&#x89C1; <a href="http://www.linuxhorizon.com/9-linux/aae0da2b1c65f3ef.htm#.U3ofDvmSzNd" target="_blank" rel="external">http://www.linuxhorizon.com/9-linux/aae0da2b1c65f3ef.htm#.U3ofDvmSzNd</a></p>
+<h1 id="5-&#x7ED3;&#x8BBA;"><a href="#5-&#x7ED3;&#x8BBA;" class="headerlink" title="5.&#x7ED3;&#x8BBA;"></a>5.&#x7ED3;&#x8BBA;</h1><p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x5206;&#x6790;&#x5F97;&#x51FA;&#xFF0C;blk_plug&#x5BF9;io&#x7684;&#x5408;&#x5E76;&#x4F1A;&#x6709;&#x5F71;&#x54CD;&#xFF0C;&#x5728;&#x4F7F;&#x7528;device mapper&#x6216;&#x8005;&#x8F6F;raid&#x65F6;&#xFF0C;&#x5982;&#x679C;&#x5185;&#x6838;&#x4F4E;&#x4E8E;3.6&#xFF0C;&#x5C31;&#x4F1A;&#x51FA;&#x73B0;&#x4E0A;&#x9762;&#x63CF;&#x8FF0;&#x7684;&#x95EE;&#x9898;&#xFF1A;&#x4E0A;&#x5C42;&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#x5F71;&#x54CD;&#x4E86;&#x5E95;&#x5C42;&#x8BBE;&#x5907;&#x7684;io&#x5408;&#x5E76;&#x3002;&#x6240;&#x4EE5;&#x5EFA;&#x8BAE;&#x5728;&#x6761;&#x4EF6;&#x5141;&#x8BB8;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x6362;&#x6210;&#x76F8;&#x5BF9;&#x8F83;&#x65B0;&#x7684;&#x5185;&#x6838;&#x4F7F;&#x7528;&#x3002;</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kernel/" rel="tag">#kernel</a>
+          
+            <a href="/tags/directio/" rel="tag">#directio</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/12/max-seg-max-sec/" rel="next" title="块设备内核参数max_segments和max_sectors_kb解析">
+                <i class="fa fa-chevron-left"></i> 块设备内核参数max_segments和max_sectors_kb解析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/12/bcache-use/" rel="prev" title="bcache使用">
+                bcache使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/12/directio-merge/"
+           data-title="direct IO中io合并的奇怪现象分析" data-url="http://yoursite.com/2016/05/12/directio-merge/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/default_avatar.jpg"
+               alt="Wu Dong" />
+          <p class="site-author-name" itemprop="name">Wu Dong</p>
+          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-不同内核下的表现"><span class="nav-number">1.</span> <span class="nav-text">1.不同内核下的表现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-3-2-57内核下测试"><span class="nav-number">1.1.</span> <span class="nav-text">1.1  3.2.57内核下测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-3-10-11内核下测试"><span class="nav-number">1.2.</span> <span class="nav-text">1.2  3.10.11内核下测试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-使用systemtap分析"><span class="nav-number">2.</span> <span class="nav-text">2.使用systemtap分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-3-2-57内核下分析"><span class="nav-number">2.1.</span> <span class="nav-text">2.1  3.2.57内核下分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-3-10-11内核下分析"><span class="nav-number">2.2.</span> <span class="nav-text">2.2  3.10.11内核下分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-分析blk-queue-bio代码"><span class="nav-number">3.</span> <span class="nav-text">3.分析blk_queue_bio代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-内核patch变更"><span class="nav-number">4.</span> <span class="nav-text">4.内核patch变更</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-结论"><span class="nav-number">5.</span> <span class="nav-text">5.结论</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wu Dong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sysnote"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
