@@ -261,6 +261,131 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/12/max-seg-max-sec/" itemprop="url">
+                  块设备内核参数max_segments和max_sectors_kb解析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-12T16:47:03+08:00" content="2016-05-12">
+              2016-05-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/12/max-seg-max-sec/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/max-seg-max-sec/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x5728;DMA&#x8BBE;&#x5907;&#x4E0D;&#x91C7;&#x7528;S/G&#xFF08;&#x5206;&#x6563;/&#x805A;&#x96C6;&#xFF09;&#x6A21;&#x5F0F;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5FC5;&#x987B;&#x4FDD;&#x8BC1;&#x7F13;&#x51B2;&#x533A;&#x662F;&#x7269;&#x7406;&#x4E0A;&#x8FDE;&#x7EED;&#x7684;&#xFF0C;linux&#x5185;&#x6838;&#x6709;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x7528;&#x6765;&#x5206;&#x914D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#xFF1A;kmalloc()&#x548C;<strong>get_free_pages()&#x3002;&#x8FD9;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x90FD;&#x6709;&#x5206;&#x914D;&#x8FDE;&#x7EED;&#x5185;&#x5B58;&#x7684;&#x6700;&#x5927;&#x503C;&#xFF0C;kmalloc&#x4EE5;&#x5206;&#x914D;&#x5B57;&#x8282;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x7EA6;&#x4E3A;64KB&#xFF0C;</strong>get_free_pages()&#x4EE5;&#x5206;&#x914D;&#x9875;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x80FD;&#x5206;&#x914D;2^order&#x6570;&#x76EE;&#x7684;&#x9875;</p>
+<p>&#x4F7F;&#x7528;DMA&#x7F13;&#x51B2;&#x533A;&#x7684;&#x4E3B;&#x8981;&#x95EE;&#x9898;&#x662F;&#xFF1A;&#x5F53;&#x5927;&#x4E8E;&#x4E00;&#x9875;&#x65F6;&#xFF0C;&#x5B83;&#x4EEC;&#x5FC5;&#x987B;&#x5360;&#x636E;&#x8FDE;&#x63A5;&#x7684;&#x7269;&#x7406;&#x9875;&#xFF0C;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;ISA&#x6216;&#x8005;PCI&#x7CFB;&#x7EDF;&#x603B;&#x7EBF;&#x4F20;&#x8F93;&#x6570;&#x636E;&#xFF0C;&#x800C;&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;&#x7684;&#x90FD;&#x662F;&#x7269;&#x7406;&#x5730;&#x5740;</p>
+<p>linux&#x5757;&#x8BBE;&#x5907;&#x5728;&#x5904;&#x7406;io&#x65F6;&#x4F1A;&#x53D7;&#x5230;&#x4E00;&#x4E9B;&#x53C2;&#x6570;&#xFF08;&#x8BBE;&#x5907;&#x7684;queue limits&#x53C2;&#x6570;&#xFF0C;&#x4EE5;&#x4E0B;&#x7B80;&#x79F0;limits&#x53C2;&#x6570;&#xFF09;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x6BD4;&#x5982;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x4E2D;&#x5141;&#x8BB8;&#x7684;&#x6700;&#x5927;&#x6247;&#x533A;&#x6570;&#xFF0C;&#x6700;&#x5927;segment&#x6570;&#x7B49;&#x3002;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x53EF;&#x4EE5;&#x5728;/sys/block/<device>/queue/&#x4E0B;&#x67E5;&#x770B;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x5728;&#x521D;&#x59CB;&#x5316;&#x65F6;&#x4F1A;&#x8BBE;&#x7F6E;&#x9ED8;&#x8BA4;&#x503C;&#x3002;&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x5206;&#x6790;max_segments&#x548C;max_sectors_kb&#x3002;</device></p>
+<h1 id="1-&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><h2 id="1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"><a href="#1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;" class="headerlink" title="1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"></a>1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;</h2><p>&#x9996;&#x5148;&#x5C31;&#x9700;&#x8981;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;&#x4EC0;&#x4E48;&#x662F;&#x6BB5;&#xFF08;segment&#xFF09;&#x3002;<br>&#x4E00;&#x4E2A;&#x6BB5;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5B83;&#x4EEC;&#x5305;&#x542B;&#x78C1;&#x76D8;&#x4E0A;&#x7269;&#x7406;&#x76F8;&#x90BB;&#x7684;&#x6570;&#x636E;&#x5757;&#x3002;<br>&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;io&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#x3002;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x6570;&#x636E;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x53EA;&#x8981;&#x5411;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x53D1;&#x9001;&#x9002;&#x5F53;&#x7684;&#x547D;&#x4EE4;&#x5C31;&#x53EF;&#x4EE5;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x4E00;&#x65E6;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x5C31;&#x4F1A;&#x53D1;&#x51FA;&#x4E00;&#x4E2A;&#x4E2D;&#x65AD;&#x901A;&#x77E5;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x3002;<br>DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x7684;&#x662F;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x867D;&#x7136;&#x4E5F;&#x5141;&#x8BB8;&#x4F20;&#x9001;&#x4E0D;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;&#x6BD4;&#x8F83;&#x4F4E;&#x6548;&#xFF0C;&#x56E0;&#x4E3A;&#x78C1;&#x5934;&#x79FB;&#x52A8;&#x6162;&#x3002;<br>&#x8001;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x4EC5;&#x4EC5;&#x652F;&#x6301;&#x201C;&#x7B80;&#x5355;&#x201D;&#x7684;DMA&#x65B9;&#x5F0F;&#xFF1A;&#x78C1;&#x76D8;&#x5FC5;&#x987B;&#x4E0E;RAM&#x4E2D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x5355;&#x5143;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;&#x4F46;&#x662F;&#x65B0;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;&#xFF08;scatter-gather&#xFF09;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x78C1;&#x76D8;&#x53EF;&#x4EE5;&#x4E0E;&#x4E00;&#x4E9B;&#x975E;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;<br>&#x4E3A;&#x4E86;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x5FC5;&#x987B;&#x80FD;&#x591F;&#x5904;&#x7406;&#x79F0;&#x4E3A;&#x6BB5;&#x7684;&#x6570;&#x636E;&#x5B58;&#x50A8;&#x5355;&#x5143;&#xFF0C;&#x4E00;&#x6B21;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x53EF;&#x4EE5;&#x4F20;&#x9001;&#x51E0;&#x4E2A;&#x6BB5;&#x3002;<br>&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x6B63;&#x597D;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#xFF0C;&#x8FD9;&#x79CD;&#x5408;&#x5E76;&#x65B9;&#x5F0F;&#x4EA7;&#x751F;&#x7684;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x5C31;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/05/12/max-seg-max-sec/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/05/flashcachegroup/" itemprop="url">
                   flashcachegroup浅析
                 </a>
@@ -773,7 +898,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -790,7 +915,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
