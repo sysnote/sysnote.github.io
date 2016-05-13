@@ -1,0 +1,723 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ceph,rbd," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="System Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5728;&amp;#x4F7F;&amp;#x7528;ceph rbd&amp;#x5757;&amp;#x8BBE;&amp;#x5907;&amp;#x65F6;&amp;#xFF0C;&amp;#x521B;&amp;#x5EFA;&amp;#x4E00;&amp;#x4E2A;rbd image&amp;#x53EF;&amp;#x4EE5;&amp;#x6307;&amp;#x5B9A;&amp;#x683C;&amp;#x5F0F;&amp;#xFF1A;&amp;#x2013;image-format=1&amp;#x6216;&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceph rbd中的对象解析">
+<meta property="og:url" content="http://yoursite.com/2015/10/20/ceph-rbd-obj/index.html">
+<meta property="og:site_name" content="System Notes">
+<meta property="og:description" content="&amp;#x5728;&amp;#x4F7F;&amp;#x7528;ceph rbd&amp;#x5757;&amp;#x8BBE;&amp;#x5907;&amp;#x65F6;&amp;#xFF0C;&amp;#x521B;&amp;#x5EFA;&amp;#x4E00;&amp;#x4E2A;rbd image&amp;#x53EF;&amp;#x4EE5;&amp;#x6307;&amp;#x5B9A;&amp;#x683C;&amp;#x5F0F;&amp;#xFF1A;&amp;#x2013;image-format=1&amp;#x6216;&amp;">
+<meta property="og:updated_time" content="2016-05-13T09:02:00.849Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceph rbd中的对象解析">
+<meta name="twitter:description" content="&amp;#x5728;&amp;#x4F7F;&amp;#x7528;ceph rbd&amp;#x5757;&amp;#x8BBE;&amp;#x5907;&amp;#x65F6;&amp;#xFF0C;&amp;#x521B;&amp;#x5EFA;&amp;#x4E00;&amp;#x4E2A;rbd image&amp;#x53EF;&amp;#x4EE5;&amp;#x6307;&amp;#x5B9A;&amp;#x683C;&amp;#x5F0F;&amp;#xFF1A;&amp;#x2013;image-format=1&amp;#x6216;&amp;">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> ceph rbd中的对象解析 | System Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">System Notes</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ceph rbd中的对象解析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-10-20T15:27:13+08:00" content="2015-10-20">
+              2015-10-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/10/20/ceph-rbd-obj/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/10/20/ceph-rbd-obj/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x5728;&#x4F7F;&#x7528;ceph rbd&#x5757;&#x8BBE;&#x5907;&#x65F6;&#xFF0C;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;rbd image&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x683C;&#x5F0F;&#xFF1A;&#x2013;image-format=1&#x6216;&#x8005;&#x2013;image-format=2&#xFF0C;&#x5B98;&#x65B9;&#x6587;&#x6863;&#x7ED9;&#x51FA;&#x4E86;&#x5982;&#x4E0B;&#x89E3;&#x91CA;</p>
+<ul>
+<li>format 1 - Use the original format for a new rbd image. This format is understood by all versions of librbd and the kernel rbd module, but does not support newer features like cloning.</li>
+<li>format 2 - Use the second rbd format, which is supported by librbd (but not the kernel rbd module) at this time. This adds support for cloning and is more easily extensible to allow more features in the future.</li>
+</ul>
+<p>&#x9ED8;&#x8BA4;&#x7684;image&#x683C;&#x5F0F;&#x662F;format 1&#xFF0C;&#x8FD9;&#x79CD;&#x683C;&#x5F0F;&#x652F;&#x6301;&#x6240;&#x6709;&#x7248;&#x672C;&#x7684;librbd&#x548C;&#x5185;&#x6838;rbd&#x6A21;&#x5757;&#xFF0C;&#x4F46;&#x662F;&#x4E0D;&#x652F;&#x6301;&#x65B0;&#x7684;&#x529F;&#x80FD;&#x5982;&#x514B;&#x9686;&#xFF1B;&#x800C;format 2&#x7531;librbd&#x652F;&#x6301;&#xFF0C;&#x4F46;&#x662F;&#x4E0D;&#x652F;&#x6301;&#x5185;&#x6838;rbd&#x6A21;&#x5757;&#xFF0C;&#x8FD9;&#x79CD;&#x683C;&#x5F0F;&#x652F;&#x6301;&#x514B;&#x9686;&#xFF0C;&#x5E76;&#x4E14;&#x4FBF;&#x4E8E;&#x6269;&#x5C55;&#x540E;&#x7EED;&#x5176;&#x4ED6;&#x529F;&#x80FD;&#x3002;</p>
+<h1 id="1-format-1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;"><a href="#1-format-1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;" class="headerlink" title="1. format 1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;"></a>1. format 1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;</h1><p>&#x9996;&#x5148;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;format 1&#x683C;&#x5F0F;&#x7684;image<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rbd create test_vol --size=10</span></span><br><span class="line">root@ceph1:~<span class="comment"># rbd -p rbd ls                                                       </span></span><br><span class="line"><span class="built_in">test</span>_vol</span><br></pre></td></tr></table></figure></p>
+<p>&#x7136;&#x540E;&#x4F7F;&#x7528;rados&#x547D;&#x4EE4;&#x770B;&#x5230;&#x5BF9;&#x5E94;&#x4EA7;&#x751F;&#x4E00;&#x4E2A;test_vol.rbd&#x7684;&#x5BF9;&#x8C61;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rados -p rbd ls</span></span><br><span class="line"><span class="built_in">test</span>_vol.rbd</span><br><span class="line">rbd_directory</span><br></pre></td></tr></table></figure></p>
+<p>&#x5176;&#x4E2D;rbd_directory&#x662F;&#x4FDD;&#x5B58;&#x8BE5;&#x5B58;&#x50A8;&#x6C60;&#x91CC;&#x7684;image&#x5217;&#x8868;<br>&#x4ECE;&#x4E0B;&#x9762;&#x7684;&#x547D;&#x4EE4;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5BF9;&#x4E8E;format 1&#x683C;&#x5F0F;&#x7684;image&#xFF0C;&#x6CA1;&#x6709;&#x5C06;image name&#x548C;id&#x7684;&#x6620;&#x5C04;&#x4FDD;&#x5B58;&#x5230;rbd_directory&#x91CC;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment">#rados -p rbd listomapvals rbd_directory</span></span><br><span class="line">root@ceph1:~<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>&#x4F7F;&#x7528;rbd info&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5BF9;&#x5E94;image&#x7684;&#x4E00;&#x4E9B;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x5305;&#x62EC;size&#xFF0C;order&#x5C31;&#x662F;&#x5757;&#x5927;&#x5C0F;&#xFF08;1&lt;&lt;order&#xFF09;&#xFF0C;block_name_prefix&#x662F;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x540D;&#x79F0;&#x7684;&#x524D;&#x7F00;&#xFF0C;format&#x8868;&#x793A;&#x662F;&#x54EA;&#x79CD;image&#x683C;&#x5F0F;&#x3002;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rbd info rbd/test_vol</span></span><br><span class="line">rbd image <span class="string">&apos;test_vol&apos;</span>:</span><br><span class="line">        size 10240 kB <span class="keyword">in</span> 3 objects</span><br><span class="line">        order 22 (4096 kB objects)</span><br><span class="line">        block_name_prefix: rb.0.12ae.74b0dc51</span><br><span class="line">        format: 1</span><br></pre></td></tr></table></figure>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5982;&#x4E0B;&#x65B9;&#x5F0F;&#x770B;&#x5230;test_vol.rbd&#x91CC;&#x5305;&#x542B;&#x7684;&#x5143;&#x6570;&#x636E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rados -p rbd stat test_vol.rbd</span></span><br><span class="line">rbd/<span class="built_in">test</span>_vol.rbd mtime 1445237108, size 141</span><br><span class="line"></span><br><span class="line">root@ceph1:~<span class="comment"># rados -p rbd get test_vol.rbd 1.txt</span></span><br><span class="line">root@ceph1:~<span class="comment"># xxd 1.txt</span></span><br><span class="line">0000000: 3c3c 3c20 5261 646f 7320 426c 6f63 6b20  &lt;&lt;&lt; Rados Block</span><br><span class="line">0000010: 4465 7669 6365 2049 6d61 6765 203e 3e3e  Device Image &gt;&gt;&gt;</span><br><span class="line">0000020: 0a00 0000 0000 0000 7262 2e30 2e31 3261  ........rb.0.12a</span><br><span class="line">0000030: 652e 3734 6230 6463 3531 0000 0000 0000  e.74b0dc51......</span><br><span class="line">0000040: 5242 4400 3030 312e 3030 3500 1600 0000  RBD.001.005.....</span><br><span class="line">0000050: 0000 a000 0000 0000 0400 0000 0000 0000  ................</span><br><span class="line">0000060: 0100 0000 0000 0000 0d00 0000 0000 0000  ................</span><br><span class="line">0000070: 0400 0000 0000 0000 0000 a000 0000 0000  ................</span><br><span class="line">0000080: 7465 7374 766f 6c5f 736e 6170 00         testvol_snap.</span><br></pre></td></tr></table></figure></p>
+<p>&#x5F80;&#x8FD9;&#x4E2A;image&#x91CC;&#x5199;&#x6570;&#x636E;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x4F7F;&#x7528;rados -p rbd ls&#x67E5;&#x770B;&#x53D1;&#x73B0;&#x591A;&#x4E86;&#x4E00;&#x4E2A;&#x8BE5;image&#x7684;&#x6570;&#x636E;&#x5BF9;&#x8C61;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rbd map test_vol</span></span><br><span class="line">root@ceph1:~<span class="comment"># rbd showmapped </span></span><br><span class="line">id pool    image     snap device    </span><br><span class="line">2  volumes <span class="built_in">test</span>_vol1 -    /dev/rbd2 </span><br><span class="line">3  rbd     myrbd     -    /dev/rbd3 </span><br><span class="line">4  rbd     <span class="built_in">test</span>_vol  -    /dev/rbd4 </span><br><span class="line">root@ceph1:~<span class="comment"># dd if=/dev/urandom of=/dev/rbd/rbd/test_vol bs=4M count=1 oflag=direct</span></span><br><span class="line">1+0 records <span class="keyword">in</span></span><br><span class="line">1+0 records out</span><br><span class="line">4194304 bytes (4.2 MB) copied, 1.03652 s, 4.0 MB/s</span><br><span class="line">root@ceph1:~<span class="comment"># </span></span><br><span class="line">root@ceph1:~<span class="comment"># rados -p rbd ls</span></span><br><span class="line">rbd_directory</span><br><span class="line"><span class="built_in">test</span>_vol.rbd</span><br><span class="line">rb.0.12ae.74b0dc51.000000000000</span><br></pre></td></tr></table></figure></p>
+<p>&#x5E76;&#x4E14;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5177;&#x4F53;&#x7684;&#x6570;&#x636E;&#x5BF9;&#x8C61;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># ls -la *head |grep 74b0dc51</span></span><br><span class="line">-rw-r--r--   1 root root 4194304 Oct 19 14:26 rb.0.12ae.74b0dc51.000000000000__head_331FC0BA__2</span><br></pre></td></tr></table></figure></p>
+<p>&#x5BF9;&#x8C61;&#x7684;&#x547D;&#x540D;&#x89C4;&#x5219;&#x4E3A;&#xFF1A;<br>block_name_prefix.fragment.<strong>head(snap_num)_hash</strong>poolid</p>
+<ul>
+<li>block_name_prefix&#xFF1A;&#x5BF9;&#x8C61;&#x540D;&#x524D;&#x7F00;</li>
+<li>fragment&#xFF1A;&#x6309;&#x7167;&#x5757;&#x5927;&#x5C0F;&#x6765;&#x5212;&#x5206;&#x7684;&#x504F;&#x79FB;&#xFF0C;&#x6BD4;&#x5982;4MB&#x7684;&#x5757;&#x5927;&#x5C0F;&#xFF0C;&#x90A3;&#x4E48;000000000000&#x5C31;&#x8868;&#x793A;&#x7B2C;&#x4E00;&#x4E2A;4MB&#x7684;&#x5757;</li>
+<li>head(snap_num)&#xFF1A;snapshot&#x7248;&#x672C;&#xFF0C;&#x5982;&#x679C;&#x662F;head&#xFF0C;&#x8868;&#x793A;&#x662F;image&#x7684;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x6570;&#x5B57;&#xFF0C;&#x8868;&#x793A;&#x662F;snapshot&#x7684;&#x5E8F;&#x53F7;</li>
+<li>hash&#xFF1A;&#x7531;block_nama_prefix&#x8BA1;&#x7B97;&#x5F97;&#x5230;&#x7684;</li>
+<li>poolid&#xFF1A;image&#x6240;&#x5C5E;&#x7684;pool id</li>
+</ul>
+<h1 id="2-format-2&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;"><a href="#2-format-2&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;" class="headerlink" title="2. format 2&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;"></a>2. format 2&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;</h1><p>&#x521B;&#x5EFA;format 2&#x683C;&#x5F0F;&#x7684;image&#x65F6;&#x52A0;&#x4E0A;&#x2013;image-format=2&#x5373;&#x53EF;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x7F57;&#x5217;&#x5177;&#x4F53;&#x7684;&#x521B;&#x5EFA;&#x8FC7;&#x7A0B;&#x4E86;&#xFF0C;&#x4E0B;&#x9762;&#x76F4;&#x63A5;&#x6765;&#x770B;&#x4E00;&#x4E0B;rbd format 2&#x4E0B;&#x6709;&#x54EA;&#x4E9B;&#x5BF9;&#x8C61;&#x3002;<br>rbd&#x4E3B;&#x8981;&#x7684;&#x51E0;&#x4E2A;osd&#x7684;&#x5BF9;&#x8C61;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rados -p rbd ls</span></span><br><span class="line">rbd_id.myrbdsnapclone1</span><br><span class="line">rbd_header.11ee2ae8944a</span><br><span class="line">rbd_children</span><br><span class="line">rbd_directory</span><br><span class="line">rbd_data.11ee2ae8944a.0000000000000000</span><br><span class="line">rbd_id.myrbd</span><br><span class="line">rbd_data.11ee2ae8944a.0000000000000002</span><br><span class="line">rbd_header.123f238e1f29</span><br><span class="line">rbd_data.11ee2ae8944a.0000000000000001</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-1-rbd-id-image-name"><a href="#2-1-rbd-id-image-name" class="headerlink" title="2.1 rbd_id.{image name}"></a>2.1 rbd_id.{image name}</h2><p>rbd_id&#x5BF9;&#x8C61;&#x7684;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;rbd\uid.{image name}<strong>head_hash</strong>poolid<br>&#x6BD4;&#x5982;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:var/<span class="built_in">local</span>/osd/current<span class="comment"># ls *head -la |grep id</span></span><br><span class="line">-rw-r--r--   1 root root   16 Oct 19 10:25 rbd\uid.myrbd__head_422A8C36__2</span><br></pre></td></tr></table></figure></p>
+<p>&#x5BF9;&#x8C61;&#x91CC;&#x5B58;&#x7684;&#x5C31;&#x662F;image&#x7684;id&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#x67E5;&#x770B;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rados -p rbd get rbd_id.myrbd 1.txt</span></span><br><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># xxd 1.txt</span></span><br><span class="line">0000000: 0c00 0000 3131 6565 3261 6538 3934 3461  ....11ee2ae8944a</span><br></pre></td></tr></table></figure></p>
+<p>&#x6216;&#x8005;&#x76F4;&#x63A5;&#x627E;&#x5BF9;&#x5BF9;&#x5E94;&#x7684;&#x5BF9;&#x8C61;&#x8FDB;&#x884C;&#x67E5;&#x770B;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># xxd 2.36_head/rbd\\uid.myrbd__head_422A8C36__2 </span></span><br><span class="line">0000000: 0c00 0000 3131 6565 3261 6538 3934 3461  ....11ee2ae8944a</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-2-rbd-header-image-id"><a href="#2-2-rbd-header-image-id" class="headerlink" title="2.2 rbd_header.{image id}"></a>2.2 rbd_header.{image id}</h2><p>rbd_header&#x5BF9;&#x8C61;&#x7684;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;rbd\uheader.{image id}<strong>head_hash</strong>poolid<br>&#x6BD4;&#x5982;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment">#ls *head -la |grep header</span></span><br><span class="line">-rw-r--r--   1 root root    0 Oct 19 10:25 rbd\uheader.11ee2ae8944a__head_3FB535C5__2</span><br></pre></td></tr></table></figure></p>
+<p>&#x8BB0;&#x5F55;rbd image&#x7684;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x5176;&#x5185;&#x5BB9;&#x5305;&#x62EC;size&#xFF0C;order&#xFF0C;object_prefix, snap<em>seq, parent&#xFF08;&#x514B;&#x9686;&#x7684;image&#x624D;&#x6709;&#xFF09;, snapshot</em>{snap id}&#xFF08;&#x5404;&#x4E2A;&#x5FEB;&#x7167;&#x7684;&#x4FE1;&#x606F;&#xFF09;&#x3002;<br>&#x4E0B;&#x9762;&#x5206;&#x522B;&#x5BF9;&#x4E0D;&#x540C;&#x7C7B;&#x578B;&#x7684;image&#x7684;rbd_header&#x91CC;&#x7684;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x8BF4;&#x660E;</p>
+<h3 id="1&#xFF09;&#x6CA1;&#x6709;&#x5FEB;&#x7167;&#x7684;image"><a href="#1&#xFF09;&#x6CA1;&#x6709;&#x5FEB;&#x7167;&#x7684;image" class="headerlink" title="1&#xFF09;&#x6CA1;&#x6709;&#x5FEB;&#x7167;&#x7684;image"></a>1&#xFF09;&#x6CA1;&#x6709;&#x5FEB;&#x7167;&#x7684;image</h3><ul>
+<li>object_prefix&#xFF1A;&#x5BF9;&#x8C61;&#x7684;&#x540D;&#x5B57;&#x524D;&#x7F00;</li>
+<li>order&#xFF1A;&#x7528;&#x6765;&#x8BA1;&#x7B97;block size&#x7684;&#xFF0C;&#x6BD4;&#x5982;22&#xFF0C;&#x90A3;&#x4E48;&#x5757;&#x5927;&#x5C0F;&#x5C31;&#x662F;1&lt;&lt;22=4MB</li>
+<li>size&#xFF1A;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;</li>
+<li>snap_seq&#xFF1A;&#x5FEB;&#x7167;&#x7F16;&#x53F7;&#xFF0C;&#x6CA1;&#x6709;&#x5FEB;&#x7167;&#x7684;&#x65F6;&#x5019;&#x662F;0</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rados -p rbd listomapvals rbd_header.12812ae8944a</span></span><br><span class="line">features</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 01 00 00 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">object_prefix</span><br><span class="line">value: (25 bytes) :</span><br><span class="line">0000 : 15 00 00 00 72 62 64 5f 64 61 74 61 2e 31 32 38 : ....rbd_data.128</span><br><span class="line">0010 : 31 32 61 65 38 39 34 34 61                      : 12ae8944a</span><br><span class="line"></span><br><span class="line">order</span><br><span class="line">value: (1 bytes) :</span><br><span class="line">0000 : 16                                              : .</span><br><span class="line"></span><br><span class="line">size</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 00 00 a0 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">snap_seq</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 00 00 00 00 00 00 00 00                         : ........</span><br></pre></td></tr></table></figure>
+<h3 id="2&#xFF09;&#x505A;&#x8FC7;&#x5FEB;&#x7167;&#x7684;image"><a href="#2&#xFF09;&#x505A;&#x8FC7;&#x5FEB;&#x7167;&#x7684;image" class="headerlink" title="2&#xFF09;&#x505A;&#x8FC7;&#x5FEB;&#x7167;&#x7684;image"></a>2&#xFF09;&#x505A;&#x8FC7;&#x5FEB;&#x7167;&#x7684;image</h3><ul>
+<li>object_prefix&#xFF1A;&#x5BF9;&#x8C61;&#x7684;&#x540D;&#x5B57;&#x524D;&#x7F00;</li>
+<li>order&#xFF1A;&#x7528;&#x6765;&#x8BA1;&#x7B97;block size&#x7684;&#xFF0C;&#x6BD4;&#x5982;22&#xFF0C;&#x90A3;&#x4E48;&#x5757;&#x5927;&#x5C0F;&#x5C31;&#x662F;1&lt;&lt;22=4MB</li>
+<li>size&#xFF1A;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;</li>
+<li>snap_seq&#xFF1A;&#x5FEB;&#x7167;&#x7F16;&#x53F7;</li>
+<li>snapshot_id&#xFF1A;&#x8BB0;&#x5F55;&#x5BF9;&#x5E94;&#x5FEB;&#x7167;&#x7684;&#x4FE1;&#x606F;</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rados -p rbd listomapvals rbd_header.11ee2ae8944a</span></span><br><span class="line">features</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 01 00 00 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">object_prefix</span><br><span class="line">value: (25 bytes) :</span><br><span class="line">0000 : 15 00 00 00 72 62 64 5f 64 61 74 61 2e 31 31 65 : ....rbd_data.11e</span><br><span class="line">0010 : 65 32 61 65 38 39 34 34 61                      : e2ae8944a</span><br><span class="line"></span><br><span class="line">order</span><br><span class="line">value: (1 bytes) :</span><br><span class="line">0000 : 16                                                                            : .</span><br><span class="line"></span><br><span class="line">size</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 00 00 a0 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">snap_seq</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 03 00 00 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">snapshot_0000000000000002</span><br><span class="line">value: (78 bytes) :</span><br><span class="line">0000 : 03 01 48 00 00 00 02 00 00 00 00 00 00 00 09 00 : ..H.............</span><br><span class="line">0010 : 00 00 6d 79 72 62 64 73 6e 61 70 00 00 a0 00 00 : ..myrbdsnap.....</span><br><span class="line">0020 : 00 00 00 01 00 00 00 00 00 00 00 01 01 1c 00 00 : ................</span><br><span class="line">0030 : 00 ff ff ff ff ff ff ff ff 00 00 00 00 fe ff ff : ................</span><br><span class="line">0040 : ff ff ff ff ff 00 00 00 00 00 00 00 00 02       : ..............</span><br><span class="line"></span><br><span class="line">snapshot_0000000000000003</span><br><span class="line">value: (79 bytes) :</span><br><span class="line">0000 : 03 01 49 00 00 00 03 00 00 00 00 00 00 00 0a 00 : ..I.............</span><br><span class="line">0010 : 00 00 6d 79 72 62 64 73 6e 61 70 32 00 00 a0 00 : ..myrbdsnap2....</span><br><span class="line">0020 : 00 00 00 00 01 00 00 00 00 00 00 00 01 01 1c 00 : ................</span><br><span class="line">0030 : 00 00 ff ff ff ff ff ff ff ff 00 00 00 00 fe ff : ................</span><br><span class="line">0040 : ff ff ff ff ff ff 00 00 00 00 00 00 00 00 00    : ...............</span><br></pre></td></tr></table></figure>
+<h3 id="3&#xFF09;&#x4ECE;&#x5FEB;&#x7167;&#x514B;&#x9686;&#x7684;image"><a href="#3&#xFF09;&#x4ECE;&#x5FEB;&#x7167;&#x514B;&#x9686;&#x7684;image" class="headerlink" title="3&#xFF09;&#x4ECE;&#x5FEB;&#x7167;&#x514B;&#x9686;&#x7684;image"></a>3&#xFF09;&#x4ECE;&#x5FEB;&#x7167;&#x514B;&#x9686;&#x7684;image</h3><ul>
+<li>object_prefix&#xFF1A;&#x5BF9;&#x8C61;&#x7684;&#x540D;&#x5B57;&#x524D;&#x7F00;</li>
+<li>order&#xFF1A;&#x7528;&#x6765;&#x8BA1;&#x7B97;block size&#x7684;&#xFF0C;&#x6BD4;&#x5982;22&#xFF0C;&#x90A3;&#x4E48;&#x5757;&#x5927;&#x5C0F;&#x5C31;&#x662F;1&lt;&lt;22=4MB</li>
+<li>size&#xFF1A;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;</li>
+<li>snap_seq&#xFF1A;&#x5FEB;&#x7167;&#x7F16;&#x53F7;&#xFF0C;&#x6CA1;&#x6709;&#x5FEB;&#x7167;&#x7684;&#x65F6;&#x5019;&#x662F;0</li>
+<li>parent&#xFF1A;&#x8BB0;&#x5F55;&#x8BE5;image&#x7684;&#x7236;image&#x7684;id</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rados -p rbd listomapvals rbd_header.123f238e1f29</span></span><br><span class="line">features</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 01 00 00 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">object_prefix</span><br><span class="line">value: (25 bytes) :</span><br><span class="line">0000 : 15 00 00 00 72 62 64 5f 64 61 74 61 2e 31 32 33 : ....rbd_data.123</span><br><span class="line">0010 : 66 32 33 38 65 31 66 32 39                      : f238e1f29</span><br><span class="line"></span><br><span class="line">order</span><br><span class="line">value: (1 bytes) :</span><br><span class="line">0000 : 16                                                                           : .</span><br><span class="line"></span><br><span class="line">parent</span><br><span class="line">value: (46 bytes) :</span><br><span class="line">0000 : 01 01 28 00 00 00 02 00 00 00 00 00 00 00 0c 00 : ..(.............</span><br><span class="line">0010 : 00 00 31 31 65 65 32 61 65 38 39 34 34 61 02 00 : ..11ee2ae8944a..</span><br><span class="line">0020 : 00 00 00 00 00 00 00 00 a0 00 00 00 00 00       : ..............</span><br><span class="line"></span><br><span class="line">size</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 00 00 a0 00 00 00 00 00                         : ........</span><br><span class="line"></span><br><span class="line">snap_seq</span><br><span class="line">value: (8 bytes) :</span><br><span class="line">0000 : 00 00 00 00 00 00 00 00                         : ........</span><br></pre></td></tr></table></figure>
+<h2 id="2-3-rbd-data-image-id-offset"><a href="#2-3-rbd-data-image-id-offset" class="headerlink" title="2.3 rbd_data.{image id}.{offset}"></a>2.3 rbd_data.{image id}.{offset}</h2><p>rbd_data&#x7684;&#x5BF9;&#x8C61;&#x547D;&#x540D;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;rbd\udata.{image id}.fragement<strong>head(snap)_hash</strong>poolid<br>rbd image&#x7684;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#xFF0C;&#x5B58;&#x653E;&#x5177;&#x4F53;&#x7684;&#x6570;&#x636E;&#x5185;&#x5BB9;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@ceph2:/var/<span class="built_in">local</span>/osd/current<span class="comment"># ls *head -la|grep data</span></span><br><span class="line">-rw-r--r--   1 root root 1048576 Oct 19 10:47 rbd\udata.11ee2ae8944a.0000000000000000__2_88F8F929__2</span><br><span class="line">-rw-r--r--   1 root root 4194304 Oct 19 11:37 rbd\udata.11ee2ae8944a.0000000000000000__3_88F8F929__2</span><br><span class="line">-rw-r--r--   1 root root 4194304 Oct 19 11:37 rbd\udata.11ee2ae8944a.0000000000000000__head_88F8F929__2</span><br><span class="line">-rw-r--r--   1 root root 4194304 Oct 19 11:37 rbd\udata.11ee2ae8944a.0000000000000001__3_0F1C4EFE__2</span><br><span class="line">-rw-r--r--   1 root root 4194304 Oct 19 11:37 rbd\udata.11ee2ae8944a.0000000000000001__head_0F1C4EFE__2</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-4-rbd-directory"><a href="#2-4-rbd-directory" class="headerlink" title="2.4 rbd_directory"></a>2.4 rbd_directory</h2><p>rbd_directory&#x5BF9;&#x8C61;&#x7684;&#x547D;&#x540D;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;rbd\udirectory<strong>head_hash</strong>poolid<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># ls *head -la|grep directory</span></span><br><span class="line">-rw-r--r--   1 root root    8 Oct 19 10:22 rbd\udirectory__head_30A98C1C__2</span><br></pre></td></tr></table></figure></p>
+<p>&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x91CC;&#x9762;&#x5305;&#x542B;&#x5BF9;&#x5E94;&#x5B58;&#x50A8;&#x6C60;&#x91CC;&#x6240;&#x6709;&#x7684;image&#x7684;name&#x548C;id&#x7684;&#x53CC;&#x5411;&#x6620;&#x5C04;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rados -p rbd listomapvals rbd_directory</span></span><br><span class="line">id_11ee2ae8944a</span><br><span class="line">value: (9 bytes) :</span><br><span class="line">0000 : 05 00 00 00 6d 79 72 62 64                      : ....myrbd</span><br><span class="line"></span><br><span class="line">id_123f238e1f29</span><br><span class="line">value: (19 bytes) :</span><br><span class="line">0000 : 0f 00 00 00 6d 79 72 62 64 73 6e 61 70 63 6c 6f : ....myrbdsnapclo</span><br><span class="line">0010 : 6e 65 31                                        : ne1</span><br><span class="line"></span><br><span class="line">id_12812ae8944a</span><br><span class="line">value: (10 bytes) :</span><br><span class="line">0000 : 06 00 00 00 6d 79 72 62 64 32                   : ....myrbd2</span><br><span class="line"></span><br><span class="line">name_myrbd</span><br><span class="line">value: (16 bytes) :</span><br><span class="line">0000 : 0c 00 00 00 31 31 65 65 32 61 65 38 39 34 34 61 : ....11ee2ae8944a</span><br><span class="line"></span><br><span class="line">name_myrbd2</span><br><span class="line">value: (16 bytes) :</span><br><span class="line">0000 : 0c 00 00 00 31 32 38 31 32 61 65 38 39 34 34 61 : ....12812ae8944a</span><br><span class="line"></span><br><span class="line">name_myrbdsnapclone1</span><br><span class="line">value: (16 bytes) :</span><br><span class="line">0000 : 0c 00 00 00 31 32 33 66 32 33 38 65 31 66 32 39 : ....123f238e1f29</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-5-rbd-children"><a href="#2-5-rbd-children" class="headerlink" title="2.5 rbd_children"></a>2.5 rbd_children</h2><p>rbd_children&#x5BF9;&#x8C61;&#x547D;&#x540D;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;rbd\uchildren<strong>head_hash</strong>poolid<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph3:/var/<span class="built_in">local</span>/osd/current<span class="comment"># ls *head -la|grep children </span></span><br><span class="line">-rw-r--r--   1 root root    0 Oct 19 11:19 rbd\uchildren__head_0FA1CACA__2</span><br></pre></td></tr></table></figure></p>
+<p>&#x8BB0;&#x5F55;&#x7236;&#x5B50;&#x5173;&#x7CFB;&#xFF0C;key&#x662F;parent image&#x7684;id&#xFF0C;value&#x662F;&#x514B;&#x9686;&#x7684;image&#x7684;id&#xFF0C;&#x7528;&#x6765;&#x5FEB;&#x901F;&#x67E5;&#x627E;&#x786E;&#x8BA4;&#x7236;&#x5B50;&#x5173;&#x7CFB;&#x7684;&#x3002;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:/var/<span class="built_in">local</span>/osd/current<span class="comment"># rados -p rbd listomapvals rbd_children </span></span><br><span class="line">key: (32 bytes):</span><br><span class="line">0000 : 02 00 00 00 00 00 00 00 0c 00 00 00 31 31 65 65 : ............11ee</span><br><span class="line">0010 : 32 61 65 38 39 34 34 61 02 00 00 00 00 00 00 00 : 2ae8944a........</span><br><span class="line"></span><br><span class="line">value: (20 bytes) :</span><br><span class="line">0000 : 01 00 00 00 0c 00 00 00 31 32 33 66 32 33 38 65 : ........123f238e</span><br><span class="line">0010 : 31 66 32 39                                     : 1f29</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ceph/" rel="tag">#ceph</a>
+          
+            <a href="/tags/rbd/" rel="tag">#rbd</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/25/use-new-glibc/" rel="next" title="如何使用新的glibc来编译自己的程序">
+                <i class="fa fa-chevron-left"></i> 如何使用新的glibc来编译自己的程序
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/25/ceph-osd-rw1/" rel="prev" title="ceph OSD读写流程（1）–主OSD的处理流程">
+                ceph OSD读写流程（1）–主OSD的处理流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/10/20/ceph-rbd-obj/"
+           data-title="ceph rbd中的对象解析" data-url="http://yoursite.com/2015/10/20/ceph-rbd-obj/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Wu Dong" />
+          <p class="site-author-name" itemprop="name">Wu Dong</p>
+          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">23</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-format-1格式的对象解析"><span class="nav-number">1.</span> <span class="nav-text">1. format 1格式的对象解析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-format-2格式的对象解析"><span class="nav-number">2.</span> <span class="nav-text">2. format 2格式的对象解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-rbd-id-image-name"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 rbd_id.{image name}</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-rbd-header-image-id"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 rbd_header.{image id}</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1）没有快照的image"><span class="nav-number">2.2.1.</span> <span class="nav-text">1）没有快照的image</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2）做过快照的image"><span class="nav-number">2.2.2.</span> <span class="nav-text">2）做过快照的image</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3）从快照克隆的image"><span class="nav-number">2.2.3.</span> <span class="nav-text">3）从快照克隆的image</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-rbd-data-image-id-offset"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 rbd_data.{image id}.{offset}</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-rbd-directory"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 rbd_directory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-rbd-children"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 rbd_children</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wu Dong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sysnote"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

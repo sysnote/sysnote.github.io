@@ -261,8 +261,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/12/journal-guided-resync-for-sraid/" itemprop="url">
-                  Journal-guided Resynchronization for Software RAID
+                <a class="post-title-link" href="/2016/02/28/ceph-rbd-snap/" itemprop="url">
+                  ceph rbd快照原理解析
                 </a>
               
             
@@ -275,8 +275,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T22:24:38+08:00" content="2016-05-12">
-              2016-05-12
+            <time itemprop="dateCreated" datetime="2016-02-28T16:37:11+08:00" content="2016-02-28">
+              2016-02-28
             </time>
           </span>
 
@@ -289,8 +289,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/paper/" itemprop="url" rel="index">
-                    <span itemprop="name">paper</span>
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
                   </a>
                 </span>
 
@@ -305,8 +305,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/12/journal-guided-resync-for-sraid/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/journal-guided-resync-for-sraid/" itemprop="commentsCount"></span>
+                <a href="/2016/02/28/ceph-rbd-snap/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/28/ceph-rbd-snap/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -330,135 +330,11 @@
 
       
         
-          
-            <p>&#x8BE5;&#x6587;&#x7AE0;&#x4E3B;&#x8981;&#x8BB2;&#x628A;&#x65E5;&#x5FD7;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF08;&#x5982;ext3&#xFF09;&#x4E0E;&#x5E95;&#x5C42;&#x7684;&#x8F6F;raid&#x7ED3;&#x5408;&#x8D77;&#x6765;&#xFF0C;&#x5F15;&#x5165;declared mode&#xFF0C;&#x5728;&#x5199;&#x5165;&#x6570;&#x636E;&#x524D;&#xFF0C;&#x5148;&#x8BB0;&#x5F55;&#x65E5;&#x5FD7;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x610F;&#x5916;&#x5D29;&#x6E83;&#x7684;&#x65F6;&#x5019;&#x80FD;&#x591F;&#x6839;&#x636E;&#x65E5;&#x5FD7;&#x6765;&#x5224;&#x65AD;&#x54EA;&#x4E9B;&#x6570;&#x636E;&#x662F;&#x4E0D;&#x4E00;&#x81F4;&#x7684;&#xFF0C;&#x4ECE;&#x800C;&#x51CF;&#x5C11;&#x4E86;&#x5168;&#x91CF;&#x540C;&#x6B65;&#xFF0C;&#x7F29;&#x77ED;&#x4E86;&#x5904;&#x4E8E;&#x6545;&#x969C;&#x6062;&#x590D;&#x72B6;&#x6001;&#x7684;&#x65F6;&#x95F4;&#x3002;</p>
-<p>&#x4E3A;&#x4E86;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#xFF0C;&#x4E3A;&#x8F6F;raid&#x589E;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x63A5;&#x53E3;&#xFF0C;verify read&#xFF0C;&#x5728;&#x6536;&#x5230;&#x8FD9;&#x79CD;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x5148;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x7684;&#x6821;&#x9A8C;&#x5224;&#x65AD;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x4E0D;&#x4E00;&#x81F4;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x5219;&#x91CD;&#x5199;&#x955C;&#x50CF;&#x6216;&#x6821;&#x9A8C;&#x6570;&#x636E;&#x6765;&#x4FDD;&#x6301;&#x4E00;&#x81F4;&#x3002;<br>&#x5982;&#x679C;&#x628A;&#x65E5;&#x5FD7;&#x8BB0;&#x5F55;&#x5230;&#x8BE5;&#x9635;&#x5217;&#x4E2D;&#xFF0C;&#x4F1A;&#x964D;&#x4F4E;&#x9635;&#x5217;&#x7684;&#x6027;&#x80FD;&#xFF0C;&#x9AD8;&#x7AEF;&#x9635;&#x5217;&#x4E00;&#x822C;&#x662F;&#x91C7;&#x7528;&#x4E00;&#x4E2A;NVRAM&#x6765;&#x8BB0;&#x5F55;&#x65E5;&#x5FD7;&#xFF0C;<br>&#x53E6;&#x4E00;&#x79CD;&#x65B9;&#x5F0F;&#x662F;&#x628A;&#x65E5;&#x5FD7;&#x8BB0;&#x5F55;&#x5230;&#x9635;&#x5217;&#x7684;bitmap&#x4E2D;&#xFF0C;&#x4E0D;&#x8FC7;&#x8FD9;&#x6837;&#x90FD;&#x4F1A;&#x5F71;&#x54CD;&#x6027;&#x80FD;&#x3002;&#xFF08;&#x5C31;&#x662F;mdraid&#x7684;bitmap&#x673A;&#x5236;&#xFF0C;<a href="http://www.linuxsymposium.org/archives/OLS/Reprints-2003/LinuxSymposium2003.pdf#page=109&#xFF09;" target="_blank" rel="external">http://www.linuxsymposium.org/archives/OLS/Reprints-2003/LinuxSymposium2003.pdf#page=109&#xFF09;</a></p>
-<p>&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E3B;&#x8981;&#x8BB2;&#x7684;&#x5C31;&#x662F;&#x5229;&#x7528;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x6062;&#x590D;&#x673A;&#x5236;&#xFF0C;&#x6765;&#x89E3;&#x51B3;&#x8F6F;raid&#x5D29;&#x6E83;&#x65F6;&#x5168;&#x91CF;&#x540C;&#x6B65;&#x7684;&#x95EE;&#x9898;&#x3002;<br>&#x8FD9;&#x91CC;&#x662F;&#x57FA;&#x4E8E;&#x65E5;&#x5FD7;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF08;&#x5982;ext3&#x4E4B;&#x7C7B;&#x7684;&#xFF09;&#xFF0C;&#x5728;&#x5199;&#x6570;&#x636E;&#x5230;&#x78C1;&#x76D8;&#x4E4B;&#x524D;&#xFF0C;&#x5148;&#x8BB0;&#x5F55;&#x65E5;&#x5FD7;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x6570;&#x636E;&#xFF0C;&#x5199;&#x6210;&#x529F;&#x540E;&#x518D;&#x8BB0;&#x5F55;commit&#x65E5;&#x5FD7;&#x3002;<br>&#x8FD9;&#x6837;&#x5728;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5D29;&#x6E83;&#x65F6;&#x53EF;&#x4EE5;&#x6839;&#x636E;&#x65E5;&#x5FD7;&#x6765;&#x8FDB;&#x884C;&#x6062;&#x590D;&#xFF0C;&#x65E5;&#x5FD7;&#x4E2D;&#x5DF2;&#x7ECF;commit&#x6210;&#x529F;&#x7684;&#x662F;&#x4E0D;&#x9700;&#x8981;&#x6062;&#x590D;&#x7684;&#x3002;<br>&#x4E3A;&#x4E86;&#x5229;&#x7528;&#x8FD9;&#x4E2A;&#x673A;&#x5236;&#xFF0C;&#x4E3A;&#x8F6F;raid&#x5F15;&#x5165;veryfy read&#xFF0C;&#x5C31;&#x662F;&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5411;&#x8F6F;raid&#x53D1;veryfy read&#x8BF7;&#x6C42;&#xFF0C;&#x5C31;&#x662F;&#x5728;buffer head&#x4E2D;&#x589E;&#x52A0;&#x4E00;&#x4E2A;raid synchronize&#x7684;&#x6807;&#x8BB0;&#xFF0C;&#x8F6F;raid&#x5728;&#x6536;&#x5230;&#x5E26;&#x6709;&#x8FD9;&#x4E2A;&#x6807;&#x8BB0;&#x7684;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x624D;&#x8FDB;&#x884C;&#x68C0;&#x67E5;&#xFF08;raid1&#x662F;&#x68C0;&#x67E5;&#x6E90;&#x76D8;&#x548C;&#x955C;&#x50CF;&#x76D8;&#x5BF9;&#x5E94;&#x7684;&#x6570;&#x636E;&#x662F;&#x5426;&#x4E00;&#x81F4;&#xFF0C;raid5&#x662F;&#x68C0;&#x67E5;&#x6821;&#x9A8C;&#x5757;&#x548C;&#x7531;&#x6570;&#x636E;&#x5757;&#x8BA1;&#x7B97;&#x7684;&#x6821;&#x9A8C;&#x503C;&#x662F;&#x5426;&#x4E00;&#x81F4;&#xFF09;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x4E00;&#x81F4;&#xFF0C;&#x5C31;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#xFF08;raid1&#x8BA9;&#x5404;&#x4E2A;&#x955C;&#x50CF;&#x76D8;&#x7684;&#x5BF9;&#x5E94;&#x6570;&#x636E;&#x4E00;&#x6837;&#xFF0C;raid5&#x662F;&#x5C06;&#x65B0;&#x8BA1;&#x7B97;&#x7684;&#x6821;&#x9A8C;&#x503C;&#x5199;&#x5165;&#x6821;&#x9A8C;&#x5757;&#x4E2D;&#xFF09;&#x3002;&#x8FD9;&#x6837;&#x5C31;&#x907F;&#x514D;&#x4E86;&#x8F6F;raid&#x5D29;&#x6E83;&#x65F6;&#xFF0C;&#x5168;&#x76D8;&#x626B;&#x63CF;&#x8FDB;&#x884C;&#x6BD4;&#x5BF9;&#x4E86;&#x3002;<br>&#x5C40;&#x9650;&#x5728;&#x4E8E;&#xFF1A;<br>1&#xFF09;&#x5FC5;&#x987B;&#x662F;&#x57FA;&#x4E8E;&#x65E5;&#x5FD7;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x800C;&#x4E14;&#x5FC5;&#x987B;&#x662F;&#x8F6F;raid&#x4E0A;&#x5EFA;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x5982;&#x679C;&#x8F6F;raid&#x4E0A;&#x6CA1;&#x6709;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x800C;&#x76F4;&#x63A5;&#x88F8;&#x76D8;&#x4F7F;&#x7528;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x4E0D;&#x9002;&#x7528;&#x3002;<br>2&#xFF09;&#x5BF9;&#x4E8E;&#x8DE8;&#x7F51;&#x7EDC;&#x7684;&#x8F6F;raid&#xFF08;&#x4F7F;&#x7528;iscsi&#x6216;nbd&#x7B49;&#x65B9;&#x5F0F;&#xFF09;&#xFF0C;&#x6587;&#x7AE0;&#x4E2D;&#x7684;&#x5728;&#x8BF7;&#x6C42;&#x4E0A;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;synchronize&#x6807;&#x8BB0;&#x8FD8;&#x4E0D;&#x4E00;&#x5B9A;&#x53EF;&#x884C;&#xFF0C;&#x56E0;&#x4E3A;&#x9700;&#x8981;iscsi&#x534F;&#x8BAE;&#x6216;nbd&#x91CC;&#x6709;&#x7A7A;&#x95F2;&#x5B57;&#x6BB5;&#x7528;&#x4E8E;&#x5B58;&#x653E;synchronize&#x6807;&#x8BB0;&#x624D;&#x884C;&#x3002;<br>&#x503C;&#x5F97;&#x501F;&#x9274;&#x7684;&#x5730;&#x65B9;&#xFF1A;<br>1&#xFF09;&#x80FD;&#x591F;&#x6839;&#x636E;&#x8BF7;&#x6C42;&#x7684;&#x7C7B;&#x578B;&#x6765;&#x5224;&#x65AD;&#x662F;&#x5426;&#x8FDB;&#x884C;&#x8F6F;raid&#x7684;&#x6570;&#x636E;&#x6062;&#x590D;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x8FDB;&#x884C;&#x5168;&#x76D8;&#x626B;&#x63CF;&#xFF1B;<br>2&#xFF09;&#x5BF9;&#x4E8E;&#x4E91;&#x786C;&#x76D8;&#x6765;&#x8BF4;&#xFF0C;&#x76EE;&#x524D;&#x91C7;&#x7528;&#x7684;bitmap&#x673A;&#x5236;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x628A;&#x65E5;&#x5FD7;&#x8BB0;&#x5F55;&#x5230;bitmap&#x4E2D;&#xFF08;&#x6587;&#x7AE0;&#x4E2D;&#x4E5F;&#x6709;&#x63D0;&#x5230;&#xFF09;&#xFF0C;&#x4E0D;&#x8FC7;&#x5728;&#x6574;&#x4E2A;&#x673A;&#x623F;&#x65AD;&#x7535;&#x91CD;&#x542F;&#x8FD9;&#x79CD;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#xFF0C;bitmap&#x4E5F;&#x4E22;&#x5931;&#x4E0D;&#x53EF;&#x7528;&#x4E86;&#xFF0C;&#x76EE;&#x524D;&#x5C31;&#x53EA;&#x80FD;&#x5168;&#x76D8;&#x626B;&#x63CF;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#xFF08;&#x8FD9;&#x91CC;&#x7684;&#x5168;&#x76D8;&#x626B;&#x63CF;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#x662F;&#x76F4;&#x63A5;&#x5C06;&#x4E00;&#x5757;&#x76D8;&#x7684;&#x6570;&#x636E;&#x5B8C;&#x5168;&#x62F7;&#x8D1D;&#x5230;&#x53E6;&#x4E00;&#x5757;&#x76D8;&#xFF0C;&#x8FD8;&#x662F;&#x9700;&#x8981;&#x6839;&#x636E;chunk&#x5757;&#x5927;&#x5C0F;&#x8FDB;&#x884C;&#x6BD4;&#x5BF9;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x5C31;&#x4E0D;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x62F7;&#x8D1D;&#xFF0C;&#x4E0D;&#x8FC7;&#x4E5F;&#x5FC5;&#x987B;&#x5148;&#x4ECE;&#x4E24;&#x4E2A;&#x955C;&#x50CF;&#x4E2D;&#x90FD;&#x8BFB;&#x51FA;&#x6570;&#x636E;&#x6765;&#xFF0C;&#x76EE;&#x524D;&#x8BA4;&#x4E3A;&#x662F;&#x7B2C;&#x4E8C;&#x79CD;&#xFF09;&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x4F7F;&#x7528;&#x7684;extern bitmap&#xFF0C;&#x8FD9;&#x79CD;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;bitmap&#x4E0D;&#x53EF;&#x7528;&#xFF0C;&#x5982;&#x679C;&#x662F;intern bitmap&#xFF0C;&#x90A3;&#x5BF9;&#x4E8E;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E5F;&#x662F;&#x53EF;&#x4EE5;&#x4E0D;&#x7528;&#x5168;&#x91CF;&#x540C;&#x6B65;&#x7684;&#xFF0C;&#x53EA;&#x4E0D;&#x8FC7;intern bitmap&#x662F;&#x5B58;&#x653E;&#x5728;&#x9635;&#x5217;&#x672C;&#x8EAB;&#xFF0C;&#x5BF9;&#x4E8E;&#x6B63;&#x5E38;&#x8BF7;&#x6C42;&#x6765;&#x8BF4;&#x5F00;&#x9500;&#x8F83;&#x5927;&#x3002;</p>
-
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/fs-io-map/" itemprop="url">
-                  文件系统磁盘布局与I/O映射
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T22:09:16+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/fs-io-map/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/fs-io-map/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5BF9;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x78C1;&#x76D8;&#x5E03;&#x5C40;&#x8FDB;&#x884C;&#x6982;&#x8981;&#x7684;&#x68B3;&#x7406;&#xFF0C;&#x5E76;&#x5728;&#x6B64;&#x57FA;&#x7840;&#x4E0A;&#x5206;&#x6790;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;I/O&#x5230;&#x5757;I/O&#x7684;&#x6620;&#x5C04;&#x673A;&#x5236;&#x3002;</p>
-<h1 id="1-&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;"><a href="#1-&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;" class="headerlink" title="1.&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;"></a>1.&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;</h1><p>&#x9996;&#x5148;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5C42;&#x9762;&#x6765;&#x9610;&#x8FF0;&#x6587;&#x4EF6;&#x4E0E;&#x5757;&#x8BBE;&#x5907;&#x7684;&#x5173;&#x7CFB;&#x3002;</p>
-<h2 id="1-1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode"><a href="#1-1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode" class="headerlink" title="1.1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode"></a>1.1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode</h2><p>&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x5728;&#x8BBF;&#x95EE;&#x6587;&#x4EF6;&#x65F6;&#x90FD;&#x4F1A;&#x5148;&#x6253;&#x5F00;&#x6587;&#x4EF6;&#xFF0C;&#x5728;&#x5185;&#x6838;&#x4E2D;&#xFF0C;&#x5BF9;&#x5E94;&#x6BCF;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x90FD;&#x4F1A;&#x6709;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x8868;&#x793A;&#x8FD9;&#x4E2A;&#x8FDB;&#x7A0B;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x4F46;&#x662F;&#x7528;&#x6237;&#x7A0B;&#x5E8F;&#x4E0D;&#x80FD;&#x76F4;&#x63A5;&#x8BBF;&#x95EE;&#x5185;&#x6838;&#x4E2D;&#x7684;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;,&#x800C;&#x53EA;&#x80FD;&#x4F7F;&#x7528;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x7684;&#x7D22;&#x5F15;&#xFF08;&#x4E00;&#x4E2A;&#x6574;&#x6570;&#xFF09;&#xFF0C;&#x8FD9;&#x4E9B;&#x7D22;&#x5F15;&#x5C31;&#x88AB;&#x79F0;&#x4E3A;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x3002;&#x5F53;&#x8C03;&#x7528;open &#x6253;&#x5F00;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x6216;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x6587;&#x4EF6;&#x65F6;,&#x5185;&#x6838;&#x5206;&#x914D;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x5E76;&#x8FD4;&#x56DE;&#x7ED9;&#x7528;&#x6237;&#x7A0B;&#x5E8F;,&#x8BE5;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x9879;&#x4E2D;&#x7684;&#x6307;&#x9488;&#x6307;&#x5411;&#x65B0;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
-<p>&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x8868;&#x4E2D;&#x6BCF;&#x4E00;&#x9879;&#x90FD;&#x662F;&#x4E00;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x6307;&#x5411;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x63CF;&#x8FF0;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#x7684;&#x6570;&#x636E;&#x5757;&#x2013;file&#x5BF9;&#x8C61;&#xFF0C;file&#x5BF9;&#x8C61;&#x4E2D;&#x63CF;&#x8FF0;&#x4E86;&#x6587;&#x4EF6;&#x7684;&#x6253;&#x5F00;&#x6A21;&#x5F0F;&#xFF0C;&#x8BFB;&#x5199;&#x4F4D;&#x7F6E;&#x7B49;&#x91CD;&#x8981;&#x4FE1;&#x606F;&#xFF0C;&#x5F53;&#x8FDB;&#x7A0B;&#x6253;&#x5F00;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x65F6;&#xFF0C;&#x5185;&#x6838;&#x5C31;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x7684;file&#x5BF9;&#x8C61;&#x3002;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;file&#x5BF9;&#x8C61;&#x4E0D;&#x662F;&#x4E13;&#x5C5E;&#x4E8E;&#x67D0;&#x4E2A;&#x8FDB;&#x7A0B;&#x7684;&#xFF0C;&#x4E0D;&#x540C;&#x8FDB;&#x7A0B;&#x7684;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x4E2D;&#x7684;&#x6307;&#x9488;&#x53EF;&#x4EE5;&#x6307;&#x5411;&#x76F8;&#x540C;&#x7684;file&#x5BF9;&#x8C61;&#xFF0C;&#x4ECE;&#x800C;&#x5171;&#x4EAB;&#x8FD9;&#x4E2A;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#x3002;file&#x5BF9;&#x8C61;&#x6709;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#xFF0C;&#x8BB0;&#x5F55;&#x4E86;&#x5F15;&#x7528;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E2A;&#x6570;&#xFF0C;&#x53EA;&#x6709;&#x5F53;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x4E3A;0&#x65F6;&#xFF0C;&#x5185;&#x6838;&#x624D;&#x9500;&#x6BC1;file&#x5BF9;&#x8C61;&#xFF0C;&#x56E0;&#x6B64;&#x67D0;&#x4E2A;&#x8FDB;&#x7A0B;&#x5173;&#x95ED;&#x6587;&#x4EF6;&#xFF0C;&#x4E0D;&#x5F71;&#x54CD;&#x4E0E;&#x4E4B;&#x5171;&#x4EAB;&#x540C;&#x4E00;&#x4E2A;file&#x5BF9;&#x8C61;&#x7684;&#x8FDB;&#x7A0B;&#x3002;</p>
-<p>file&#x5BF9;&#x8C61;&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x6307;&#x5411;dentry&#x5BF9;&#x8C61;&#x3002;dentry&#x5BF9;&#x8C61;&#x4EE3;&#x8868;&#x4E00;&#x4E2A;&#x72EC;&#x7ACB;&#x7684;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;&#xFF0C;&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;&#x88AB;&#x6253;&#x5F00;&#x591A;&#x6B21;&#xFF0C;&#x90A3;&#x4E48;&#x4F1A;&#x5EFA;&#x7ACB;&#x591A;&#x4E2A;file&#x5BF9;&#x8C61;&#xFF0C;&#x4F46;&#x5B83;&#x4EEC;&#x90FD;&#x6307;&#x5411;&#x540C;&#x4E00;&#x4E2A;dentry&#x5BF9;&#x8C61;&#x3002;inode&#x5BF9;&#x8C61;&#x4EE3;&#x8868;&#x4E00;&#x4E2A;&#x72EC;&#x7ACB;&#x6587;&#x4EF6;&#xFF0C;inode &#x5BF9;&#x8C61;&#x5305;&#x542B;&#x4E86;&#x6700;&#x7EC8;&#x5BF9;&#x6587;&#x4EF6;&#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#x6240;&#x9700;&#x7684;&#x6240;&#x6709;&#x4FE1;&#x606F;&#xFF0C;&#x5982;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7C7B;&#x578B;&#x3001;&#x6587;&#x4EF6;&#x7684;&#x64CD;&#x4F5C;&#x65B9;&#x6CD5;&#x3001;&#x6587;&#x4EF6;&#x7684;&#x6743;&#x9650;&#x3001;&#x8BBF;&#x95EE;&#x65E5;&#x671F;&#x7B49;&#x3002;<br></p>
+          <p>&#x524D;&#x6BB5;&#x65F6;&#x95F4;&#x4E00;&#x76F4;&#x5728;&#x7814;&#x7A76;ceph&#x7684;&#x5FEB;&#x7167;&#x4EE5;&#x53CA;&#x5176;&#x6240;&#x6D89;&#x53CA;&#x7684;&#x6545;&#x969C;&#x6062;&#x590D;&#x903B;&#x8F91;&#xFF0C;ceph&#x5728;&#x8FD9;&#x90E8;&#x5206;&#x7684;&#x5B9E;&#x73B0;&#x633A;&#x7CBE;&#x5999;&#x7684;&#xFF0C;&#x867D;&#x7136;&#x4E5F;&#x662F;&#x57FA;&#x4E8E;COW&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x7EC6;&#x7EC6;&#x54C1;&#x6765;&#xFF0C;&#x5176;&#x5728;&#x5FEB;&#x7167;&#x7684;&#x5143;&#x6570;&#x636E;&#x7BA1;&#x7406;&#x4EE5;&#x53CA;&#x7236;&#x5B50;&#x5173;&#x7CFB;&#x7684;&#x7EF4;&#x62A4;&#x4E0A;&#x6709;&#x72EC;&#x5230;&#x4E4B;&#x5904;&#xFF0C;&#x672C;&#x6587;&#x5C06;&#x8BE6;&#x7EC6;&#x9610;&#x8FF0;&#x5FEB;&#x7167;&#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x4EE5;&#x53CA;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#x5728;&#x6062;&#x590D;&#x65F6;&#x5982;&#x4F55;&#x81F3;&#x5173;&#x91CD;&#x8981;&#x7684;&#x4F5C;&#x7528;&#x3002;</p>
+<h1 id="1-rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;"><a href="#1-rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;" class="headerlink" title="1.rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;"></a>1.rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;</h1><p>ceph&#x7684;rbd&#x5377;&#x53EF;&#x7528;&#x505A;&#x591A;&#x6B21;&#x5FEB;&#x7167;&#xFF0C;&#x6BCF;&#x6B21;&#x505A;&#x5B8C;&#x5FEB;&#x7167;&#x540E;&#x518D;&#x5BF9;&#x5377;&#x8FDB;&#x884C;&#x5199;&#x5165;&#x65F6;&#x5C31;&#x4F1A;&#x89E6;&#x53D1;COW&#x64CD;&#x4F5C;&#xFF0C;&#x5373;&#x5148;&#x62F7;&#x8D1D;&#x51FA;&#x539F;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x636E;&#x51FA;&#x6765;&#x751F;&#x6210;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x539F;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x8FDB;&#x884C;&#x5199;&#x5165;&#x3002;&#x76F4;&#x89C2;&#x56FE;&#x89E3;&#x5982;&#x4E0B;&#xFF1A;<br><img src="/2016/02/28/ceph-rbd-snap/rbd-flow.png" alt="rbd-flow"><br>&#x505A;&#x5FEB;&#x7167;&#x7684;&#x64CD;&#x4F5C;&#x662F;&#x5F88;&#x5FEB;&#x7684;&#xFF0C;&#x56E0;&#x4E3A;&#x53EA;&#x66F4;&#x65B0;&#x4E86;&#x5377;&#x7684;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x6DFB;&#x52A0;&#x4E86;&#x4E00;&#x4E9B;&#x5FEB;&#x7167;&#x4FE1;&#x606F;&#xFF08;&#x5305;&#x62EC;&#x8BE5;&#x5377;&#x6709;&#x54EA;&#x4E9B;&#x5FEB;&#x7167;&#xFF0C;&#x5FEB;&#x7167;id&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x4E2A;&#x5377;&#x662F;&#x514B;&#x9686;&#x51FA;&#x6765;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x8FD8;&#x5305;&#x62EC;parent&#x4FE1;&#x606F;&#xFF09;&#x3002;&#x6BCF;&#x4E2A;rbd&#x5377;&#x5728;rados&#x91CC;&#x90FD;&#x6709;&#x4E00;&#x4E2A;<strong>rbd_header</strong>&#x5BF9;&#x8C61;&#xFF0C;&#x8FD9;&#x4E2A;rbd_header&#x5BF9;&#x8C61;&#x91CC;&#x9762;&#x6CA1;&#x6570;&#x636E;&#xFF0C;&#x5377;&#x7684;&#x5143;&#x6570;&#x636E;&#x90FD;&#x662F;&#x4F5C;&#x4E3A;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5C5E;&#x6027;&#x4EE5;omap&#x65B9;&#x5F0F;&#x8BB0;&#x5F55;&#x5230;leveldb&#x91CC;&#xFF08;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;rados -p <pool> listomapvals rbd_header.<id>&#x6765;&#x83B7;&#x5F97;&#x5FEB;&#x7167;&#x76F8;&#x5173;&#x7684;&#x5143;&#x6570;&#x636E;&#x4FE1;&#x606F;&#xFF09;&#x3002;</id></pool></p>
+<p>&#x5F53;&#x505A;&#x5B8C;&#x5FEB;&#x7167;&#x540E;&#xFF0C;&#x5982;&#x679C;&#x5BF9;&#x539F;&#x5377;&#x8FDB;&#x884C;&#x5199;&#x5165;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C31;&#x4F1A;&#x5148;&#x62F7;&#x8D1D;&#x6570;&#x636E;&#x51FA;&#x6765;&#x751F;&#x6210;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#xFF08;&#x5728;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x91CC;&#x5C31;&#x662F;&#x4E00;&#x4E2A;clone&#x64CD;&#x4F5C;&#xFF09;&#xFF0C;&#x62F7;&#x8D1D;&#x7684;&#x65F6;&#x5019;&#x662F;&#x6574;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x636E;&#xFF08;&#x6709;&#x53EF;&#x80FD;&#x8FD9;&#x4E2A;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x4E0D;&#x662F;&#x9ED8;&#x8BA4;&#x7684;4MB&#x5927;&#x5C0F;&#xFF0C;&#x90A3;&#x4E48;&#x6709;&#x591A;&#x5927;&#x62F7;&#x591A;&#x5927;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x5165;&#x65B0;&#x6570;&#x636E;&#x3002;&#x5728;ceph&#x91CC;&#xFF0C;&#x5377;&#x7684;&#x539F;&#x5BF9;&#x8C61;&#x53EB;&#x505A;<strong>head&#x5BF9;&#x8C61;</strong>&#xFF0C;&#x800C;&#x5377;&#x4F5C;&#x4E3A;&#x5FEB;&#x7167;&#x540E;&#x901A;&#x8FC7;cow&#x62F7;&#x8D1D;&#x51FA;&#x6765;&#x7684;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#x79F0;&#x4E3A;<strong>snap&#x5BF9;&#x8C61;</strong>&#x3002;<br>&#x56E0;&#x4E3A;ceph&#x91CC;&#x5BF9;&#x8C61;&#x662F;&#x5199;&#x65F6;&#x5206;&#x914D;&#x7684;&#xFF0C;&#x4E00;&#x4E2A;&#x65B0;&#x521B;&#x5EFA;&#x7684;&#x5377;&#x5982;&#x679C;&#x6BCF;&#x4E00;&#x5199;&#x8FC7;&#x6570;&#x636E;&#xFF0C;&#x5728;rados&#x91CC;&#x662F;&#x6CA1;&#x6709;&#x751F;&#x6210;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x7684;&#xFF0C;&#x53EA;&#x6709;&#x5F53;&#x6570;&#x636E;&#x5199;&#x5165;&#x65F6;&#xFF0C;&#x624D;&#x5206;&#x914D;&#x51FA;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x6765;&#x3002;<br></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/fs-io-map/#more" rel="contents">
+            <a class="btn" href="/2016/02/28/ceph-rbd-snap/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -509,8 +385,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/12/linux-io-stack/" itemprop="url">
-                  linux块设备IO栈浅析
+                <a class="post-title-link" href="/2016/02/15/ceph-consistency/" itemprop="url">
+                  ceph基于pglog的一致性协议
                 </a>
               
             
@@ -523,8 +399,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T21:54:13+08:00" content="2016-05-12">
-              2016-05-12
+            <time itemprop="dateCreated" datetime="2016-02-15T16:30:31+08:00" content="2016-02-15">
+              2016-02-15
             </time>
           </span>
 
@@ -537,8 +413,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
                   </a>
                 </span>
 
@@ -553,8 +429,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/12/linux-io-stack/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/linux-io-stack/" itemprop="commentsCount"></span>
+                <a href="/2016/02/15/ceph-consistency/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/15/ceph-consistency/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -578,10 +454,11 @@
 
       
         
-          <p>&#x5757;&#x5B58;&#x50A8;&#xFF0C;&#x7B80;&#x5355;&#x6765;&#x8BF4;&#x5C31;&#x662F;&#x4F7F;&#x7528;&#x5757;&#x8BBE;&#x5907;&#x4E3A;&#x7CFB;&#x7EDF;&#x63D0;&#x4F9B;&#x5B58;&#x50A8;&#x670D;&#x52A1;&#x3002;&#x5757;&#x5B58;&#x50A8;&#x5206;&#x591A;&#x79CD;&#x7C7B;&#x578B;&#xFF0C;&#x6709;&#x5355;&#x673A;&#x5757;&#x5B58;&#x50A8;&#xFF0C;&#x7F51;&#x7EDC;&#x5B58;&#x50A8;&#xFF08;&#x5982;NAS&#xFF0C;SAN&#x7B49;&#xFF09;&#xFF0C;&#x5206;&#x5E03;&#x5F0F;&#x5757;&#x5B58;&#x50A8;&#xFF08;&#x76EE;&#x524D;&#x4E3B;&#x6D41;&#x7684;&#x5982;AWS&#x7684;EBS&#xFF0C;&#x9752;&#x4E91;&#x7684;&#x4E91;&#x786C;&#x76D8;&#xFF0C;&#x963F;&#x91CC;&#x4E91;&#x7684;&#x4E91;&#x78C1;&#x76D8;&#xFF0C;&#x7F51;&#x6613;&#x4E91;&#x786C;&#x76D8;&#x7B49;&#xFF09;&#x3002;&#x901A;&#x5E38;&#x5757;&#x5B58;&#x50A8;&#x7684;&#x8868;&#x73B0;&#x5F62;&#x5F0F;&#x5C31;&#x662F;&#x4E00;&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x7528;&#x6237;&#x770B;&#x5230;&#x7684;&#x5C31;&#x662F;&#x7C7B;&#x4F3C;&#x4E8E;sda&#xFF0C;sdb&#x8FD9;&#x6837;&#x7684;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x4ECB;&#x7ECD;Linux&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x5BF9;Linux&#x7684;&#x5757;&#x8BBE;&#x5907;I/O&#x6808;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
-<h1 id="1-&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><p>&#x5757;&#x8BBE;&#x5907;&#x5C06;&#x4FE1;&#x606F;&#x5B58;&#x50A8;&#x5728;&#x56FA;&#x5B9A;&#x5927;&#x5C0F;&#x7684;&#x5757;&#x4E2D;&#xFF0C;&#x6BCF;&#x4E2A;&#x5757;&#x90FD;&#x6709;&#x81EA;&#x5DF1;&#x7684;&#x5730;&#x5740;&#x3002;&#x5BF9;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x800C;&#x8A00;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x662F;&#x4EE5;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#x7684;&#x5916;&#x89C2;&#x5C55;&#x73B0;&#x7684;&#xFF0C;&#x4F8B;&#x5982;/dev/sda&#xFF0C;&#x867D;&#x7136;&#x5BF9;&#x8FD9;&#x79CD;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#x53EF;&#x4EE5;&#x6309;&#x7167;&#x5B57;&#x8282;&#x4E3A;&#x5355;&#x4F4D;&#x8BBF;&#x95EE;&#xFF0C;&#x4F46;&#x662F;&#x5B9E;&#x9645;&#x4E0A;&#x5230;&#x5757;&#x8BBE;&#x5907;&#x4E0A;&#x5374;&#x662F;&#x4EE5;&#x5757;&#x4E3A;&#x5355;&#x4F4D;&#xFF08;&#x6700;&#x5C0F;512byte&#xFF0C;&#x5373;&#x4E00;&#x4E2A;&#x6247;&#x533A;&#xFF09;&#xFF0C;&#x8FD9;&#x4E4B;&#x95F4;&#x7684;&#x8F6C;&#x6362;&#x662F;&#x7531;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x6765;&#x5B9E;&#x73B0;&#x7684;&#x3002;<br>        &#x4E0B;&#x9762;&#x4ECB;&#x7ECD;&#x51E0;&#x4E2A;&#x5757;&#x8BBE;&#x5907;&#x7684;&#x57FA;&#x672C;&#x6982;&#x5FF5;&#xFF1A;<br>        1&#xFF09;&#x6247;&#x533A;&#xFF1A;&#x78C1;&#x76D8;&#x76D8;&#x7247;&#x4E0A;&#x7684;&#x6247;&#x5F62;&#x533A;&#x57DF;&#xFF0C;&#x903B;&#x8F91;&#x5316;&#x6570;&#x636E;&#xFF0C;&#x65B9;&#x4FBF;&#x7BA1;&#x7406;&#x78C1;&#x76D8;&#x7A7A;&#x95F4;&#xFF0C;&#x662F;&#x786C;&#x4EF6;&#x8BBE;&#x5907;&#x6570;&#x636E;&#x4F20;&#x9001;&#x7684;&#x57FA;&#x672C;&#x5355;&#x4F4D;&#xFF0C;&#x4E00;&#x822C;512Byte&#xFF1B;<br>    2&#xFF09;&#x5757;&#xFF1A;&#x5757;&#x662F;VFS&#x548C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6570;&#x636E;&#x4F20;&#x9001;&#x7684;&#x57FA;&#x672C;&#x5355;&#x4F4D;&#xFF0C;&#x5FC5;&#x987B;&#x662F;&#x6247;&#x533A;&#x7684;&#x6574;&#x6570;&#x500D;&#xFF0C;&#x683C;&#x5F0F;&#x5316;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x5757;&#x5927;&#x5C0F;&#xFF08;&#x4E00;&#x822C;512,1024,2048,4096&#x5B57;&#x8282;&#xFF09;&#xFF1B;<br>       3&#xFF09;&#x6BB5;&#xFF1A;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x4E2D;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5305;&#x542B;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x78C1;&#x76D8;&#x6247;&#x533A;&#x4E2D;&#x7684;&#x6570;&#x636E;&#xFF1B;&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;I/O&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x5728;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x4F20;&#x9001;&#x3002;&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x5757;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x5728;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5408;&#x5E76;&#x5B83;&#x4EEC;&#xFF0C;&#x4EA7;&#x751F;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#xFF0C;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x662F;&#x901A;&#x8FC7;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6765;&#x8BBF;&#x95EE;&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x901A;&#x8FC7;&#x6307;&#x5B9A;&#x504F;&#x79FB;&#x548C;&#x5927;&#x5C0F;&#x6765;&#x8BFB;&#x5199;&#x88F8;&#x8BBE;&#x5907;&#x3002;<br>&#x5E38;&#x89C1;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x5C31;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF0C;&#x5728;Linux&#x7CFB;&#x7EDF;&#x4E0B;&#xFF0C;&#x8FD8;&#x63D0;&#x4F9B;&#x57FA;&#x4E8E;&#x5176;&#x4ED6;&#x5757;&#x8BBE;&#x5907;&#x4E4B;&#x4E0A;&#x7684;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#xFF0C;&#x5982;Device Mapper&#xFF0C;&#x8F6F;RAID&#x7B49;&#x3002;<br></p>
+          <p>&#x5206;&#x5E03;&#x5F0F;&#x5B58;&#x50A8;&#x7CFB;&#x7EDF;&#x901A;&#x5E38;&#x91C7;&#x7528;&#x591A;&#x526F;&#x672C;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x4FDD;&#x8BC1;&#x7CFB;&#x7EDF;&#x7684;&#x53EF;&#x9760;&#x6027;&#xFF0C;&#x800C;&#x591A;&#x526F;&#x672C;&#x4E4B;&#x95F4;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7684;&#x4E00;&#x81F4;&#x6027;&#x5C31;&#x662F;&#x7CFB;&#x7EDF;&#x7684;&#x6838;&#x5FC3;&#x3002;ceph&#x53F7;&#x79F0;&#x7EDF;&#x4E00;&#x5B58;&#x50A8;&#xFF0C;&#x5176;&#x6838;&#x5FC3;RADOS&#x65E2;&#x652F;&#x6301;&#x591A;&#x526F;&#x672C;&#xFF0C;&#x4E5F;&#x652F;&#x6301;&#x7EA0;&#x5220;&#x7801;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5206;&#x6790;ceph&#x7684;&#x591A;&#x526F;&#x672C;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#x3002;</p>
+<h1 id="1-pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;"><a href="#1-pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;" class="headerlink" title="1.pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;"></a>1.pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;</h1><p>ceph&#x4F7F;&#x7528;pglog&#x6765;&#x4FDD;&#x8BC1;&#x591A;&#x526F;&#x672C;&#x4E4B;&#x95F4;&#x7684;&#x4E00;&#x81F4;&#x6027;&#xFF0C;pglog&#x7684;&#x793A;&#x610F;&#x56FE;&#x5982;&#x4E0B;&#xFF1A;pglog&#x4E3B;&#x8981;&#x662F;&#x7528;&#x6765;&#x8BB0;&#x5F55;&#x505A;&#x4E86;&#x4EC0;&#x4E48;&#x64CD;&#x4F5C;&#xFF0C;&#x6BD4;&#x5982;&#x4FEE;&#x6539;&#xFF0C;&#x5220;&#x9664;&#x7B49;&#xFF0C;&#x800C;&#x6BCF;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#x91CC;&#x5305;&#x542B;&#x4E86;&#x5BF9;&#x8C61;&#x4FE1;&#x606F;&#xFF0C;&#x8FD8;&#x6709;&#x7248;&#x672C;&#x3002;<br>ceph&#x4F7F;&#x7528;&#x7248;&#x672C;&#x63A7;&#x5236;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x6807;&#x8BB0;&#x4E00;&#x4E2A;PG&#x5185;&#x7684;&#x6BCF;&#x4E00;&#x6B21;&#x66F4;&#x65B0;&#xFF0C;&#x6BCF;&#x4E2A;&#x7248;&#x672C;&#x5305;&#x62EC;&#x4E00;&#x4E2A;(epoch&#xFF0C;version)&#x6765;&#x7EC4;&#x6210;&#xFF1A;&#x5176;&#x4E2D;epoch&#x662F;osdmap&#x7684;&#x7248;&#x672C;&#xFF0C;&#x6BCF;&#x5F53;&#x6709;OSD&#x72B6;&#x6001;&#x53D8;&#x5316;&#x5982;&#x589E;&#x52A0;&#x5220;&#x9664;&#x7B49;&#x65F6;&#xFF0C;epoch&#x5C31;&#x9012;&#x589E;&#xFF1B;version&#x662F;PG&#x5185;&#x6BCF;&#x6B21;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;&#x7684;&#x7248;&#x672C;&#x53F7;&#xFF0C;&#x9012;&#x589E;&#x7684;&#xFF0C;&#x7531;PG&#x5185;&#x7684;Primary OSD&#x8FDB;&#x884C;&#x5206;&#x914D;&#x7684;&#x3002;<br><img src="/2016/02/15/ceph-consistency/pglog-entry.png" alt="pglog-entry"><br>&#x6BCF;&#x4E2A;&#x526F;&#x672C;&#x4E0A;&#x90FD;&#x7EF4;&#x62A4;&#x4E86;pglog&#xFF0C;pglog&#x91CC;&#x6700;&#x91CD;&#x8981;&#x7684;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x5C31;&#x662F;last_complete&#x548C;last_update&#xFF0C;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6BCF;&#x4E2A;&#x526F;&#x672C;&#x4E0A;&#x8FD9;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x90FD;&#x6307;&#x5411;&#x540C;&#x4E00;&#x4E2A;&#x4F4D;&#x7F6E;&#xFF0C;&#x5F53;&#x51FA;&#x73B0;&#x673A;&#x5668;&#x91CD;&#x542F;&#x3001;&#x7F51;&#x7EDC;&#x4E2D;&#x65AD;&#x7B49;&#x6545;&#x969C;&#x65F6;&#xFF0C;&#x6545;&#x969C;&#x526F;&#x672C;&#x7684;&#x8FD9;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x5C31;&#x4F1A;&#x6709;&#x6240;&#x533A;&#x522B;&#xFF0C;&#x4EE5;&#x4FBF;&#x4E8E;&#x6765;&#x8BB0;&#x5F55;&#x526F;&#x672C;&#x95F4;&#x7684;&#x5DEE;&#x5F02;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x4FBF;&#x4E8E;&#x8BF4;&#x660E;ceph&#x7684;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#xFF0C;&#x5148;&#x7B80;&#x8981;&#x63CF;&#x8FF0;&#x4E00;&#x4E0B;ceph&#x7684;&#x8BFB;&#x5199;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x3002;<br>&#x5199;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#xFF1A;<br>1&#xFF09;client&#x628A;&#x5199;&#x8BF7;&#x6C42;&#x53D1;&#x5230;Primary OSD&#x4E0A;&#xFF0C;Primary OSD&#x4E0A;&#x5C06;&#x5199;&#x8BF7;&#x6C42;&#x5E8F;&#x5217;&#x5316;&#x5230;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D;&#xFF08;&#x5728;&#x5185;&#x5B58;&#x91CC;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x6784;&#x9020;&#x4E00;&#x6761;pglog&#x8BB0;&#x5F55;&#xFF0C;&#x4E5F;&#x5E8F;&#x5217;&#x5316;&#x5230;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x4EE5;directIO&#x7684;&#x65B9;&#x5F0F;&#x5F02;&#x6B65;&#x5199;&#x5165;journal&#xFF0C;&#x540C;&#x65F6;Primary OSD&#x628A;&#x5199;&#x8BF7;&#x6C42;&#x548C;pglog(pglog_entry&#x662F;&#x7531;primary&#x751F;&#x6210;)&#x53D1;&#x9001;&#x5230;Replicas&#x4E0A;&#xFF1B;<br>2&#xFF09;&#x5728;Primary OSD&#x5C06;&#x4E8B;&#x52A1;&#x5199;&#x5230;journal&#x4E0A;&#x540E;&#xFF0C;&#x4F1A;&#x901A;&#x8FC7;&#x4E00;&#x7CFB;&#x5217;&#x7684;&#x7EBF;&#x7A0B;&#x548C;&#x56DE;&#x8C03;&#x5904;&#x7406;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#x7684;&#x6570;&#x636E;&#x5199;&#x5165;filesystem&#xFF08;&#x53EA;&#x662F;&#x5199;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x7F13;&#x5B58;&#x91CC;&#xFF0C;&#x4F1A;&#x6709;&#x7EBF;&#x7A0B;&#x5B9A;&#x671F;&#x5237;&#x6570;&#x636E;&#xFF09;&#xFF0C;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#x7684;pglog&#x8BB0;&#x5F55;&#xFF08;&#x4E5F;&#x5305;&#x62EC;pginfo&#x7684;last_complete&#x548C;last_update&#xFF09;&#x4F1A;&#x5199;&#x5230;leveldb&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x4E9B;&#x6269;&#x5C55;&#x5C5E;&#x6027;&#x76F8;&#x5173;&#x7684;&#x4E5F;&#x5728;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#xFF0C;&#x5728;&#x904D;&#x5386;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x65F6;&#x4E5F;&#x4F1A;&#x5199;&#x5230;leveldb&#xFF1B;<br>3&#xFF09;&#x5728;Replicas&#x4E0A;&#xFF0C;&#x4E5F;&#x662F;&#x8FDB;&#x884C;&#x7C7B;&#x4F3C;&#x4E8E;Primary&#x7684;&#x52A8;&#x4F5C;&#xFF0C;&#x5148;&#x5199;journal&#xFF0C;&#x5199;&#x6210;&#x529F;&#x4F1A;&#x7ED9;Primary&#x53D1;&#x9001;&#x4E00;&#x4E2A;committed ack&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#x7684;&#x6570;&#x636E;&#x5199;&#x5230;filesystem&#xFF0C;pglog&#x4E0E;pginfo&#x5199;&#x5230;leveldb&#x91CC;&#xFF0C;&#x5199;&#x5B8C;&#x540E;&#x4F1A;&#x7ED9;Primary&#x53D1;&#x9001;&#x53E6;&#x5916;&#x4E00;&#x4E2A;applied ack&#xFF1B;<br>4&#xFF09;Primary&#x5728;&#x81EA;&#x5DF1;&#x5B8C;&#x6210;journal&#x7684;&#x5199;&#x5165;&#x65F6;&#xFF0C;&#x4EE5;&#x53CA;&#x5728;&#x6536;&#x5230;Replica&#x7684;committed ack&#x65F6;&#x90FD;&#x4F1A;&#x68C0;&#x67E5;&#x662F;&#x5426;&#x591A;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x5199;&#x5165;journal&#x6210;&#x529F;&#x4E86;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5219;&#x5411;client&#x7AEF;&#x53D1;&#x9001;ack&#x901A;&#x77E5;&#x5199;&#x5B8C;&#x6210;&#xFF1B;Primary&#x5728;&#x81EA;&#x5DF1;&#x5B8C;&#x6210;&#x4E8B;&#x52A1;&#x5199;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x548C;leveldb&#x540E;&#xFF0C;&#x4EE5;&#x53CA;&#x5728;&#x6536;&#x5230;replica&#x7684;applied ack&#x65F6;&#x90FD;&#x4F1A;&#x68C0;&#x67E5;&#x662F;&#x5426;&#x591A;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x5199;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6210;&#x529F;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5219;&#x5411;client&#x7AEF;&#x53D1;&#x9001;ack&#x901A;&#x77E5;&#x6570;&#x636E;&#x53EF;&#x8BFB;&#xFF1B;<br>&#x5BF9;&#x8BFB;&#x6D41;&#x7A0B;&#x6765;&#x8BF4;&#xFF0C;&#x5C31;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x90FD;&#x662F;&#x7531;Primary&#x6765;&#x5904;&#x7406;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x591A;&#x8BF4;&#x4E86;&#x3002;<br></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/linux-io-stack/#more" rel="contents">
+            <a class="btn" href="/2016/02/15/ceph-consistency/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -632,8 +509,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/12/tgt-arch/" itemprop="url">
-                  tgt程序框架
+                <a class="post-title-link" href="/2015/12/18/ceph-pglog/" itemprop="url">
+                  ceph解读之PGLog
                 </a>
               
             
@@ -646,8 +523,891 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T21:39:11+08:00" content="2016-05-12">
-              2016-05-12
+            <time itemprop="dateCreated" datetime="2015-12-18T16:15:51+08:00" content="2015-12-18">
+              2015-12-18
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/12/18/ceph-pglog/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/18/ceph-pglog/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>ceph&#x7684;PGLog&#x662F;&#x7531;PG&#x6765;&#x7EF4;&#x62A4;&#xFF0C;&#x8BB0;&#x5F55;&#x4E86;&#x8BE5;PG&#x7684;&#x6240;&#x6709;&#x64CD;&#x4F5C;&#xFF0C;&#x5176;&#x4F5C;&#x7528;&#x7C7B;&#x4F3C;&#x4E8E;&#x6570;&#x636E;&#x5E93;&#x91CC;&#x7684;undo log&#x3002;PGLog&#x901A;&#x5E38;&#x53EA;&#x4FDD;&#x5B58;&#x8FD1;&#x5343;&#x6761;&#x7684;&#x64CD;&#x4F5C;&#x8BB0;&#x5F55;&#xFF08;&#x9ED8;&#x8BA4;&#x662F;3000&#x6761;&#xFF09;&#xFF0C;&#x4F46;&#x662F;&#x5F53;PG&#x5904;&#x4E8E;&#x964D;&#x7EA7;&#x72B6;&#x6001;&#x65F6;&#xFF0C;&#x5C31;&#x4F1A;&#x4FDD;&#x5B58;&#x66F4;&#x591A;&#x7684;&#x65E5;&#x5FD7;&#xFF08;&#x9ED8;&#x8BA4;&#x662F;10000&#x6761;&#xFF09;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x53EF;&#x4EE5;&#x5728;&#x6545;&#x969C;&#x7684;PG&#x91CD;&#x73B0;&#x4E0A;&#x7EBF;&#x540E;&#x7528;&#x6765;&#x6062;&#x590D;PG&#x7684;&#x6570;&#x636E;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x4ECE;PGLog&#x7684;&#x683C;&#x5F0F;&#x3001;&#x5B58;&#x50A8;&#x65B9;&#x5F0F;&#x3001;&#x5982;&#x4F55;&#x53C2;&#x4E0E;&#x6062;&#x590D;&#x6765;&#x89E3;&#x6790;PGLog&#x3002;</p>
+<h1 id="1-PGLog&#x7684;&#x683C;&#x5F0F;"><a href="#1-PGLog&#x7684;&#x683C;&#x5F0F;" class="headerlink" title="1.PGLog&#x7684;&#x683C;&#x5F0F;"></a>1.PGLog&#x7684;&#x683C;&#x5F0F;</h1><p>ceph&#x4F7F;&#x7528;&#x7248;&#x672C;&#x63A7;&#x5236;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x6807;&#x8BB0;&#x4E00;&#x4E2A;PG&#x5185;&#x7684;&#x6BCF;&#x4E00;&#x6B21;&#x66F4;&#x65B0;&#xFF0C;&#x6BCF;&#x4E2A;&#x7248;&#x672C;&#x5305;&#x62EC;&#x4E00;&#x4E2A;(epoch&#xFF0C;version)&#x6765;&#x7EC4;&#x6210;&#xFF1A;&#x5176;&#x4E2D;epoch&#x662F;osdmap&#x7684;&#x7248;&#x672C;&#xFF0C;&#x6BCF;&#x5F53;&#x6709;OSD&#x72B6;&#x6001;&#x53D8;&#x5316;&#x5982;&#x589E;&#x52A0;&#x5220;&#x9664;&#x7B49;&#x65F6;&#xFF0C;epoch&#x5C31;&#x9012;&#x589E;&#xFF1B;version&#x662F;PG&#x5185;&#x6BCF;&#x6B21;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;&#x7684;&#x7248;&#x672C;&#x53F7;&#xFF0C;&#x9012;&#x589E;&#x7684;&#xFF0C;&#x7531;PG&#x5185;&#x7684;Primary OSD&#x8FDB;&#x884C;&#x5206;&#x914D;&#x7684;&#x3002;</p>
+<p>PGLog&#x5728;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x4E2D;&#x6709;3&#x4E2A;&#x4E3B;&#x8981;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x6765;&#x7EF4;&#x62A4;&#xFF1A;pg_info_t&#xFF0C;pg_log_t&#xFF0C;pg_log_entry_t&#x3002;&#x4E09;&#x8005;&#x7684;&#x5173;&#x7CFB;&#x793A;&#x610F;&#x56FE;&#x5982;&#x4E0B;&#x3002;&#x4ECE;&#x7ED3;&#x6784;&#x4E0A;&#x53EF;&#x4EE5;&#x5F97;&#x77E5;&#xFF0C;PGLog&#x91CC;&#x53EA;&#x6709;&#x5BF9;&#x8C61;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;&#x76F8;&#x5173;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x6CA1;&#x6709;&#x5177;&#x4F53;&#x7684;&#x6570;&#x636E;&#x4EE5;&#x53CA;&#x504F;&#x79FB;&#x5927;&#x5C0F;&#x7B49;&#xFF0C;&#x6240;&#x4EE5;&#x540E;&#x7EED;&#x4EE5;PGLog&#x6765;&#x8FDB;&#x884C;&#x6062;&#x590D;&#x65F6;&#x90FD;&#x662F;&#x6309;&#x7167;&#x6574;&#x4E2A;&#x5BF9;&#x8C61;&#x6765;&#x8FDB;&#x884C;&#x6062;&#x590D;&#x7684;&#xFF08;&#x9ED8;&#x8BA4;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#x662F;4MB&#xFF09;&#x3002;<br><img src="/2015/12/18/ceph-pglog/pglog.png" alt="pglog"><br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/12/18/ceph-pglog/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/12/05/restart-osd-affects/" itemprop="url">
+                  重启osd对ceph性能影响的分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-12-05T16:03:16+08:00" content="2015-12-05">
+              2015-12-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/12/05/restart-osd-affects/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/05/restart-osd-affects/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x6700;&#x8FD1;&#x6D4B;&#x8BD5;ceph&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#x5BF9;&#x4E1A;&#x52A1;io&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x53D1;&#x73B0;&#x4FEE;&#x590D;&#x65F6;ceph&#x96C6;&#x7FA4;&#x7684;&#x6027;&#x80FD;&#x9AA4;&#x964D;&#xFF0C;&#x6BD4;&#x5982;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x4E00;&#x4E2A;&#x5377;&#x7684;&#x968F;&#x673A;4k&#x5199;&#x7684;iops&#x7EA6;10k&#xFF0C;&#x4F46;&#x662F;&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#x9AA4;&#x964D;&#x5230;1k&#x5DE6;&#x53F3;&#x3002;&#x4ECE;ceph&#x8BBE;&#x8BA1;&#x6765;&#x8BF4;&#xFF0C;&#x6062;&#x590D;&#x6D89;&#x53CA;&#x5230;peering&#xFF0C;backfill&#xFF0C;remap&#x7B49;&#x64CD;&#x4F5C;&#xFF0C;&#x5BF9;&#x6027;&#x80FD;&#x5FC5;&#x7136;&#x4F1A;&#x5B58;&#x5728;&#x5F71;&#x54CD;&#xFF0C;&#x8FD9;&#x91CC;&#x5148;&#x4E0D;&#x6DF1;&#x7A76;ceph&#x7684;&#x6062;&#x590D;&#x673A;&#x5236;&#xFF0C;&#x540E;&#x7EED;&#x7814;&#x7A76;&#x6E05;&#x695A;&#x4E86;&#x518D;&#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF0C;&#x672C;&#x6587;&#x4EE5;&#x91CD;&#x542F;osd&#x4E3A;&#x4F8B;&#xFF0C;&#x4ECE;&#x73B0;&#x8C61;&#x5165;&#x624B;&#x6765;&#x7B80;&#x8981;&#x5206;&#x6790;&#x91CD;&#x542F;osd&#x5BF9;ceph&#x6027;&#x80FD;&#x7684;&#x5F71;&#x54CD;&#x3002;</p>
+<h1 id="1-&#x73AF;&#x5883;&#x914D;&#x7F6E;"><a href="#1-&#x73AF;&#x5883;&#x914D;&#x7F6E;" class="headerlink" title="1.&#x73AF;&#x5883;&#x914D;&#x7F6E;"></a>1.&#x73AF;&#x5883;&#x914D;&#x7F6E;</h1><p>1&#xFF09;&#x786C;&#x4EF6;&#x914D;&#x7F6E;&#xFF1A;&#x4F7F;&#x7528;openstack + ceph&#x540E;&#x7AEF;&#xFF0C;&#x8BA1;&#x7B97;&#x548C;&#x5B58;&#x50A8;&#x5206;&#x79BB;&#xFF0C;6&#x53F0;&#x7269;&#x7406;&#x673A;&#x4F5C;&#x4E3A;ceph&#x5B58;&#x50A8;&#x8282;&#x70B9;&#xFF0C;&#x6BCF;&#x53F0;&#x673A;&#x5668;6&#x5757;ssd&#xFF0C;&#x6BCF;&#x5757;ssd&#x4E0A;&#x8FD0;&#x884C;&#x4E00;&#x4E2A;osd&#xFF08;&#x5176;&#x4E2D;journal&#x548C;data&#x5404;&#x5360;&#x4E00;&#x4E2A;&#x5206;&#x533A;&#xFF09;&#xFF0C;&#x6574;&#x4E2A;&#x96C6;&#x7FA4;&#x7684;&#x6570;&#x636E;&#x6D41;&#x4F7F;&#x7528;&#x4E07;&#x5146;&#x7F51;&#x7EDC;&#xFF1B;<br>2&#xFF09;&#x6D4B;&#x8BD5;&#x65F6;&#x5728;6&#x53F0;kvm&#x865A;&#x62DF;&#x673A;&#x91CC;&#x5206;&#x522B;&#x6302;&#x8F7D;&#x4E00;&#x5757;20GB&#x7684;ceph&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x7136;&#x540E;&#x4F7F;&#x7528;fio&#x5206;&#x522B;&#x8DD1;6&#x79CD;I/O&#x6A21;&#x578B;&#xFF1A;4KB&#x5757;&#x5927;&#x5C0F;&#x7684;&#x968F;&#x673A;&#x5199;&#xFF0C;4KB&#x5757;&#x5927;&#x5C0F;&#x7684;&#x968F;&#x673A;&#x8BFB;&#xFF0C;4KB&#x5757;&#x5927;&#x5C0F;&#x7684;&#x968F;&#x673A;&#x6DF7;&#x5408;&#x8BFB;&#x5199;&#xFF08;1:1&#x6BD4;&#x4F8B;&#xFF09;&#xFF0C;64KB&#x5757;&#x5927;&#x5C0F;&#x7684;&#x987A;&#x5E8F;&#x5199;&#xFF0C;64KB&#x5757;&#x5927;&#x5C0F;&#x7684;&#x987A;&#x5E8F;&#x8BFB;&#xFF0C;64KB&#x5757;&#x5927;&#x5C0F;&#x7684;&#x987A;&#x5E8F;&#x6DF7;&#x5408;&#x8BFB;&#x5199;&#xFF08;1:1&#x6BD4;&#x4F8B;&#xFF09;&#x3002;&#x4F7F;&#x7528;&#x8FD9;&#x6837;&#x7684;&#x6A21;&#x578B;&#x6765;&#x6A21;&#x62DF;&#x96C6;&#x7FA4;&#x8D1F;&#x8F7D;&#xFF1B;</p>
+<h1 id="2-&#x91CD;&#x542F;osd&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;"><a href="#2-&#x91CD;&#x542F;osd&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;" class="headerlink" title="2.&#x91CD;&#x542F;osd&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;"></a>2.&#x91CD;&#x542F;osd&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;</h1><p>1&#xFF09;&#x5148;&#x5C06;6&#x4E2A;&#x5377;&#x7684;I/O&#x8DD1;&#x8D77;&#x6765;&#xFF0C;&#x7136;&#x540E;&#x91CD;&#x542F;&#x4E00;&#x4E2A;osd&#xFF1B;<br>2&#xFF09;&#x89C2;&#x5BDF;&#x5230;&#x968F;&#x673A;&#x5199;&#x7684;iops&#x4ECE;10k&#x964D;&#x5230;&#x4F4E;&#x4E8E;1k&#xFF0C;&#x5E76;&#x4E14;&#x6CE2;&#x52A8;&#x8FD8;&#x6BD4;&#x8F83;&#x5927;&#xFF0C;&#x968F;&#x673A;&#x8BFB;&#x7684;iops&#x4ECE;10k&#x964D;&#x5230;&#x51E0;&#x767E;&#xFF1B;<br>3&#xFF09;&#x6027;&#x80FD;&#x4E0B;&#x964D;&#x6301;&#x7EED;&#x4E86;10&#x51E0;&#x79D2;&#x540E;&#x53C8;&#x6B63;&#x5E38;&#xFF0C;&#x662F;&#x56E0;&#x4E3A;&#x6062;&#x590D;&#x5B8C;&#x4E86;&#xFF1B;<br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/12/05/restart-osd-affects/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/11/25/ceph-osd-rw3/" itemprop="url">
+                  ceph OSD读写流程（3）–副本OSD的消息处理及主OSD的响应处理
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-11-25T15:57:12+08:00" content="2015-11-25">
+              2015-11-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/11/25/ceph-osd-rw3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/11/25/ceph-osd-rw3/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="/2015/11/25/ceph-osd-rw3/replica.png" alt="replica"></p>
+<ul>
+<li>&#x526F;&#x672C;OSD&#x6536;&#x5230;&#x4E3B;OSD&#x7684;&#x5199;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x4E5F;&#x662F;&#x6309;&#x7167;&#x6D88;&#x606F;&#x5904;&#x7406;&#x7684;&#x6D41;&#x7A0B;&#x4ECE;&#x961F;&#x5217;&#x91CC;&#x53D6;&#x51FA;&#x6765;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x5148;&#x5199;PGLog&#xFF0C;&#x7136;&#x540E;&#x6CE8;&#x518C;&#x4E24;&#x4E2A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x7136;&#x540E;&#x8FDB;&#x884C;&#x5199;journal&#x548C;&#x5199;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x5728;&#x5904;&#x7406;&#x5B8C;&#x6210;&#x540E;&#x53D1;&#x9001;&#x54CD;&#x5E94;&#x7ED9;&#x4E3B;OSD&#xFF08;op_modify_commit&#x548C;op_modify_applied&#xFF09;&#xFF0C;&#x5177;&#x4F53;&#x6D41;&#x7A0B;&#x53C2;&#x8003;&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#xFF1B;</li>
+<li>&#x4E3B;OSD&#x6536;&#x5230;&#x526F;&#x672C;OSD&#x7684;&#x54CD;&#x5E94;&#x540E;&#xFF0C;&#x4ECE;in_progress_ops&#x4E2D;&#x627E;&#x5230;op&#xFF0C;op&#x91CC;&#x5C31;&#x6709;&#x6CE8;&#x518C;&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x5224;&#x65AD;flag&#x5982;&#x679C;&#x662F;CEPH_OSD_FLG_ONDISK&#xFF0C;&#x5219;&#x4ECE;waiting_for_commit&#x4E2D;&#x5220;&#x9664;&#xFF0C;&#x5426;&#x5219;&#x4ECE;waiting_for_applied&#x4E2D;&#x5220;&#x9664;&#xFF1B;&#x7136;&#x540E;&#x6839;&#x636E;waiting_for_commit/waiting_for_applied&#x662F;&#x5426;&#x4E3A;&#x7A7A;&#xFF0C;&#x6765;&#x8C03;&#x7528;&#x5BF9;&#x5E94;&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x5728;&#x5B8C;&#x6210;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x53D1;&#x9001;&#x6D88;&#x606F;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#xFF1B;</li>
+</ul>
+<p>&#x5BF9;&#x4E8E;0.80.10&#x7248;&#x672C;&#xFF0C;&#x6CA1;&#x6709;MSG_OSD_REPOP&#xFF0C;&#x53EA;&#x6709;MSG_OSD_SUBOP</p>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/11/25/ceph-osd-rw2/" itemprop="url">
+                  ceph OSD读写流程（2）–主OSD的写操作事务的处理
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-11-25T15:51:59+08:00" content="2015-11-25">
+              2015-11-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/11/25/ceph-osd-rw2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/11/25/ceph-osd-rw2/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="/2015/11/25/ceph-osd-rw2/journal-trans.png" alt="journal-trans"></p>
+<ul>
+<li>OSD&#x4E2D;&#x5199;&#x64CD;&#x4F5C;&#x7684;&#x5904;&#x7406;&#x4E2D;&#x6D89;&#x53CA;&#x5230;&#x5F88;&#x591A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF08;&#x8FD9;&#x4E5F;&#x662F;ceph&#x672C;&#x8EAB;&#x7684;&#x4E00;&#x4E2A;&#x7279;&#x70B9;&#xFF09;&#xFF0C;&#x8FD9;&#x4E9B;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x8FFD;&#x6EAF;&#x5230;Context&#x7C7B;&#xFF0C;&#x8FD9;&#x4E2A;&#x7C7B;&#x662F;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x7C7B;&#x7684;&#x62BD;&#x8C61;&#x57FA;&#x7C7B;&#xFF0C;&#x7EE7;&#x627F;&#x5B83;&#x7684;&#x7C7B;&#x53EA;&#x9700;&#x8981;&#x5728;&#x5B50;&#x7C7B;&#x4E2D;&#x5B9E;&#x73B0;&#x5B83;&#x7684;finish&#x51FD;&#x6570;&#xFF0C;&#x7136;&#x540E;&#x518D;finish&#x51FD;&#x6570;&#x4E2D;&#x8C03;&#x7528;&#x81EA;&#x5DF1;&#x6CE8;&#x518C;&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x5C31;&#x80FD;&#x5B8C;&#x6210;&#x56DE;&#x8C03;&#xFF1B;</li>
+<li>&#x4E0A;&#x9762;&#x8BF4;&#x5230;&#x7684;&#x8C03;&#x7528;Context&#x7C7B;&#x7684;finish&#x51FD;&#x6570;&#x5C31;&#x80FD;&#x8FDB;&#x884C;&#x56DE;&#x8C03;&#xFF0C;&#x90A3;&#x4E48;&#x5177;&#x4F53;&#x8C03;&#x7528;&#x5B83;&#x7684;&#x5730;&#x65B9;&#x5C31;&#x5728;Finisher&#x7C7B;&#x7684;finisher_thread_entry&#x91CC;&#xFF0C;&#x8FD9;&#x4E2A;&#x662F;finisher&#x7684;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x51FD;&#x6570;&#xFF0C;&#x5E76;&#x4E14;finisher&#x8FD8;&#x6709;&#x4E00;&#x4E2A;finisher_queue&#xFF0C;&#x5B9E;&#x73B0;&#x751F;&#x4EA7;&#x8005;&#x6D88;&#x8D39;&#x8005;&#x6A21;&#x578B;&#xFF0C;&#x751F;&#x4EA7;&#x8005;&#x5F80;finisher_queue&#x91CC;&#x653E;&#x4E1C;&#x897F;&#xFF0C;&#x5E76;&#x901A;&#x8FC7;&#x6761;&#x4EF6;&#x53D8;&#x91CF;&#x901A;&#x77E5;finisher&#x7684;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x51FD;&#x6570;&#x6765;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x51FD;&#x6570;&#x91CC;&#x5C31;&#x80FD;&#x901A;&#x8FC7;&#x8C03;&#x7528;Context&#x7C7B;&#x7684;complete&#x51FD;&#x6570;&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528;&#x6389;&#x5176;&#x5B50;&#x7C7B;&#x5B9E;&#x73B0;&#x7684;finish&#x51FD;&#x6570;&#xFF0C;&#x4ECE;&#x800C;&#x5B8C;&#x6210;&#x56DE;&#x8C03;&#x7684;&#x5904;&#x7406;&#xFF1B;</li>
+<li>OSD&#x7684;&#x5199;&#x64CD;&#x4F5C;&#x5148;&#x653E;&#x5230;writeq&#x91CC;&#xFF0C;&#x901A;&#x77E5;FileJournal&#x7684;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x51FD;&#x6570;&#x8FDB;&#x884C;&#x5199;journal&#x7684;&#x5904;&#x7406;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x653E;&#x5165;&#x5230;journal&#x7684;finisher_queue&#x91CC;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x5E94;&#x7684;finisher&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x4E4B;&#x524D;&#x6CE8;&#x518C;&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF08;<strong>C_JournaledAhead</strong>&#x5BF9;&#x5E94;&#x7684;&#x51FD;&#x8C03;&#x51FD;&#x6570;&#x662F;FileStore::_journaled_ahead&#xFF09;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x5206;&#x6210;&#x4E24;&#x6761;&#x7EBF;&#x8DEF;&#x8FDB;&#x884C;&#x4E0B;&#x53BB;&#xFF1A;<ul>
+<li>&#x653E;&#x5165;ondisk_finisher&#xFF0C;&#x8FDB;&#x800C;&#x89E6;&#x53D1;ondisk_finisher&#x7684;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x51FD;&#x6570;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x5C31;&#x4F1A;&#x8C03;&#x7528;&#x5230;<strong>C_OSD_OnOpCommit</strong>&#x7684;&#x51FD;&#x8C03;&#x51FD;&#x6570;ReplicatedBackend::op_commit&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x9762;&#x4F1A;&#x68C0;&#x67E5;waiting_for_commit&#x662F;&#x5426;&#x4E3A;&#x7A7A;&#xFF08;&#x5982;&#x679C;&#x662F;3&#x526F;&#x672C;&#xFF0C;&#x8FD9;&#x91CC;&#x9762;&#x5C31;&#x6709;3&#x9879;&#xFF0C;&#x6BCF;&#x5B8C;&#x6210;&#x4E00;&#x4E2A;&#x526F;&#x672C;&#x7684;&#x5199;journal&#x64CD;&#x4F5C;&#xFF0C;&#x5C31;&#x4F1A;&#x4ECE;waiting_for_commit&#x91CC;&#x5220;&#x9664;&#x4E00;&#x4E2A;&#xFF09;&#xFF0C;&#x5982;&#x679C;&#x4E3A;&#x7A7A;&#xFF0C;&#x624D;&#x8C03;&#x7528;<strong>C_OSD_RepopCommit</strong>&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;repop_all_committed&#xFF0C;&#x4ECE;&#x800C;&#x8C03;&#x7528;ReplicatePG::eval_repop&#x53D1;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#x5199;&#x64CD;&#x4F5C;&#x5B8C;&#x6210;&#xFF1B;</li>
+<li>&#x653E;&#x5165;op_wq&#x91CC;&#xFF0C;FileStore::op_tp&#x7EBF;&#x7A0B;&#x6C60;&#x5C31;&#x4F1A;&#x4ECE;op_wq&#x4E2D;&#x53D6;&#x51FA;&#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#xFF0C;&#x5728;FileStore::OpWQ::_process&#x53BB;&#x8FDB;&#x884C;&#x5199;&#x5230;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x7684;&#x64CD;&#x4F5C;&#xFF08;FileStore::_write&#xFF09;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x5B8C;&#x6210;&#x540E;FileStore::OpWQ::_process_finish&#x4E2D;&#x5904;&#x7406;&#xFF0C;&#x7C7B;&#x4F3C;&#x7684;&#x4E5F;&#x662F;&#x653E;&#x5230;&#x4E00;&#x4E2A;finisher_queue&#x91CC;&#xFF08;op_finisher&#xFF09;&#xFF0C;&#x7136;&#x540E;finisher&#x7684;&#x7EBF;&#x7A0B;&#x8C03;&#x7528;<strong>C_OSD_OnOpApplied</strong>&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF08;ReplicatedBackend::op_applied&#xFF09;&#x6765;&#x5904;&#x7406;&#xFF0C;&#x5982;&#x679C;waiting_for_applied&#x4E3A;&#x7A7A;&#xFF08;&#x5982;&#x679C;&#x662F;3&#x526F;&#x672C;&#xFF0C;&#x8FD9;&#x91CC;&#x9762;&#x5C31;&#x6709;3&#x9879;&#xFF0C;&#x6BCF;&#x5B8C;&#x6210;&#x4E00;&#x4E2A;&#x526F;&#x672C;&#x7684;&#x5199;&#x672C;&#x5730;&#x64CD;&#x4F5C;&#xFF0C;&#x5C31;&#x4F1A;&#x4ECE;waiting_for_applied&#x91CC;&#x5220;&#x9664;&#x4E00;&#x4E2A;&#xFF09;&#xFF0C;&#x624D;&#x8C03;&#x7528;<strong>C_OSD_RepOpApplied</strong>&#x7684;&#x56DE;&#x8C03;&#x51FD;&#x6570;repop_all_applied&#xFF0C;&#x8FDB;&#x800C;&#x8C03;&#x7528;ReplicatePG::eval_repop&#x53D1;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#x6570;&#x636E;&#x53EF;&#x8BFB;&#xFF1B;</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/11/25/ceph-osd-rw1/" itemprop="url">
+                  ceph OSD读写流程（1）–主OSD的处理流程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-11-25T15:48:55+08:00" content="2015-11-25">
+              2015-11-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/11/25/ceph-osd-rw1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/11/25/ceph-osd-rw1/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&#x672C;&#x6587;&#x57FA;&#x4E8E;hammer&#x7248;&#x672C;&#x5BF9;OSD&#x7684;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;&#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF0C;&#x5BF9;&#x4E8E;&#x6D88;&#x606F;&#x7684;&#x63A5;&#x6536;&#x5904;&#x7406;&#x540E;&#x7EED;&#x4F1A;&#x5355;&#x72EC;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;<br><img src="/2015/11/25/ceph-osd-rw1/primary-path.png" alt="primary-path"><br>&#x5177;&#x4F53;&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x4ECE;&#x56FE;&#x4E2D;&#x5C31;&#x53EF;&#x4EE5;&#x4F53;&#x73B0;&#x51FA;&#x6765;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x4F5C;&#x8FC7;&#x591A;&#x7684;&#x63CF;&#x8FF0;&#xFF0C;&#x9700;&#x8981;&#x63D0;&#x7684;&#x51E0;&#x70B9;&#xFF1A;</p>
+<ul>
+<li>1&#xFF09;&#x8BFB;&#x8BF7;&#x6C42;&#x7531;Primary OSD&#x6765;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF1B;</li>
+<li>2&#xFF09;&#x5BF9;&#x4E8E;&#x5199;&#x8BF7;&#x6C42;&#xFF0C;Primary OSD&#x5148;&#x53D1;&#x6D88;&#x606F;&#x5230;&#x526F;&#x672C;OSD&#xFF0C;&#x7136;&#x540E;&#x8BB0;&#x5F55;PGLog&#xFF08;&#x5728;log_operation&#x91CC;&#x53EA;&#x662F;&#x6784;&#x9020;transaction&#xFF0C;&#x771F;&#x6B63;&#x5199;&#x5230;&#x76D8;&#x662F;&#x548C;journal&#x4E00;&#x8D77;&#x5199;&#x7684;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x751F;&#x6210;&#x672C;&#x5730;&#x4E8B;&#x52A1;&#x8FDB;&#x884C;&#x672C;&#x5730;&#x5199;&#x7684;&#x5904;&#x7406;&#xFF1B;</li>
+<li>3&#xFF09;&#x5199;&#x8BF7;&#x6C42;&#x6D89;&#x53CA;&#x5230;&#x4E24;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x5199;journal&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x5199;&#x5230;&#x672C;&#x5730;&#x7F13;&#x5B58;&#xFF08;page cache&#xFF09;&#xFF0C;&#x5BF9;&#x4E8E;&#x6BCF;&#x4E00;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x6709;&#x8FD9;&#x4E24;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x6BCF;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x662F;&#x5148;&#x5199;journal&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x5230;&#x672C;&#x5730;&#x7F13;&#x5B58;&#xFF0C;&#x5982;&#x679C;&#x662F;3&#x526F;&#x672C;&#xFF0C;&#x5C31;&#x6D89;&#x53CA;&#x5230;6&#x6B21;&#x5199;&#x64CD;&#x4F5C;&#xFF1B;</li>
+<li>4&#xFF09;Primary OSD&#x521B;&#x5EFA;&#x4E86;2&#x4E2A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x6765;&#x5904;&#x7406;&#x5199;journal&#x548C;&#x5199;&#x5230;&#x7F13;&#x5B58;&#xFF08;&#x5206;&#x522B;&#x662F;<strong>C_OSD_RepopCommit</strong>&#x548C;<strong>C_OSD_RepOpApplied</strong>&#xFF09;&#xFF0C;&#x4E3B;&#x526F;&#x672C;&#x7684;&#x5199;&#x548C;&#x4ECE;&#x526F;&#x672C;&#x7684;&#x5199;&#x6CA1;&#x6709;&#x5148;&#x540E;&#x987A;&#x5E8F;&#xFF0C;&#x6709;&#x53EF;&#x80FD;&#x4E3B;&#x7684;journal&#x5148;&#x5199;&#x5B8C;&#xFF0C;&#x4E5F;&#x6709;&#x53EF;&#x80FD;&#x4ECE;&#x7684;journal&#x5148;&#x5199;&#x5B8C;&#xFF0C;ceph&#x4E0D;&#x7BA1;&#x8FD9;&#x4E2A;&#x987A;&#x5E8F;&#xFF0C;&#x53EA;&#x8981;&#x4FDD;&#x8BC1;3&#x526F;&#x672C;&#x90FD;&#x5199;&#x5B8C;&#x4E86;&#x4E4B;&#x540E;&#x624D;&#x8FD4;&#x56DE;&#x5BA2;&#x6237;&#x7AEF;&#x54CD;&#x5E94;&#xFF08;degrade&#x60C5;&#x51B5;&#x4E0B;&#x4F8B;&#x5916;&#xFF09;&#xFF0C;3&#x4E2A;&#x526F;&#x672C;&#x7684;journal&#x5199;&#x5B8C;&#x6210;&#xFF08;all_commit&#xFF09;&#xFF0C;&#x4F1A;&#x8FD4;&#x56DE;&#x5BA2;&#x6237;&#x7AEF;&#x201C;&#x5199;&#x64CD;&#x4F5C;&#x5B8C;&#x6210;&#x201D;&#xFF0C;&#x800C;3&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x5199;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x5B8C;&#x6210;&#x540E;&#xFF08;all_applied&#xFF09;&#xFF0C;&#x624D;&#x8FD4;&#x56DE;&#x5BA2;&#x6237;&#x7AEF;&#x201C;&#x6570;&#x636E;&#x53EF;&#x8BFB;&#x201D;&#xFF1B;</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/10/20/ceph-rbd-obj/" itemprop="url">
+                  ceph rbd中的对象解析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-10-20T15:27:13+08:00" content="2015-10-20">
+              2015-10-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/10/20/ceph-rbd-obj/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/10/20/ceph-rbd-obj/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x5728;&#x4F7F;&#x7528;ceph rbd&#x5757;&#x8BBE;&#x5907;&#x65F6;&#xFF0C;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;rbd image&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x683C;&#x5F0F;&#xFF1A;&#x2013;image-format=1&#x6216;&#x8005;&#x2013;image-format=2&#xFF0C;&#x5B98;&#x65B9;&#x6587;&#x6863;&#x7ED9;&#x51FA;&#x4E86;&#x5982;&#x4E0B;&#x89E3;&#x91CA;</p>
+<ul>
+<li>format 1 - Use the original format for a new rbd image. This format is understood by all versions of librbd and the kernel rbd module, but does not support newer features like cloning.</li>
+<li>format 2 - Use the second rbd format, which is supported by librbd (but not the kernel rbd module) at this time. This adds support for cloning and is more easily extensible to allow more features in the future.</li>
+</ul>
+<p>&#x9ED8;&#x8BA4;&#x7684;image&#x683C;&#x5F0F;&#x662F;format 1&#xFF0C;&#x8FD9;&#x79CD;&#x683C;&#x5F0F;&#x652F;&#x6301;&#x6240;&#x6709;&#x7248;&#x672C;&#x7684;librbd&#x548C;&#x5185;&#x6838;rbd&#x6A21;&#x5757;&#xFF0C;&#x4F46;&#x662F;&#x4E0D;&#x652F;&#x6301;&#x65B0;&#x7684;&#x529F;&#x80FD;&#x5982;&#x514B;&#x9686;&#xFF1B;&#x800C;format 2&#x7531;librbd&#x652F;&#x6301;&#xFF0C;&#x4F46;&#x662F;&#x4E0D;&#x652F;&#x6301;&#x5185;&#x6838;rbd&#x6A21;&#x5757;&#xFF0C;&#x8FD9;&#x79CD;&#x683C;&#x5F0F;&#x652F;&#x6301;&#x514B;&#x9686;&#xFF0C;&#x5E76;&#x4E14;&#x4FBF;&#x4E8E;&#x6269;&#x5C55;&#x540E;&#x7EED;&#x5176;&#x4ED6;&#x529F;&#x80FD;&#x3002;</p>
+<h1 id="1-format-1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;"><a href="#1-format-1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;" class="headerlink" title="1. format 1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;"></a>1. format 1&#x683C;&#x5F0F;&#x7684;&#x5BF9;&#x8C61;&#x89E3;&#x6790;</h1><p>&#x9996;&#x5148;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;format 1&#x683C;&#x5F0F;&#x7684;image<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rbd create test_vol --size=10</span></span><br><span class="line">root@ceph1:~<span class="comment"># rbd -p rbd ls                                                       </span></span><br><span class="line"><span class="built_in">test</span>_vol</span><br></pre></td></tr></table></figure></p>
+<p>&#x7136;&#x540E;&#x4F7F;&#x7528;rados&#x547D;&#x4EE4;&#x770B;&#x5230;&#x5BF9;&#x5E94;&#x4EA7;&#x751F;&#x4E00;&#x4E2A;test_vol.rbd&#x7684;&#x5BF9;&#x8C61;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment"># rados -p rbd ls</span></span><br><span class="line"><span class="built_in">test</span>_vol.rbd</span><br><span class="line">rbd_directory</span><br></pre></td></tr></table></figure></p>
+<p>&#x5176;&#x4E2D;rbd_directory&#x662F;&#x4FDD;&#x5B58;&#x8BE5;&#x5B58;&#x50A8;&#x6C60;&#x91CC;&#x7684;image&#x5217;&#x8868;<br>&#x4ECE;&#x4E0B;&#x9762;&#x7684;&#x547D;&#x4EE4;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5BF9;&#x4E8E;format 1&#x683C;&#x5F0F;&#x7684;image&#xFF0C;&#x6CA1;&#x6709;&#x5C06;image name&#x548C;id&#x7684;&#x6620;&#x5C04;&#x4FDD;&#x5B58;&#x5230;rbd_directory&#x91CC;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@ceph1:~<span class="comment">#rados -p rbd listomapvals rbd_directory</span></span><br><span class="line">root@ceph1:~<span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/10/20/ceph-rbd-obj/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/08/25/use-new-glibc/" itemprop="url">
+                  如何使用新的glibc来编译自己的程序
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-08-25T15:20:58+08:00" content="2015-08-25">
+              2015-08-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/tools/" itemprop="url" rel="index">
+                    <span itemprop="name">tools</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/08/25/use-new-glibc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/25/use-new-glibc/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x6211;&#x4EEC;&#x90FD;&#x662F;&#x76F4;&#x63A5;&#x4F7F;&#x7528;glibc&#x63D0;&#x4F9B;&#x7684;&#x4E00;&#x4E9B;&#x5E93;&#x51FD;&#x6570;&#xFF0C;&#x4F46;&#x662F;&#x67D0;&#x4E9B;&#x7279;&#x6B8A;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x6BD4;&#x5982;&#x8981;&#x4FEE;&#x6539;glibc&#x7684;&#x4E00;&#x4E9B;&#x4EE3;&#x7801;&#x6216;&#x8005;&#x52A0;&#x5165;glibc&#x7684;&#x4E00;&#x4E9B;&#x7F16;&#x8BD1;&#x9009;&#x9879;&#x6216;&#x8005;&#x8981;&#x4F7F;&#x7528;&#x5176;&#x4ED6;&#x7248;&#x672C;&#x7684;glibc&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x9700;&#x8981;&#x91CD;&#x65B0;&#x7F16;&#x8BD1;glibc&#x3002;<br>&#x7F16;&#x8BD1;glibc&#x65F6;&#x7279;&#x522B;&#x8981;&#x6CE8;&#x610F;&#xFF0C;&#x4E0D;&#x80FD;&#x53BB;&#x66FF;&#x6362;&#x7CFB;&#x7EDF;&#x81EA;&#x5E26;&#x7684;glibc&#xFF0C;&#x56E0;&#x4E3A;glibc&#x4F5C;&#x4E3A;linux&#x7CFB;&#x7EDF;&#x7684;&#x6838;&#x5FC3;&#x5E93;&#xFF0C;&#x5F88;&#x591A;&#x5E95;&#x5C42;&#x6A21;&#x5757;&#x90FD;&#x4F9D;&#x8D56;&#x5B83;&#xFF0C;&#x7A0D;&#x6709;&#x4E0D;&#x614E;&#x5C31;&#x4F1A;&#x628A;&#x7CFB;&#x7EDF;&#x641E;&#x6302;&#x6389;&#x3002;&#x56E0;&#x6B64;&#x6211;&#x4EEC;&#x7F16;&#x8BD1;glibc&#x65F6;&#x6700;&#x597D;&#x8981;&#x6307;&#x5B9A;prefix=/new/path&#xFF0C;<br>&#x8FD9;&#x6837;&#x7F16;&#x8BD1;&#x5B8C;&#x4E86;&#x4E4B;&#x540E;make install&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4E0D;&#x4F1A;&#x53BB;&#x8986;&#x76D6;&#x7CFB;&#x7EDF;&#x81EA;&#x5E26;&#x7684;&#x7248;&#x672C;&#x3002;&#x90A3;&#x4E48;&#x95EE;&#x9898;&#x6765;&#x4E86;&#xFF0C;&#x7F16;&#x8BD1;&#x597D;glibc&#x540E;&#xFF0C;&#x5982;&#x4F55;&#x8BA9;&#x6211;&#x4EEC;&#x7684;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x65B0;&#x7F16;&#x8BD1;&#x7684;glibc&#x5462;&#xFF1F;&#x4E0B;&#x9762;&#x5C31;&#x4EE5;&#x6211;&#x4EEC;&#x5B9E;&#x9645;&#x7F16;&#x8BD1;glibc&#x7684;&#x6B65;&#x9AA4;&#x6765;&#x8BF4;&#x660E;&#x3002;</p>
+<h1 id="1-&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;"><a href="#1-&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;" class="headerlink" title="1.&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;"></a>1.&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;</h1><p><a href="http://www.gnu.org/software/libc/&#xFF0C;&#x5728;&#x5B98;&#x7F51;&#x4E0A;&#x6709;&#x5404;&#x4E2A;glibc&#x7684;&#x53D1;&#x884C;&#x7248;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x9009;&#x7528;&#x7684;&#x662F;glibc-2.17">http://www.gnu.org/software/libc/&#xFF0C;&#x5728;&#x5B98;&#x7F51;&#x4E0A;&#x6709;&#x5404;&#x4E2A;glibc&#x7684;&#x53D1;&#x884C;&#x7248;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x9009;&#x7528;&#x7684;&#x662F;glibc-2.17</a></p>
+<h1 id="2-&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;"><a href="#2-&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;" class="headerlink" title="2.&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;"></a>2.&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~<span class="comment"># tar zxvf glibc-2.17.tar.gz</span></span><br></pre></td></tr></table></figure>
+<h1 id="3-&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;"><a href="#3-&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;" class="headerlink" title="3.&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;"></a>3.&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;</h1><p>&#x4E0D;&#x80FD;&#x5728;glibc-2.17&#x6E90;&#x7801;&#x76EE;&#x5F55;&#x4E0B;./configure&#xFF0C;&#x4F1A;&#x62A5;&#x9519;&#x201C;configure: error: you must configure in a separate build directory&#x201D;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~<span class="comment"># mkdir -p build/glibc-build</span></span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/08/25/use-new-glibc/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/08/20/IET/" itemprop="url">
+                  IET架构解析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-08-20T15:15:29+08:00" content="2015-08-20">
+              2015-08-20
             </time>
           </span>
 
@@ -688,8 +1448,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/12/tgt-arch/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/tgt-arch/" itemprop="commentsCount"></span>
+                <a href="/2015/08/20/IET/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/20/IET/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -713,741 +1473,11 @@
 
       
         
-          <p>tgt&#x662F;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;iscsi target&#xFF0C;&#x800C;iet&#xFF08;iscsi enterprise target&#xFF09;&#x662F;&#x5728;&#x5185;&#x6838;&#x6001;&#x5B9E;&#x73B0;&#x7684;target&#xFF0C;tgt&#x76F8;&#x6BD4;&#x4E8E;iet&#x6765;&#x8BF4;&#xFF0C;&#x56E0;&#x4E3A;&#x5176;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#xFF0C;&#x65B9;&#x4FBF;&#x8C03;&#x8BD5;&#xFF0C;&#x65B0;&#x52A0;&#x5165;&#x4E00;&#x4E9B;&#x529F;&#x80FD;&#x7B49;&#xFF0C;&#x4E0D;&#x8FC7;&#x6027;&#x80FD;&#x76F8;&#x6BD4;iet&#x6765;&#x8BF4;&#x8981;&#x7A0D;&#x5DEE;&#x4E00;&#x70B9;&#x3002;&#x4E0B;&#x9762;&#x5C31;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;tgt&#x7684;&#x7A0B;&#x5E8F;&#x6846;&#x67B6;&#xFF08;&#x7565;&#x8FC7;iscsi&#x534F;&#x8BAE;&#x89E3;&#x6790;&#x5904;&#x7406;&#x90E8;&#x5206;&#xFF09;&#xFF0C;&#x4EE5;&#x4FBF;&#x4E8E;&#x6574;&#x4F53;&#x628A;&#x63E1;tgt&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x65B9;&#x4FBF;&#x540E;&#x7EED;&#x7684;&#x4E00;&#x4E9B;&#x4FEE;&#x6539;&#x3002;</p>
-<h1 id="1-&#x6574;&#x4F53;&#x6846;&#x67B6;"><a href="#1-&#x6574;&#x4F53;&#x6846;&#x67B6;" class="headerlink" title="1.&#x6574;&#x4F53;&#x6846;&#x67B6;"></a>1.&#x6574;&#x4F53;&#x6846;&#x67B6;</h1><p>&#x8FD9;&#x91CC;&#x501F;&#x7528;tgt&#x5B98;&#x7F51;&#x7ED9;&#x51FA;&#x7684;&#x4E00;&#x5F20;&#x56FE;&#x3002;<br><img src="/2016/05/12/tgt-arch/tgt-arch.png" alt="tgt-arch"><br>tgt&#x4E2D;&#x547D;&#x4EE4;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x4E0E;initiator&#x7AEF;&#x7684;&#x901A;&#x4FE1;&#x90FD;&#x662F;&#x901A;&#x8FC7;epoll&#x6765;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x4E0B;&#x9762;&#x5206;&#x522B;&#x5BF9;&#x8FD9;&#x4E24;&#x90E8;&#x5206;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;<br></p>
+          <p>IET&#xFF08;iSCSI Enterprise Target&#xFF09;&#x662F;&#x5185;&#x6838;&#x6001;&#x5B9E;&#x73B0;&#x7684;iscsi target&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;target&#xFF08;&#x6BD4;&#x5982;tgt&#xFF09;&#xFF0C;iet&#x6BD4;&#x8F83;&#x7A33;&#x5B9A;&#xFF0C;&#x5E76;&#x4E14;&#x4E5F;&#x7B97;&#x662F;&#x5386;&#x53F2;&#x60A0;&#x4E45;&#xFF0C;io&#x90FD;&#x76F4;&#x63A5;&#x7ECF;&#x8FC7;&#x5185;&#x6838;&#x6001;&#xFF0C;&#x6027;&#x80FD;&#x6BD4;&#x8F83;&#x597D;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x9488;&#x5BF9;IET&#x7684;&#x7A0B;&#x5E8F;&#x67B6;&#x6784;&#xFF0C;&#x4ECE;&#x7A0B;&#x5E8F;&#x6A21;&#x5757;&#xFF0C;&#x547D;&#x4EE4;&#x64CD;&#x4F5C;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#xFF0C;initiator&#x4E0E;target&#x7684;&#x4EA4;&#x4E92;&#xFF0C;I/O&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
+<h1 id="1-&#x7A0B;&#x5E8F;&#x6A21;&#x5757;"><a href="#1-&#x7A0B;&#x5E8F;&#x6A21;&#x5757;" class="headerlink" title="1.&#x7A0B;&#x5E8F;&#x6A21;&#x5757;"></a>1.&#x7A0B;&#x5E8F;&#x6A21;&#x5757;</h1><p>IET&#x5305;&#x542B;3&#x90E8;&#x5206;&#xFF1A;ietadm&#xFF0C;ietd&#xFF0C;iscsi_trgt&#xFF0C;&#x5176;&#x4E2D;ietadm&#x662F;&#x547D;&#x4EE4;&#x884C;&#x5DE5;&#x5177;&#xFF0C;&#x63D0;&#x4F9B;target&#xFF0C;lun&#x7684;&#x521B;&#x5EFA;&#x3001;&#x5220;&#x9664;&#x3001;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;&#x7B49;&#x64CD;&#x4F5C;&#xFF1B;&#x800C;ietd&#x662F;&#x4E00;&#x4E2A;&#x7528;&#x6237;&#x6001;&#x7A0B;&#x5E8F;&#xFF0C;&#x7528;&#x4E8E;&#x548C;ietadm&#x4EE5;&#x53CA;initiator&#x7684;&#x4EA4;&#x4E92;&#xFF0C;&#x5E76;&#x8FDB;&#x884C;&#x5BF9;&#x5E94;&#x7684;&#x5904;&#x7406;&#xFF0C;iscsi&#x76F8;&#x5173;&#x7684;&#x53D1;&#x73B0;&#x3001;&#x767B;&#x5F55;&#x3001;&#x8BA4;&#x8BC1;&#x3001;&#x767B;&#x51FA;&#x7B49;&#x64CD;&#x4F5C;&#x90FD;&#x5728;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#xFF1B;iscsi_trgt&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x6838;&#x6A21;&#x5757;&#xFF0C;iscsi&#x534F;&#x8BAE;&#x7684;&#x89E3;&#x6790;&#x5904;&#x7406;&#xFF0C;I/O&#x5904;&#x7406;&#x90FD;&#x5728;&#x8FD9;&#x4E2A;&#x5185;&#x6838;&#x6001;&#x6A21;&#x5757;&#x5185;&#x5B8C;&#x6210;&#x3002;</p>
+<p>1&#xFF09;ietdadm&#x4E0E;ietd&#x901A;&#x8FC7;IPC&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF0C;IPC&#x5728;ietd&#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x8FDB;&#x884C;&#x521D;&#x59CB;&#x5316;&#xFF1B;<br>2&#xFF09;ietd&#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x8FD8;&#x4F1A;&#x521B;&#x5EFA;&#x76D1;&#x542C;socket&#xFF08;&#x9ED8;&#x8BA4;&#x7684;&#x7AEF;&#x53E3;&#x662F;3260&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x4E3A;&#x8BE5;&#x673A;&#x5668;&#x4E0A;&#x7684;&#x6BCF;&#x4E2A;ip&#x90FD;&#x751F;&#x6210;&#x4E00;&#x4E2A;&#x76D1;&#x542C;socket&#xFF0C;initiator&#x5728;&#x53D1;&#x73B0;target&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x6307;&#x5B9A;ip&#x548C;port&#xFF09;&#xFF0C;initiator&#x5C31;&#x901A;&#x8FC7;socket&#x4E0E;ietd&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF0C;&#x4E00;&#x4E2A;initiator&#x548C;&#x4E00;&#x4E2A;target&#x5EFA;&#x7ACB;&#x8D77;&#x4E00;&#x4E2A;&#x957F;&#x8FDE;&#x63A5;&#xFF08;iscsi&#x534F;&#x8BAE;&#x6807;&#x51C6;&#x8BF4;&#x7684;&#x662F;&#x81F3;&#x5C11;1&#x4E2A;&#x8FDE;&#x63A5;&#xFF09;&#xFF0C;&#x540E;&#x7EED;&#x7684;I/O&#x90FD;&#x662F;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x8FDE;&#x63A5;&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF1B;<br>3&#xFF09;ietd&#x4E0E;iscsi_trgt&#x4F7F;&#x7528;ioctl&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF0C;&#x4E00;&#x4E9B;&#x64CD;&#x4F5C;&#xFF08;&#x6BD4;&#x5982;&#x521B;&#x5EFA;&#x5220;&#x9664;target&#xFF0C;&#x521B;&#x5EFA;&#x5220;&#x9664;lun&#x7B49;&#xFF09;&#x90FD;&#x7531;ietd&#x5728;&#x7528;&#x6237;&#x6001;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x540E;&#xFF0C;&#x5C06;&#x547D;&#x4EE4;&#x901A;&#x8FC7;ioctl&#x53D1;&#x5230;iscsi_trgt&#xFF0C;&#x7136;&#x540E;iscsi_trgt&#x5728;&#x5185;&#x6838;&#x6001;&#x4E0B;&#x8FDB;&#x884C;&#x76F8;&#x5173;&#x5904;&#x7406;&#xFF1B;<br></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/tgt-arch/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/hello-world/" itemprop="url">
-                  Hello World
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T21:36:48+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/hello-world/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/hello-world/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/bcache-analysis/" itemprop="url">
-                  bcache浅析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T17:43:08+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/bcache-analysis/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/bcache-analysis/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="1-&#x7B80;&#x4ECB;"><a href="#1-&#x7B80;&#x4ECB;" class="headerlink" title="1.&#x7B80;&#x4ECB;"></a>1.&#x7B80;&#x4ECB;</h1><p>bcache&#x662F;linux&#x5185;&#x6838;&#x5757;&#x8BBE;&#x5907;&#x5C42;cache&#xFF0C;&#x7C7B;&#x4F3C;&#x4E8E;flashcache&#x4F7F;&#x7528;ssd&#x4F5C;&#x4E3A;hdd&#x7684;&#x7F13;&#x5B58;&#x65B9;&#x6848;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;flashcache&#xFF0C;bcache&#x66F4;&#x52A0;&#x7075;&#x6D3B;&#xFF0C;&#x652F;&#x6301;ssd&#x4F5C;&#x4E3A;&#x591A;&#x5757;hdd&#x7684;&#x5171;&#x4EAB;&#x7F13;&#x5B58;&#xFF0C;&#x5E76;&#x4E14;&#x8FD8;&#x652F;&#x6301;&#x591A;&#x5757;ssd&#xFF08;&#x8FD8;&#x672A;&#x5B8C;&#x5584;&#xFF09;&#xFF0C;&#x80FD;&#x591F;&#x5728;&#x8FD0;&#x884C;&#x4E2D;&#x52A8;&#x6001;&#x589E;&#x52A0;&#xFF0C;&#x5220;&#x9664;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#x548C;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x3002;&#x4ECE;3.10&#x5F00;&#x59CB;&#xFF0C;bcache&#x8FDB;&#x5165;&#x5185;&#x6838;&#x4E3B;&#x7EBF;&#x3002;bcache&#x652F;&#x6301;writeback&#x3001;writethrough&#x3001;writearoud&#x4E09;&#x79CD;&#x7B56;&#x7565;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F;wriththrough&#xFF0C;&#x53EF;&#x4EE5;&#x52A8;&#x6001;&#x4FEE;&#x6539;&#xFF0C;&#x7F13;&#x5B58;&#x66FF;&#x6362;&#x65B9;&#x5F0F;&#x652F;&#x6301;lru&#x3001;fifo&#x548C;random&#x4E09;&#x79CD;&#x3002;&#x4E0B;&#x9762;&#x4ECE;&#x51E0;&#x4E2A;&#x65B9;&#x9762;&#x4ECB;&#x7ECD;bcache&#x7684;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x3002;</p>
-<h1 id="2-&#x603B;&#x4F53;&#x7ED3;&#x6784;"><a href="#2-&#x603B;&#x4F53;&#x7ED3;&#x6784;" class="headerlink" title="2.&#x603B;&#x4F53;&#x7ED3;&#x6784;"></a>2.&#x603B;&#x4F53;&#x7ED3;&#x6784;</h1><p>bcache&#x7684;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;<br><img src="/2016/05/12/bcache-analysis/arch.png" alt="arch"><br>bcache&#x4E2D;&#x662F;&#x4EE5;cache set&#x6765;&#x5212;&#x5206;&#x4E0D;&#x540C;&#x5B58;&#x50A8;&#x96C6;&#x5408;&#xFF0C;&#x4E00;&#x4E2A;cache set&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;ssd&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;hdd&#xFF09;&#x3002;bcache&#x5BF9;&#x5916;&#x8F93;&#x51FA;&#x7ED9;&#x7528;&#x6237;&#x4F7F;&#x7528;&#x7684;&#x662F;/dev/bcache<N>&#x8FD9;&#x79CD;&#x8BBE;&#x5907;&#xFF0C;&#x6BCF;&#x4E2A;bcache<N>&#x8BBE;&#x5907;&#x90FD;&#x4E0E;&#x4E00;&#x4E2A;&#x540E;&#x7AEF;&#x7269;&#x7406;&#x76D8;&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;&#x7528;&#x6237;&#x5BF9;&#x4E0D;&#x540C;bcache&#x8BBE;&#x5907;&#x7684;io&#x4F1A;&#x7F13;&#x5B58;&#x5728;ssd&#x4E2D;&#xFF0C;&#x5237;&#x810F;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5199;&#x5230;&#x5404;&#x81EA;&#x5BF9;&#x5E94;&#x7684;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x4E0A;&#x3002;&#x56E0;&#x6B64;&#xFF0C;bcache&#x6269;&#x5BB9;&#x5F88;&#x5BB9;&#x6613;&#xFF0C;&#x53EA;&#x8981;&#x6CE8;&#x518C;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x5373;&#x53EF;&#x3002;<br></N></N></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/bcache-analysis/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/bcache-use/" itemprop="url">
-                  bcache使用
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T17:34:40+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/bcache-use/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/bcache-use/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="1-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"><a href="#1-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;" class="headerlink" title="1.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"></a>1.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone http://evilpiepirate.org/git/bcache-tools.git</span></span><br></pre></td></tr></table></figure>
-<p>&#x5B89;&#x88C5;&#x524D;&#x9700;&#x8981;&#x4E24;&#x4E2A;&#x4F9D;&#x8D56;&#x5305;pkg-config&#x548C;libblkid-dev<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apt-get install pkg-config libblkid-dev</span></span><br></pre></td></tr></table></figure></p>
-<p>&#x7136;&#x540E;&#x7F16;&#x8BD1;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># make</span></span><br><span class="line">cc -O2 -Wall -g `pkg-config --cflags uuid blkid` make-bcache.c bcache.o `pkg-config --libs uuid blkid` -o make-bcache</span><br><span class="line">cc -O2 -Wall -g `pkg-config --cflags uuid blkid` probe-bcache.c `pkg-config --libs uuid blkid` -o probe-bcache</span><br><span class="line">cc -O2 -Wall -g -std=gnu99 bcache-super-show.c bcache.o `pkg-config --libs uuid` -o bcache-super-show</span><br><span class="line"><span class="comment"># make install</span></span><br><span class="line">install -m0755 make-bcache bcache-super-show	/usr/sbin/</span><br><span class="line">install -m0755 probe-bcache bcache-register	 /lib/udev/</span><br><span class="line">install -m0644 69-bcache.rules	/lib/udev/rules.d/</span><br><span class="line">install -T -m0755 initramfs/hook	/usr/share/initramfs-tools/hooks/bcache</span><br><span class="line"><span class="keyword">if</span> [ <span class="_">-d</span> /lib/dracut/modules.d ]; \</span><br><span class="line"> <span class="keyword">then</span> install -D -m0755 dracut/module-setup.sh /lib/dracut/modules.d/90bcache/module-setup.sh; \</span><br><span class="line"> <span class="keyword">fi</span></span><br><span class="line">install -m0644 -- *.8 /usr/share/man/man8/</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/bcache-use/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/directio-merge/" itemprop="url">
-                  direct IO中io合并的奇怪现象分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T17:07:13+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/directio-merge/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/directio-merge/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x300A;&#x5757;&#x8BBE;&#x5907;&#x5185;&#x6838;&#x53C2;&#x6570;max_segments&#x548C;max_sectors_kb&#x89E3;&#x6790;&#x300B;&#x4ECB;&#x7ECD;&#x4E86;max_sectors_kb&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x5BF9;device mapper&#x8BBE;&#x5907;&#x548C;&#x8F6F;raid&#x8BBE;&#x5907;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x5B9E;&#x9645;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#xFF0C;&#x53D1;&#x73B0;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x73B0;&#x8C61;&#xFF1A;&#x4E00;&#x5757;&#x7269;&#x7406;&#x76D8;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x76D8;&#x4E0A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;device mapper&#x8BBE;&#x5907;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x8FD9;&#x4E2A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;direct IO&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5927;&#x5757;&#x5199;&#x6216;&#x8005;&#x987A;&#x5E8F;&#x5927;&#x5757;&#x5199;&#xFF08;&#x968F;&#x673A;&#x8BFB;&#x548C;&#x987A;&#x5E8F;&#x8BFB;&#x6CA1;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x8981;&#x5927;&#x4E8E;dm&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#xFF0C;&#x4F46;&#x662F;&#x5C0F;&#x4E8E;dm&#x5E95;&#x5C42;&#x8BBE;&#x5907;&#xFF08;&#x8FD9;&#x91CC;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF09;&#x7684;max_sectors_kb&#xFF0C;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x53D1;&#x73B0;&#x5728;3.2&#x5185;&#x6838;&#x91CC;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x5E76;&#x6CA1;&#x6709;&#x5408;&#x5E76;&#xFF0C;&#x4F46;&#x662F;&#x5728;3.10&#x5185;&#x6838;&#x4E0B;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x786E;&#x662F;&#x5408;&#x5E76;&#x4E86;&#xFF08;&#x5408;&#x5E76;&#x540E;&#x7684;&#x5927;&#x5C0F;&#x4E3A;&#x7528;&#x6237;&#x53D1;&#x7684;io&#x5757;&#x5927;&#x5C0F;&#xFF09;&#x3002;&#x5177;&#x4F53;&#x73B0;&#x8C61;&#x4E0B;&#x9762;&#x4EE5;&#x4F8B;&#x5B50;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
-<h1 id="1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"><a href="#1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;" class="headerlink" title="1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"></a>1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;</h1><p>&#x8FD9;&#x91CC;&#x9009;&#x53D6;3.2.57&#x5185;&#x6838;&#x548C;3.10.11&#x5185;&#x6838;&#x4F5C;&#x4E3A;&#x5BF9;&#x6BD4;&#x3002;</p>
-<h2 id="1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"><a href="#1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;" class="headerlink" title="1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"></a>1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;</h2><p>&#x7269;&#x7406;&#x76D8;sdg&#xFF0C;&#x5728;&#x5176;&#x4E0A;&#x521B;&#x5EFA;&#x7684;10G&#x7684;device mapper&#x8BBE;&#x5907;dmtest1&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x8BBE;&#x5907;&#x4E3A;dm-71<br>1&#xFF09;&#x9ED8;&#x8BA4;&#x7684;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_segments</span></span><br><span class="line">128</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_segments</span></span><br><span class="line">128</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/directio-merge/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/12/max-seg-max-sec/" itemprop="url">
-                  块设备内核参数max_segments和max_sectors_kb解析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-12T16:47:03+08:00" content="2016-05-12">
-              2016-05-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/12/max-seg-max-sec/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/12/max-seg-max-sec/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>&#x5728;DMA&#x8BBE;&#x5907;&#x4E0D;&#x91C7;&#x7528;S/G&#xFF08;&#x5206;&#x6563;/&#x805A;&#x96C6;&#xFF09;&#x6A21;&#x5F0F;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5FC5;&#x987B;&#x4FDD;&#x8BC1;&#x7F13;&#x51B2;&#x533A;&#x662F;&#x7269;&#x7406;&#x4E0A;&#x8FDE;&#x7EED;&#x7684;&#xFF0C;linux&#x5185;&#x6838;&#x6709;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x7528;&#x6765;&#x5206;&#x914D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#xFF1A;kmalloc()&#x548C;<strong>get_free_pages()&#x3002;&#x8FD9;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x90FD;&#x6709;&#x5206;&#x914D;&#x8FDE;&#x7EED;&#x5185;&#x5B58;&#x7684;&#x6700;&#x5927;&#x503C;&#xFF0C;kmalloc&#x4EE5;&#x5206;&#x914D;&#x5B57;&#x8282;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x7EA6;&#x4E3A;64KB&#xFF0C;</strong>get_free_pages()&#x4EE5;&#x5206;&#x914D;&#x9875;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x80FD;&#x5206;&#x914D;2^order&#x6570;&#x76EE;&#x7684;&#x9875;</p>
-<p>&#x4F7F;&#x7528;DMA&#x7F13;&#x51B2;&#x533A;&#x7684;&#x4E3B;&#x8981;&#x95EE;&#x9898;&#x662F;&#xFF1A;&#x5F53;&#x5927;&#x4E8E;&#x4E00;&#x9875;&#x65F6;&#xFF0C;&#x5B83;&#x4EEC;&#x5FC5;&#x987B;&#x5360;&#x636E;&#x8FDE;&#x63A5;&#x7684;&#x7269;&#x7406;&#x9875;&#xFF0C;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;ISA&#x6216;&#x8005;PCI&#x7CFB;&#x7EDF;&#x603B;&#x7EBF;&#x4F20;&#x8F93;&#x6570;&#x636E;&#xFF0C;&#x800C;&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;&#x7684;&#x90FD;&#x662F;&#x7269;&#x7406;&#x5730;&#x5740;</p>
-<p>linux&#x5757;&#x8BBE;&#x5907;&#x5728;&#x5904;&#x7406;io&#x65F6;&#x4F1A;&#x53D7;&#x5230;&#x4E00;&#x4E9B;&#x53C2;&#x6570;&#xFF08;&#x8BBE;&#x5907;&#x7684;queue limits&#x53C2;&#x6570;&#xFF0C;&#x4EE5;&#x4E0B;&#x7B80;&#x79F0;limits&#x53C2;&#x6570;&#xFF09;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x6BD4;&#x5982;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x4E2D;&#x5141;&#x8BB8;&#x7684;&#x6700;&#x5927;&#x6247;&#x533A;&#x6570;&#xFF0C;&#x6700;&#x5927;segment&#x6570;&#x7B49;&#x3002;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x53EF;&#x4EE5;&#x5728;/sys/block/<device>/queue/&#x4E0B;&#x67E5;&#x770B;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x5728;&#x521D;&#x59CB;&#x5316;&#x65F6;&#x4F1A;&#x8BBE;&#x7F6E;&#x9ED8;&#x8BA4;&#x503C;&#x3002;&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x5206;&#x6790;max_segments&#x548C;max_sectors_kb&#x3002;</device></p>
-<h1 id="1-&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><h2 id="1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"><a href="#1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;" class="headerlink" title="1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"></a>1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;</h2><p>&#x9996;&#x5148;&#x5C31;&#x9700;&#x8981;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;&#x4EC0;&#x4E48;&#x662F;&#x6BB5;&#xFF08;segment&#xFF09;&#x3002;<br>&#x4E00;&#x4E2A;&#x6BB5;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5B83;&#x4EEC;&#x5305;&#x542B;&#x78C1;&#x76D8;&#x4E0A;&#x7269;&#x7406;&#x76F8;&#x90BB;&#x7684;&#x6570;&#x636E;&#x5757;&#x3002;<br>&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;io&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#x3002;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x6570;&#x636E;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x53EA;&#x8981;&#x5411;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x53D1;&#x9001;&#x9002;&#x5F53;&#x7684;&#x547D;&#x4EE4;&#x5C31;&#x53EF;&#x4EE5;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x4E00;&#x65E6;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x5C31;&#x4F1A;&#x53D1;&#x51FA;&#x4E00;&#x4E2A;&#x4E2D;&#x65AD;&#x901A;&#x77E5;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x3002;<br>DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x7684;&#x662F;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x867D;&#x7136;&#x4E5F;&#x5141;&#x8BB8;&#x4F20;&#x9001;&#x4E0D;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;&#x6BD4;&#x8F83;&#x4F4E;&#x6548;&#xFF0C;&#x56E0;&#x4E3A;&#x78C1;&#x5934;&#x79FB;&#x52A8;&#x6162;&#x3002;<br>&#x8001;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x4EC5;&#x4EC5;&#x652F;&#x6301;&#x201C;&#x7B80;&#x5355;&#x201D;&#x7684;DMA&#x65B9;&#x5F0F;&#xFF1A;&#x78C1;&#x76D8;&#x5FC5;&#x987B;&#x4E0E;RAM&#x4E2D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x5355;&#x5143;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;&#x4F46;&#x662F;&#x65B0;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;&#xFF08;scatter-gather&#xFF09;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x78C1;&#x76D8;&#x53EF;&#x4EE5;&#x4E0E;&#x4E00;&#x4E9B;&#x975E;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;<br>&#x4E3A;&#x4E86;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x5FC5;&#x987B;&#x80FD;&#x591F;&#x5904;&#x7406;&#x79F0;&#x4E3A;&#x6BB5;&#x7684;&#x6570;&#x636E;&#x5B58;&#x50A8;&#x5355;&#x5143;&#xFF0C;&#x4E00;&#x6B21;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x53EF;&#x4EE5;&#x4F20;&#x9001;&#x51E0;&#x4E2A;&#x6BB5;&#x3002;<br>&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x6B63;&#x597D;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#xFF0C;&#x8FD9;&#x79CD;&#x5408;&#x5E76;&#x65B9;&#x5F0F;&#x4EA7;&#x751F;&#x7684;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x5C31;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/12/max-seg-max-sec/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/05/flashcachegroup/" itemprop="url">
-                  flashcachegroup浅析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-05T16:02:35+08:00" content="2016-05-05">
-              2016-05-05
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/05/flashcachegroup/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/05/flashcachegroup/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="&#x7B80;&#x4ECB;"><a href="#&#x7B80;&#x4ECB;" class="headerlink" title="&#x7B80;&#x4ECB;"></a>&#x7B80;&#x4ECB;</h1><p>flashcachegroup&#x80FD;&#x591F;&#x4F7F;&#x7528;&#x4E00;&#x5757;&#x6216;&#x591A;&#x5757;ssd&#x6765;&#x7F13;&#x5B58;&#x4E00;&#x7EC4;hdd&#x786C;&#x76D8;&#xFF0C;&#x786C;&#x76D8;&#x7EC4;&#x80FD;&#x591F;&#x52A8;&#x6001;&#x589E;&#x52A0;&#x5220;&#x9664;&#x786C;&#x76D8;&#xFF0C;ssd&#x7F13;&#x5B58;&#x80FD;&#x591F;&#x6574;&#x4E2A;&#x786C;&#x76D8;&#x7EC4;&#x800C;&#x4E0D;&#x4EC5;&#x4EC5;&#x662F;&#x4E00;&#x5757;&#x786C;&#x76D8;&#x3002;<br>&#x5176;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF0C;&#x53C2;&#x8003;&#x5B98;&#x65B9;&#x8BF4;&#x660E;<a href="https://github.com/lihuiba/flashcachegroup&#xFF0C;&#x8FD9;&#x91CC;&#x501F;&#x7528;&#x4ECB;&#x7ECD;&#x91CC;&#x7684;&#x7ED3;&#x6784;&#x56FE;">https://github.com/lihuiba/flashcachegroup&#xFF0C;&#x8FD9;&#x91CC;&#x501F;&#x7528;&#x4ECB;&#x7ECD;&#x91CC;&#x7684;&#x7ED3;&#x6784;&#x56FE;</a>.<br><img src="/2016/05/05/flashcachegroup/fcg.png" alt="fcg"></p>
-<h1 id="1-&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup"><a href="#1-&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup" class="headerlink" title="1.&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup"></a>1.&#x5B89;&#x88C5;&#x4F7F;&#x7528;flashcachegroup</h1><h2 id="1&#xFF09;-&#x5B89;&#x88C5;flashcache"><a href="#1&#xFF09;-&#x5B89;&#x88C5;flashcache" class="headerlink" title="1&#xFF09; &#x5B89;&#x88C5;flashcache"></a>1&#xFF09; &#x5B89;&#x88C5;flashcache</h2><p>&#x9996;&#x5148;&#x9700;&#x8981;&#x5B89;&#x88C5;flashcache&#xFF0C;&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x6E90;&#x7801;&#x5B89;&#x88C5;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#git clone https://github.com/facebook/flashcache.git</span></span><br><span class="line"><span class="comment">#cd flashcache</span></span><br></pre></td></tr></table></figure></p>
-<p>&#x5207;&#x6362;&#x5230;&#x7A33;&#x5B9A;&#x7248;stable_v3.1.1<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#git checkout stable_v3.1.1</span></span><br></pre></td></tr></table></figure></p>
-<p>flashcache&#x7F16;&#x8BD1;&#x9700;&#x8981;&#x4F9D;&#x8D56;KERNE_TREE<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#make KERNEL_TREE=/usr/src/linux-headers-3.10.11-openstack-amd64/</span></span><br><span class="line"><span class="comment">#make install</span></span><br></pre></td></tr></table></figure></p>
-<p>&#x52A0;&#x8F7D;flashcache&#x6A21;&#x5757;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#modprobe flashcache</span></span><br><span class="line"><span class="comment">#lsmod | grep flashcache</span></span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/05/flashcachegroup/#more" rel="contents">
+            <a class="btn" href="/2015/08/20/IET/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1481,7 +1511,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1514,7 +1544,7 @@
       <section class="site-overview sidebar-panel  sidebar-panel-active ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/default_avatar.jpg"
+               src="/images/avatar.png"
                alt="Wu Dong" />
           <p class="site-author-name" itemprop="name">Wu Dong</p>
           <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
@@ -1522,7 +1552,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-count">23</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1530,7 +1560,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1539,7 +1569,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

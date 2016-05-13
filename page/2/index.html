@@ -261,8 +261,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/05/sheepdog-erasure-code/" itemprop="url">
-                  sheepdog中的erasure code实现机制
+                <a class="post-title-link" href="/2015/08/06/journal-guided-resync-for-sraid/" itemprop="url">
+                  Journal-guided Resynchronization for Software RAID
                 </a>
               
             
@@ -275,8 +275,130 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-05T11:13:25+08:00" content="2016-05-05">
-              2016-05-05
+            <time itemprop="dateCreated" datetime="2015-08-06T22:24:38+08:00" content="2015-08-06">
+              2015-08-06
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/paper/" itemprop="url" rel="index">
+                    <span itemprop="name">paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/08/06/journal-guided-resync-for-sraid/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/06/journal-guided-resync-for-sraid/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&#x8BE5;&#x6587;&#x7AE0;&#x4E3B;&#x8981;&#x8BB2;&#x628A;&#x65E5;&#x5FD7;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF08;&#x5982;ext3&#xFF09;&#x4E0E;&#x5E95;&#x5C42;&#x7684;&#x8F6F;raid&#x7ED3;&#x5408;&#x8D77;&#x6765;&#xFF0C;&#x5F15;&#x5165;declared mode&#xFF0C;&#x5728;&#x5199;&#x5165;&#x6570;&#x636E;&#x524D;&#xFF0C;&#x5148;&#x8BB0;&#x5F55;&#x65E5;&#x5FD7;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x610F;&#x5916;&#x5D29;&#x6E83;&#x7684;&#x65F6;&#x5019;&#x80FD;&#x591F;&#x6839;&#x636E;&#x65E5;&#x5FD7;&#x6765;&#x5224;&#x65AD;&#x54EA;&#x4E9B;&#x6570;&#x636E;&#x662F;&#x4E0D;&#x4E00;&#x81F4;&#x7684;&#xFF0C;&#x4ECE;&#x800C;&#x51CF;&#x5C11;&#x4E86;&#x5168;&#x91CF;&#x540C;&#x6B65;&#xFF0C;&#x7F29;&#x77ED;&#x4E86;&#x5904;&#x4E8E;&#x6545;&#x969C;&#x6062;&#x590D;&#x72B6;&#x6001;&#x7684;&#x65F6;&#x95F4;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#xFF0C;&#x4E3A;&#x8F6F;raid&#x589E;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x63A5;&#x53E3;&#xFF0C;verify read&#xFF0C;&#x5728;&#x6536;&#x5230;&#x8FD9;&#x79CD;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x5148;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x7684;&#x6821;&#x9A8C;&#x5224;&#x65AD;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x4E0D;&#x4E00;&#x81F4;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x5219;&#x91CD;&#x5199;&#x955C;&#x50CF;&#x6216;&#x6821;&#x9A8C;&#x6570;&#x636E;&#x6765;&#x4FDD;&#x6301;&#x4E00;&#x81F4;&#x3002;<br>&#x5982;&#x679C;&#x628A;&#x65E5;&#x5FD7;&#x8BB0;&#x5F55;&#x5230;&#x8BE5;&#x9635;&#x5217;&#x4E2D;&#xFF0C;&#x4F1A;&#x964D;&#x4F4E;&#x9635;&#x5217;&#x7684;&#x6027;&#x80FD;&#xFF0C;&#x9AD8;&#x7AEF;&#x9635;&#x5217;&#x4E00;&#x822C;&#x662F;&#x91C7;&#x7528;&#x4E00;&#x4E2A;NVRAM&#x6765;&#x8BB0;&#x5F55;&#x65E5;&#x5FD7;&#xFF0C;<br>&#x53E6;&#x4E00;&#x79CD;&#x65B9;&#x5F0F;&#x662F;&#x628A;&#x65E5;&#x5FD7;&#x8BB0;&#x5F55;&#x5230;&#x9635;&#x5217;&#x7684;bitmap&#x4E2D;&#xFF0C;&#x4E0D;&#x8FC7;&#x8FD9;&#x6837;&#x90FD;&#x4F1A;&#x5F71;&#x54CD;&#x6027;&#x80FD;&#x3002;&#xFF08;&#x5C31;&#x662F;mdraid&#x7684;bitmap&#x673A;&#x5236;&#xFF0C;<a href="http://www.linuxsymposium.org/archives/OLS/Reprints-2003/LinuxSymposium2003.pdf#page=109&#xFF09;" target="_blank" rel="external">http://www.linuxsymposium.org/archives/OLS/Reprints-2003/LinuxSymposium2003.pdf#page=109&#xFF09;</a></p>
+<p>&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E3B;&#x8981;&#x8BB2;&#x7684;&#x5C31;&#x662F;&#x5229;&#x7528;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x6062;&#x590D;&#x673A;&#x5236;&#xFF0C;&#x6765;&#x89E3;&#x51B3;&#x8F6F;raid&#x5D29;&#x6E83;&#x65F6;&#x5168;&#x91CF;&#x540C;&#x6B65;&#x7684;&#x95EE;&#x9898;&#x3002;<br>&#x8FD9;&#x91CC;&#x662F;&#x57FA;&#x4E8E;&#x65E5;&#x5FD7;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF08;&#x5982;ext3&#x4E4B;&#x7C7B;&#x7684;&#xFF09;&#xFF0C;&#x5728;&#x5199;&#x6570;&#x636E;&#x5230;&#x78C1;&#x76D8;&#x4E4B;&#x524D;&#xFF0C;&#x5148;&#x8BB0;&#x5F55;&#x65E5;&#x5FD7;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x6570;&#x636E;&#xFF0C;&#x5199;&#x6210;&#x529F;&#x540E;&#x518D;&#x8BB0;&#x5F55;commit&#x65E5;&#x5FD7;&#x3002;<br>&#x8FD9;&#x6837;&#x5728;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5D29;&#x6E83;&#x65F6;&#x53EF;&#x4EE5;&#x6839;&#x636E;&#x65E5;&#x5FD7;&#x6765;&#x8FDB;&#x884C;&#x6062;&#x590D;&#xFF0C;&#x65E5;&#x5FD7;&#x4E2D;&#x5DF2;&#x7ECF;commit&#x6210;&#x529F;&#x7684;&#x662F;&#x4E0D;&#x9700;&#x8981;&#x6062;&#x590D;&#x7684;&#x3002;<br>&#x4E3A;&#x4E86;&#x5229;&#x7528;&#x8FD9;&#x4E2A;&#x673A;&#x5236;&#xFF0C;&#x4E3A;&#x8F6F;raid&#x5F15;&#x5165;veryfy read&#xFF0C;&#x5C31;&#x662F;&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5411;&#x8F6F;raid&#x53D1;veryfy read&#x8BF7;&#x6C42;&#xFF0C;&#x5C31;&#x662F;&#x5728;buffer head&#x4E2D;&#x589E;&#x52A0;&#x4E00;&#x4E2A;raid synchronize&#x7684;&#x6807;&#x8BB0;&#xFF0C;&#x8F6F;raid&#x5728;&#x6536;&#x5230;&#x5E26;&#x6709;&#x8FD9;&#x4E2A;&#x6807;&#x8BB0;&#x7684;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x624D;&#x8FDB;&#x884C;&#x68C0;&#x67E5;&#xFF08;raid1&#x662F;&#x68C0;&#x67E5;&#x6E90;&#x76D8;&#x548C;&#x955C;&#x50CF;&#x76D8;&#x5BF9;&#x5E94;&#x7684;&#x6570;&#x636E;&#x662F;&#x5426;&#x4E00;&#x81F4;&#xFF0C;raid5&#x662F;&#x68C0;&#x67E5;&#x6821;&#x9A8C;&#x5757;&#x548C;&#x7531;&#x6570;&#x636E;&#x5757;&#x8BA1;&#x7B97;&#x7684;&#x6821;&#x9A8C;&#x503C;&#x662F;&#x5426;&#x4E00;&#x81F4;&#xFF09;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x4E00;&#x81F4;&#xFF0C;&#x5C31;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#xFF08;raid1&#x8BA9;&#x5404;&#x4E2A;&#x955C;&#x50CF;&#x76D8;&#x7684;&#x5BF9;&#x5E94;&#x6570;&#x636E;&#x4E00;&#x6837;&#xFF0C;raid5&#x662F;&#x5C06;&#x65B0;&#x8BA1;&#x7B97;&#x7684;&#x6821;&#x9A8C;&#x503C;&#x5199;&#x5165;&#x6821;&#x9A8C;&#x5757;&#x4E2D;&#xFF09;&#x3002;&#x8FD9;&#x6837;&#x5C31;&#x907F;&#x514D;&#x4E86;&#x8F6F;raid&#x5D29;&#x6E83;&#x65F6;&#xFF0C;&#x5168;&#x76D8;&#x626B;&#x63CF;&#x8FDB;&#x884C;&#x6BD4;&#x5BF9;&#x4E86;&#x3002;<br>&#x5C40;&#x9650;&#x5728;&#x4E8E;&#xFF1A;<br>1&#xFF09;&#x5FC5;&#x987B;&#x662F;&#x57FA;&#x4E8E;&#x65E5;&#x5FD7;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x800C;&#x4E14;&#x5FC5;&#x987B;&#x662F;&#x8F6F;raid&#x4E0A;&#x5EFA;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x5982;&#x679C;&#x8F6F;raid&#x4E0A;&#x6CA1;&#x6709;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x800C;&#x76F4;&#x63A5;&#x88F8;&#x76D8;&#x4F7F;&#x7528;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x4E0D;&#x9002;&#x7528;&#x3002;<br>2&#xFF09;&#x5BF9;&#x4E8E;&#x8DE8;&#x7F51;&#x7EDC;&#x7684;&#x8F6F;raid&#xFF08;&#x4F7F;&#x7528;iscsi&#x6216;nbd&#x7B49;&#x65B9;&#x5F0F;&#xFF09;&#xFF0C;&#x6587;&#x7AE0;&#x4E2D;&#x7684;&#x5728;&#x8BF7;&#x6C42;&#x4E0A;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;synchronize&#x6807;&#x8BB0;&#x8FD8;&#x4E0D;&#x4E00;&#x5B9A;&#x53EF;&#x884C;&#xFF0C;&#x56E0;&#x4E3A;&#x9700;&#x8981;iscsi&#x534F;&#x8BAE;&#x6216;nbd&#x91CC;&#x6709;&#x7A7A;&#x95F2;&#x5B57;&#x6BB5;&#x7528;&#x4E8E;&#x5B58;&#x653E;synchronize&#x6807;&#x8BB0;&#x624D;&#x884C;&#x3002;<br>&#x503C;&#x5F97;&#x501F;&#x9274;&#x7684;&#x5730;&#x65B9;&#xFF1A;<br>1&#xFF09;&#x80FD;&#x591F;&#x6839;&#x636E;&#x8BF7;&#x6C42;&#x7684;&#x7C7B;&#x578B;&#x6765;&#x5224;&#x65AD;&#x662F;&#x5426;&#x8FDB;&#x884C;&#x8F6F;raid&#x7684;&#x6570;&#x636E;&#x6062;&#x590D;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x8FDB;&#x884C;&#x5168;&#x76D8;&#x626B;&#x63CF;&#xFF1B;<br>2&#xFF09;&#x5BF9;&#x4E8E;&#x4E91;&#x786C;&#x76D8;&#x6765;&#x8BF4;&#xFF0C;&#x76EE;&#x524D;&#x91C7;&#x7528;&#x7684;bitmap&#x673A;&#x5236;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x628A;&#x65E5;&#x5FD7;&#x8BB0;&#x5F55;&#x5230;bitmap&#x4E2D;&#xFF08;&#x6587;&#x7AE0;&#x4E2D;&#x4E5F;&#x6709;&#x63D0;&#x5230;&#xFF09;&#xFF0C;&#x4E0D;&#x8FC7;&#x5728;&#x6574;&#x4E2A;&#x673A;&#x623F;&#x65AD;&#x7535;&#x91CD;&#x542F;&#x8FD9;&#x79CD;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#xFF0C;bitmap&#x4E5F;&#x4E22;&#x5931;&#x4E0D;&#x53EF;&#x7528;&#x4E86;&#xFF0C;&#x76EE;&#x524D;&#x5C31;&#x53EA;&#x80FD;&#x5168;&#x76D8;&#x626B;&#x63CF;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#xFF08;&#x8FD9;&#x91CC;&#x7684;&#x5168;&#x76D8;&#x626B;&#x63CF;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#x662F;&#x76F4;&#x63A5;&#x5C06;&#x4E00;&#x5757;&#x76D8;&#x7684;&#x6570;&#x636E;&#x5B8C;&#x5168;&#x62F7;&#x8D1D;&#x5230;&#x53E6;&#x4E00;&#x5757;&#x76D8;&#xFF0C;&#x8FD8;&#x662F;&#x9700;&#x8981;&#x6839;&#x636E;chunk&#x5757;&#x5927;&#x5C0F;&#x8FDB;&#x884C;&#x6BD4;&#x5BF9;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x5C31;&#x4E0D;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x62F7;&#x8D1D;&#xFF0C;&#x4E0D;&#x8FC7;&#x4E5F;&#x5FC5;&#x987B;&#x5148;&#x4ECE;&#x4E24;&#x4E2A;&#x955C;&#x50CF;&#x4E2D;&#x90FD;&#x8BFB;&#x51FA;&#x6570;&#x636E;&#x6765;&#xFF0C;&#x76EE;&#x524D;&#x8BA4;&#x4E3A;&#x662F;&#x7B2C;&#x4E8C;&#x79CD;&#xFF09;&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x4F7F;&#x7528;&#x7684;extern bitmap&#xFF0C;&#x8FD9;&#x79CD;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;bitmap&#x4E0D;&#x53EF;&#x7528;&#xFF0C;&#x5982;&#x679C;&#x662F;intern bitmap&#xFF0C;&#x90A3;&#x5BF9;&#x4E8E;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E5F;&#x662F;&#x53EF;&#x4EE5;&#x4E0D;&#x7528;&#x5168;&#x91CF;&#x540C;&#x6B65;&#x7684;&#xFF0C;&#x53EA;&#x4E0D;&#x8FC7;intern bitmap&#x662F;&#x5B58;&#x653E;&#x5728;&#x9635;&#x5217;&#x672C;&#x8EAB;&#xFF0C;&#x5BF9;&#x4E8E;&#x6B63;&#x5E38;&#x8BF7;&#x6C42;&#x6765;&#x8BF4;&#x5F00;&#x9500;&#x8F83;&#x5927;&#x3002;</p>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/08/06/fs-io-map/" itemprop="url">
+                  文件系统磁盘布局与I/O映射
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-08-06T22:09:16+08:00" content="2015-08-06">
+              2015-08-06
             </time>
           </span>
 
@@ -305,8 +427,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/05/sheepdog-erasure-code/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/05/sheepdog-erasure-code/" itemprop="commentsCount"></span>
+                <a href="/2015/08/06/fs-io-map/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/06/fs-io-map/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -330,18 +452,13 @@
 
       
         
-          <h1 id="1-&#x7B80;&#x4ECB;"><a href="#1-&#x7B80;&#x4ECB;" class="headerlink" title="1.&#x7B80;&#x4ECB;"></a>1.&#x7B80;&#x4ECB;</h1><p>Erasure Coding(EC) &#x662F;&#x4E00;&#x79CD;&#x6570;&#x636E;&#x5197;&#x4F59;&#x7B56;&#x7565;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;&#x591A;&#x526F;&#x672C;&#x7B56;&#x7565;&#xFF0C;&#x7EA0;&#x5220;&#x7801;&#x7684;&#x6570;&#x636E;&#x5197;&#x4F59;&#x5EA6;&#x66F4;&#x5C0F;&#xFF0C;&#x5E76;&#x80FD;&#x83B7;&#x5F97;&#x66F4;&#x9AD8;&#x7684;&#x6570;&#x636E;&#x53EF;&#x9760;&#x6027;&#x3002;&#x7EA0;&#x5220;&#x7801;&#x5305;&#x542B;&#x4E24;&#x90E8;&#x5206;&#xFF0C;&#x7F16;&#x7801;&#x548C;&#x89E3;&#x7801;&#x3002;&#x7F16;&#x7801;&#x65F6;&#xFF0C;&#x4F7F;&#x7528;&#x4E00;&#x4E9B;&#x6570;&#x636E;&#x90E8;&#x5206;&#xFF0C;&#x8BA1;&#x7B97;&#x51FA;&#x4E00;&#x4E9B;&#x6821;&#x9A8C;&#x6570;&#x636E;&#xFF1B;&#x5F53;&#x6709;&#x6570;&#x636E;&#x4E22;&#x5931;&#x65F6;&#xFF0C;&#x80FD;&#x591F;&#x4F7F;&#x7528;&#x4F59;&#x4E0B;&#x7684;&#x6570;&#x636E;&#xFF08;&#x6E90;&#x6570;&#x636E;&#x548C;&#x6821;&#x9A8C;&#x6570;&#x636E;&#xFF09;&#x89E3;&#x7801;&#x51FA;&#x4E22;&#x5931;&#x7684;&#x90E8;&#x5206;&#x3002;sheepdog&#x4E2D;&#x4E5F;&#x63D0;&#x4F9B;&#x4E86;EC&#x7684;&#x652F;&#x6301;&#x3002;&#x6BD4;&#x5982;&#x4F7F;&#x7528;8:3&#x7684;&#x7EA0;&#x5220;&#x7B56;&#x7565;&#xFF08;8&#x5757;&#x6570;&#x636E;&#x5757;&#xFF0C;3&#x5757;&#x6821;&#x9A8C;&#x5757;&#xFF09;&#xFF0C;sheepdog&#x5C31;&#x80FD;&#x591F;&#x5BB9;&#x9519;3&#x4E2A;&#x8282;&#x70B9;&#x5B95;&#x6389;&#xFF0C;&#x4EC5;&#x4EC5;&#x53EA;&#x6709;3/8=0.375&#x500D;&#x7684;&#x989D;&#x5916;&#x6570;&#x636E;&#xFF0C;&#x800C;&#x8981;&#x8FBE;&#x5230;&#x76F8;&#x540C;&#x7684;&#x6548;&#x679C;&#xFF0C;&#x591A;&#x526F;&#x672C;&#x7B56;&#x7565;&#x5374;&#x9700;&#x8981;&#x4F7F;&#x7528;4&#x526F;&#x672C;&#xFF0C;&#x5E76;&#x4E14;&#x5E26;&#x6765;&#x4E86;&#x989D;&#x5916;3&#x500D;&#x7684;&#x6570;&#x636E;&#x5F00;&#x9500;&#x3002;sheepdog&#x4E2D;&#x4F7F;&#x7528;&#x7684;&#x662F;Erasure Code&#x7684;&#x5F00;&#x6E90;&#x5E93;zfec&#x3002;</p>
-<h1 id="2-sheepdog&#x4E2D;EC&#x7684;&#x7279;&#x6027;"><a href="#2-sheepdog&#x4E2D;EC&#x7684;&#x7279;&#x6027;" class="headerlink" title="2.sheepdog&#x4E2D;EC&#x7684;&#x7279;&#x6027;"></a>2.sheepdog&#x4E2D;EC&#x7684;&#x7279;&#x6027;</h1><ul>
-<li>1&#xFF09;&#x4E00;&#x65E6;&#x6307;&#x5B9A;&#x4E86;EC&#x7B56;&#x7565;&#xFF0C;&#x8BFB;&#x5199;&#x6570;&#x636E;&#x65F6;&#x81EA;&#x52A8;&#x5730;&#x4F7F;&#x7528;EC&#x7B56;&#x7565;&#xFF0C;&#x4E0D;&#x9700;&#x8981;&#x989D;&#x5916;&#x7684;&#x64CD;&#x4F5C;&#xFF1B;</li>
-<li>2&#xFF09;&#x652F;&#x6301;&#x968F;&#x673A;&#x8BFB;&#x5199;&#xFF0C;&#x5C31;&#x5730;&#x66F4;&#x65B0;&#xFF0C;&#x975E;&#x5BF9;&#x9F50;&#x7684;&#x8BFB;&#x5199;&#xFF1B;</li>
-<li>3&#xFF09;&#x652F;&#x6301;&#x4EFB;&#x610F;&#x7C7B;&#x578B;&#x7684;VM&#x955C;&#x50CF;&#xFF1B;</li>
-<li>4&#xFF09;&#x4F7F;&#x7528;VDI&#x65F6;&#xFF0C;&#x7528;&#x6237;&#x53EF;&#x4EE5;&#x81EA;&#x5B9A;&#x4E49;EC&#x7B56;&#x7565;&#xFF1B;</li>
-<li>5&#xFF09;&#x76F8;&#x5BF9;&#x4E8E;&#x591A;&#x526F;&#x672C;&#x7B56;&#x7565;&#xFF0C;EC&#x80FD;&#x591F;&#x83B7;&#x5F97;&#x66F4;&#x597D;&#x7684;&#x8BFB;&#x5199;&#x6027;&#x80FD;&#xFF1B;</li>
-<li>6&#xFF09;&#x4E00;&#x4E2A;&#x96C6;&#x7FA4;&#x4E2D;&#x65E2;&#x80FD;&#x6709;&#x591A;&#x526F;&#x672C;&#x7684;&#x5377;&#xFF0C;&#x4E5F;&#x80FD;&#x6709;EC&#x7684;&#x5377;&#x3002;</li>
-</ul>
-<h1 id="3-&#x4F7F;&#x7528;&#x65B9;&#x5F0F;"><a href="#3-&#x4F7F;&#x7528;&#x65B9;&#x5F0F;" class="headerlink" title="3.&#x4F7F;&#x7528;&#x65B9;&#x5F0F;"></a>3.&#x4F7F;&#x7528;&#x65B9;&#x5F0F;</h1><p>&#x7528;&#x6237;&#x521B;&#x5EFA;VDI&#xFF08;&#x865A;&#x62DF;&#x5377;&#xFF09;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x6307;&#x5B9A;EC&#x7B56;&#x7565;&#x3002;<br>$dogvdi create -c x:y vdi size # Create a erasure coded VDI<br>x&#x8868;&#x793A;&#x6570;&#x636E;&#x5757;&#x7684;&#x4E2A;&#x6570;&#xFF0C;x&#x53EA;&#x80FD;&#x662F;{2,4,8,16}&#xFF0C;y&#x8868;&#x793A;&#x6821;&#x9A8C;&#x5757;&#x7684;&#x4E2A;&#x6570;&#xFF0C;y&#x53EF;&#x4EE5;&#x53D6;&#x503C;1~15&#xFF0C;&#x80FD;&#x591F;&#x5BB9;&#x9519;y&#x4E2A;&#x8282;&#x70B9;&#x5B95;&#x6389;&#x3002;<br>&#x5F53;&#x7136;&#xFF0C;&#x5982;&#x679C;&#x8282;&#x70B9;&#x4E2A;&#x6570;&#x5C0F;&#x4E8E;x+y&#xFF0C;&#x6307;&#x5B9A;&#x7684;&#x7B56;&#x7565;&#x5C06;&#x4F1A;&#x5931;&#x8D25;&#x3002;<br>&#x521D;&#x59CB;&#x5316;&#x96C6;&#x7FA4;&#x65F6;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;EC&#x4F5C;&#x4E3A;&#x9ED8;&#x8BA4;&#x7684;&#x526F;&#x672C;&#x7B56;&#x7565;&#x3002;<br>$ dog cluster format -c x:y</p>
+          <p>&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5BF9;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x78C1;&#x76D8;&#x5E03;&#x5C40;&#x8FDB;&#x884C;&#x6982;&#x8981;&#x7684;&#x68B3;&#x7406;&#xFF0C;&#x5E76;&#x5728;&#x6B64;&#x57FA;&#x7840;&#x4E0A;&#x5206;&#x6790;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;I/O&#x5230;&#x5757;I/O&#x7684;&#x6620;&#x5C04;&#x673A;&#x5236;&#x3002;</p>
+<h1 id="1-&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;"><a href="#1-&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;" class="headerlink" title="1.&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;"></a>1.&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x78C1;&#x76D8;&#x5E03;&#x5C40;</h1><p>&#x9996;&#x5148;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5C42;&#x9762;&#x6765;&#x9610;&#x8FF0;&#x6587;&#x4EF6;&#x4E0E;&#x5757;&#x8BBE;&#x5907;&#x7684;&#x5173;&#x7CFB;&#x3002;</p>
+<h2 id="1-1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode"><a href="#1-1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode" class="headerlink" title="1.1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode"></a>1.1&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E0E;inode</h2><p>&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x5728;&#x8BBF;&#x95EE;&#x6587;&#x4EF6;&#x65F6;&#x90FD;&#x4F1A;&#x5148;&#x6253;&#x5F00;&#x6587;&#x4EF6;&#xFF0C;&#x5728;&#x5185;&#x6838;&#x4E2D;&#xFF0C;&#x5BF9;&#x5E94;&#x6BCF;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x90FD;&#x4F1A;&#x6709;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x8868;&#x793A;&#x8FD9;&#x4E2A;&#x8FDB;&#x7A0B;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x4F46;&#x662F;&#x7528;&#x6237;&#x7A0B;&#x5E8F;&#x4E0D;&#x80FD;&#x76F4;&#x63A5;&#x8BBF;&#x95EE;&#x5185;&#x6838;&#x4E2D;&#x7684;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;,&#x800C;&#x53EA;&#x80FD;&#x4F7F;&#x7528;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x7684;&#x7D22;&#x5F15;&#xFF08;&#x4E00;&#x4E2A;&#x6574;&#x6570;&#xFF09;&#xFF0C;&#x8FD9;&#x4E9B;&#x7D22;&#x5F15;&#x5C31;&#x88AB;&#x79F0;&#x4E3A;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x3002;&#x5F53;&#x8C03;&#x7528;open &#x6253;&#x5F00;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x6216;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x6587;&#x4EF6;&#x65F6;,&#x5185;&#x6838;&#x5206;&#x914D;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x5E76;&#x8FD4;&#x56DE;&#x7ED9;&#x7528;&#x6237;&#x7A0B;&#x5E8F;,&#x8BE5;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x9879;&#x4E2D;&#x7684;&#x6307;&#x9488;&#x6307;&#x5411;&#x65B0;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
+<p>&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x8868;&#x4E2D;&#x6BCF;&#x4E00;&#x9879;&#x90FD;&#x662F;&#x4E00;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x6307;&#x5411;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x63CF;&#x8FF0;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#x7684;&#x6570;&#x636E;&#x5757;&#x2013;file&#x5BF9;&#x8C61;&#xFF0C;file&#x5BF9;&#x8C61;&#x4E2D;&#x63CF;&#x8FF0;&#x4E86;&#x6587;&#x4EF6;&#x7684;&#x6253;&#x5F00;&#x6A21;&#x5F0F;&#xFF0C;&#x8BFB;&#x5199;&#x4F4D;&#x7F6E;&#x7B49;&#x91CD;&#x8981;&#x4FE1;&#x606F;&#xFF0C;&#x5F53;&#x8FDB;&#x7A0B;&#x6253;&#x5F00;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x65F6;&#xFF0C;&#x5185;&#x6838;&#x5C31;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x7684;file&#x5BF9;&#x8C61;&#x3002;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;file&#x5BF9;&#x8C61;&#x4E0D;&#x662F;&#x4E13;&#x5C5E;&#x4E8E;&#x67D0;&#x4E2A;&#x8FDB;&#x7A0B;&#x7684;&#xFF0C;&#x4E0D;&#x540C;&#x8FDB;&#x7A0B;&#x7684;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x8868;&#x4E2D;&#x7684;&#x6307;&#x9488;&#x53EF;&#x4EE5;&#x6307;&#x5411;&#x76F8;&#x540C;&#x7684;file&#x5BF9;&#x8C61;&#xFF0C;&#x4ECE;&#x800C;&#x5171;&#x4EAB;&#x8FD9;&#x4E2A;&#x6253;&#x5F00;&#x7684;&#x6587;&#x4EF6;&#x3002;file&#x5BF9;&#x8C61;&#x6709;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#xFF0C;&#x8BB0;&#x5F55;&#x4E86;&#x5F15;&#x7528;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x6587;&#x4EF6;&#x63CF;&#x8FF0;&#x7B26;&#x4E2A;&#x6570;&#xFF0C;&#x53EA;&#x6709;&#x5F53;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x4E3A;0&#x65F6;&#xFF0C;&#x5185;&#x6838;&#x624D;&#x9500;&#x6BC1;file&#x5BF9;&#x8C61;&#xFF0C;&#x56E0;&#x6B64;&#x67D0;&#x4E2A;&#x8FDB;&#x7A0B;&#x5173;&#x95ED;&#x6587;&#x4EF6;&#xFF0C;&#x4E0D;&#x5F71;&#x54CD;&#x4E0E;&#x4E4B;&#x5171;&#x4EAB;&#x540C;&#x4E00;&#x4E2A;file&#x5BF9;&#x8C61;&#x7684;&#x8FDB;&#x7A0B;&#x3002;</p>
+<p>file&#x5BF9;&#x8C61;&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x6307;&#x5411;dentry&#x5BF9;&#x8C61;&#x3002;dentry&#x5BF9;&#x8C61;&#x4EE3;&#x8868;&#x4E00;&#x4E2A;&#x72EC;&#x7ACB;&#x7684;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;&#xFF0C;&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;&#x88AB;&#x6253;&#x5F00;&#x591A;&#x6B21;&#xFF0C;&#x90A3;&#x4E48;&#x4F1A;&#x5EFA;&#x7ACB;&#x591A;&#x4E2A;file&#x5BF9;&#x8C61;&#xFF0C;&#x4F46;&#x5B83;&#x4EEC;&#x90FD;&#x6307;&#x5411;&#x540C;&#x4E00;&#x4E2A;dentry&#x5BF9;&#x8C61;&#x3002;inode&#x5BF9;&#x8C61;&#x4EE3;&#x8868;&#x4E00;&#x4E2A;&#x72EC;&#x7ACB;&#x6587;&#x4EF6;&#xFF0C;inode &#x5BF9;&#x8C61;&#x5305;&#x542B;&#x4E86;&#x6700;&#x7EC8;&#x5BF9;&#x6587;&#x4EF6;&#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#x6240;&#x9700;&#x7684;&#x6240;&#x6709;&#x4FE1;&#x606F;&#xFF0C;&#x5982;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7C7B;&#x578B;&#x3001;&#x6587;&#x4EF6;&#x7684;&#x64CD;&#x4F5C;&#x65B9;&#x6CD5;&#x3001;&#x6587;&#x4EF6;&#x7684;&#x6743;&#x9650;&#x3001;&#x8BBF;&#x95EE;&#x65E5;&#x671F;&#x7B49;&#x3002;<br></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/05/sheepdog-erasure-code/#more" rel="contents">
+            <a class="btn" href="/2015/08/06/fs-io-map/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -392,8 +509,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/05/03/systemtap-analysis-mdraid-io/" itemprop="url">
-                  systemtap分析软raid io拆分问题
+                <a class="post-title-link" href="/2015/08/06/linux-io-stack/" itemprop="url">
+                  linux块设备IO栈浅析
                 </a>
               
             
@@ -406,8 +523,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-03T19:02:02+08:00" content="2016-05-03">
-              2016-05-03
+            <time itemprop="dateCreated" datetime="2015-08-06T21:54:13+08:00" content="2015-08-06">
+              2015-08-06
             </time>
           </span>
 
@@ -436,8 +553,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/03/systemtap-analysis-mdraid-io/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/03/systemtap-analysis-mdraid-io/" itemprop="commentsCount"></span>
+                <a href="/2015/08/06/linux-io-stack/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/06/linux-io-stack/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -461,13 +578,892 @@
 
       
         
-          <p>&#x4F7F;&#x7528;linux &#x8F6F;raid1&#x7684;&#x65F6;&#x5019;&#x9047;&#x5230;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x5C31;&#x662F;&#x5F53;&#x4F7F;&#x7528;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#xFF08;&#x6BD4;&#x5982;device mapper&#x8BBE;&#x5907;&#xFF09;&#x6765;&#x521B;&#x5EFA;&#x8F6F;raid&#x8BBE;&#x5907;&#x65F6;&#xFF0C;&#x5BF9;&#x8BE5;&#x8F6F;raid&#x7684;&#x5927;&#x5757;&#x8BFB;&#x5199;&#xFF0C;&#x90FD;&#x4F1A;&#x88AB;&#x62C6;&#x5206;&#x4E3A;4k&#x5757;&#x5927;&#x5C0F;&#x7684;io&#xFF1B;&#x800C;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#xFF08;&#x5982;sdb&#xFF0C;sdc&#xFF0C;vdb&#xFF0C;vdc&#x8FD9;&#x79CD;&#x8BBE;&#x5907;&#xFF09;&#x6765;&#x521B;&#x5EFA;&#x8F6F;raid&#x8BBE;&#x5907;&#x65F6;&#xFF0C;&#x5BF9;&#x8BE5;&#x8F6F;raid&#x7684;&#x5927;&#x5757;&#x8BFB;&#x5199;&#x5C31;&#x4E0D;&#x4F1A;&#x6709;io&#x62C6;&#x5206;&#x95EE;&#x9898;&#x3002;&#x4E0B;&#x9762;&#x4EE5;&#x4F8B;&#x5B50;&#x8BF4;&#x660E;&#x8FD9;&#x4E2A;&#x73B0;&#x8C61;&#xFF08;&#x4EE5;raid1&#xFF0C;&#x5199;&#x64CD;&#x4F5C;&#x4E3A;&#x4F8B;&#xFF09;&#x3002;</p>
-<h1 id="&#x60C5;&#x5F62;&#x4E00;&#xFF1A;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#x521B;&#x5EFA;&#x8F6F;raid1"><a href="#&#x60C5;&#x5F62;&#x4E00;&#xFF1A;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#x521B;&#x5EFA;&#x8F6F;raid1" class="headerlink" title="&#x60C5;&#x5F62;&#x4E00;&#xFF1A;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#x521B;&#x5EFA;&#x8F6F;raid1"></a>&#x60C5;&#x5F62;&#x4E00;&#xFF1A;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#x521B;&#x5EFA;&#x8F6F;raid1</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mdadm &#x2013;create /dev/md/md_test1 &#x2013;run &#x2013;force &#x2013;metadata=0.9 &#x2013;assume-clean &#x2013;level=1 &#x2013;raid-devices=2 /dev/vdb /dev/vdc</span></span><br><span class="line"><span class="comment"># cat /proc/mdstat</span></span><br><span class="line">Personalities : [raid1]</span><br><span class="line">md127 : active (auto-read-only) raid1 vdc[1] vdb[0]</span><br><span class="line">      20971456 blocks [2/2] [UU]</span><br></pre></td></tr></table></figure>
-<p>&#x4F7F;&#x7528;fio&#x5BF9;&#x8BE5;raid1&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5199;&#x64CD;&#x4F5C;&#xFF08;&#x987A;&#x5E8F;&#x5199;&#x4E5F;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x4E3A;64KB&#xFF0C;fio&#x7684;&#x914D;&#x7F6E;&#x5982;&#x4E0B;:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">rw=randwrite</span><br><span class="line">direct=1</span><br><span class="line">numjobs=1</span><br><span class="line">ioengine=sync</span><br><span class="line">bsrange=64k-64k</span><br><span class="line">rate_iops=60</span><br><span class="line">time_based</span><br><span class="line">runtime=120</span><br><span class="line">group_reporting</span><br><span class="line">[disk00]</span><br><span class="line">filename=/dev/md127</span><br></pre></td></tr></table></figure></p>
-<p>fio&#x5199;io&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x4F7F;&#x7528;iostat&#x67E5;&#x770B;&#x8BBE;&#x5907;&#x7684;io<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#iostat -mx 2 md127 vdb vdc</span></span><br></pre></td></tr></table></figure></p>
-<p><img src="/2016/05/03/systemtap-analysis-mdraid-io/con1-iostat.png" alt="con1-iostat"><br>&#x53EF;&#x4EE5;&#x770B;&#x5230;avgrq-sz&#x4E3A;128&#xFF0C;&#x5355;&#x4F4D;&#x662F;&#x6247;&#x533A;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;64KB&#xFF0C;&#x8BF4;&#x660E;io&#x5E76;&#x6CA1;&#x6709;&#x8FDB;&#x884C;&#x62C6;&#x5206;&#x3002;</p>
+          <p>&#x5757;&#x5B58;&#x50A8;&#xFF0C;&#x7B80;&#x5355;&#x6765;&#x8BF4;&#x5C31;&#x662F;&#x4F7F;&#x7528;&#x5757;&#x8BBE;&#x5907;&#x4E3A;&#x7CFB;&#x7EDF;&#x63D0;&#x4F9B;&#x5B58;&#x50A8;&#x670D;&#x52A1;&#x3002;&#x5757;&#x5B58;&#x50A8;&#x5206;&#x591A;&#x79CD;&#x7C7B;&#x578B;&#xFF0C;&#x6709;&#x5355;&#x673A;&#x5757;&#x5B58;&#x50A8;&#xFF0C;&#x7F51;&#x7EDC;&#x5B58;&#x50A8;&#xFF08;&#x5982;NAS&#xFF0C;SAN&#x7B49;&#xFF09;&#xFF0C;&#x5206;&#x5E03;&#x5F0F;&#x5757;&#x5B58;&#x50A8;&#xFF08;&#x76EE;&#x524D;&#x4E3B;&#x6D41;&#x7684;&#x5982;AWS&#x7684;EBS&#xFF0C;&#x9752;&#x4E91;&#x7684;&#x4E91;&#x786C;&#x76D8;&#xFF0C;&#x963F;&#x91CC;&#x4E91;&#x7684;&#x4E91;&#x78C1;&#x76D8;&#xFF0C;&#x7F51;&#x6613;&#x4E91;&#x786C;&#x76D8;&#x7B49;&#xFF09;&#x3002;&#x901A;&#x5E38;&#x5757;&#x5B58;&#x50A8;&#x7684;&#x8868;&#x73B0;&#x5F62;&#x5F0F;&#x5C31;&#x662F;&#x4E00;&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x7528;&#x6237;&#x770B;&#x5230;&#x7684;&#x5C31;&#x662F;&#x7C7B;&#x4F3C;&#x4E8E;sda&#xFF0C;sdb&#x8FD9;&#x6837;&#x7684;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x4ECB;&#x7ECD;Linux&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x5BF9;Linux&#x7684;&#x5757;&#x8BBE;&#x5907;I/O&#x6808;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
+<h1 id="1-&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><p>&#x5757;&#x8BBE;&#x5907;&#x5C06;&#x4FE1;&#x606F;&#x5B58;&#x50A8;&#x5728;&#x56FA;&#x5B9A;&#x5927;&#x5C0F;&#x7684;&#x5757;&#x4E2D;&#xFF0C;&#x6BCF;&#x4E2A;&#x5757;&#x90FD;&#x6709;&#x81EA;&#x5DF1;&#x7684;&#x5730;&#x5740;&#x3002;&#x5BF9;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x800C;&#x8A00;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x662F;&#x4EE5;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#x7684;&#x5916;&#x89C2;&#x5C55;&#x73B0;&#x7684;&#xFF0C;&#x4F8B;&#x5982;/dev/sda&#xFF0C;&#x867D;&#x7136;&#x5BF9;&#x8FD9;&#x79CD;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#x53EF;&#x4EE5;&#x6309;&#x7167;&#x5B57;&#x8282;&#x4E3A;&#x5355;&#x4F4D;&#x8BBF;&#x95EE;&#xFF0C;&#x4F46;&#x662F;&#x5B9E;&#x9645;&#x4E0A;&#x5230;&#x5757;&#x8BBE;&#x5907;&#x4E0A;&#x5374;&#x662F;&#x4EE5;&#x5757;&#x4E3A;&#x5355;&#x4F4D;&#xFF08;&#x6700;&#x5C0F;512byte&#xFF0C;&#x5373;&#x4E00;&#x4E2A;&#x6247;&#x533A;&#xFF09;&#xFF0C;&#x8FD9;&#x4E4B;&#x95F4;&#x7684;&#x8F6C;&#x6362;&#x662F;&#x7531;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x6765;&#x5B9E;&#x73B0;&#x7684;&#x3002;<br>        &#x4E0B;&#x9762;&#x4ECB;&#x7ECD;&#x51E0;&#x4E2A;&#x5757;&#x8BBE;&#x5907;&#x7684;&#x57FA;&#x672C;&#x6982;&#x5FF5;&#xFF1A;<br>        1&#xFF09;&#x6247;&#x533A;&#xFF1A;&#x78C1;&#x76D8;&#x76D8;&#x7247;&#x4E0A;&#x7684;&#x6247;&#x5F62;&#x533A;&#x57DF;&#xFF0C;&#x903B;&#x8F91;&#x5316;&#x6570;&#x636E;&#xFF0C;&#x65B9;&#x4FBF;&#x7BA1;&#x7406;&#x78C1;&#x76D8;&#x7A7A;&#x95F4;&#xFF0C;&#x662F;&#x786C;&#x4EF6;&#x8BBE;&#x5907;&#x6570;&#x636E;&#x4F20;&#x9001;&#x7684;&#x57FA;&#x672C;&#x5355;&#x4F4D;&#xFF0C;&#x4E00;&#x822C;512Byte&#xFF1B;<br>    2&#xFF09;&#x5757;&#xFF1A;&#x5757;&#x662F;VFS&#x548C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6570;&#x636E;&#x4F20;&#x9001;&#x7684;&#x57FA;&#x672C;&#x5355;&#x4F4D;&#xFF0C;&#x5FC5;&#x987B;&#x662F;&#x6247;&#x533A;&#x7684;&#x6574;&#x6570;&#x500D;&#xFF0C;&#x683C;&#x5F0F;&#x5316;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x5757;&#x5927;&#x5C0F;&#xFF08;&#x4E00;&#x822C;512,1024,2048,4096&#x5B57;&#x8282;&#xFF09;&#xFF1B;<br>       3&#xFF09;&#x6BB5;&#xFF1A;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x4E2D;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5305;&#x542B;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x78C1;&#x76D8;&#x6247;&#x533A;&#x4E2D;&#x7684;&#x6570;&#x636E;&#xFF1B;&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;I/O&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x5728;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x4F20;&#x9001;&#x3002;&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x5757;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x5728;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5408;&#x5E76;&#x5B83;&#x4EEC;&#xFF0C;&#x4EA7;&#x751F;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#xFF0C;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x662F;&#x901A;&#x8FC7;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6765;&#x8BBF;&#x95EE;&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x901A;&#x8FC7;&#x6307;&#x5B9A;&#x504F;&#x79FB;&#x548C;&#x5927;&#x5C0F;&#x6765;&#x8BFB;&#x5199;&#x88F8;&#x8BBE;&#x5907;&#x3002;<br>&#x5E38;&#x89C1;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x5C31;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF0C;&#x5728;Linux&#x7CFB;&#x7EDF;&#x4E0B;&#xFF0C;&#x8FD8;&#x63D0;&#x4F9B;&#x57FA;&#x4E8E;&#x5176;&#x4ED6;&#x5757;&#x8BBE;&#x5907;&#x4E4B;&#x4E0A;&#x7684;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#xFF0C;&#x5982;Device Mapper&#xFF0C;&#x8F6F;RAID&#x7B49;&#x3002;<br></p>
           <div class="post-more-link text-center">
-            <a class="btn" href="/2016/05/03/systemtap-analysis-mdraid-io/#more" rel="contents">
+            <a class="btn" href="/2015/08/06/linux-io-stack/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/08/06/blizzard/" itemprop="url">
+                  Blizzard Fast, Cloud-scale Block Storage for Cloud-oblivious Applications
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-08-06T15:00:43+08:00" content="2015-08-06">
+              2015-08-06
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/paper/" itemprop="url" rel="index">
+                    <span itemprop="name">paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/08/06/blizzard/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/06/blizzard/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x6709;&#x4E9B;&#x5E94;&#x7528;&#x5BB9;&#x8BB8;&#x5C11;&#x91CF;&#x7684;&#x6570;&#x636E;&#x4E22;&#x5931;&#x6765;&#x6362;&#x53D6;&#x9AD8;&#x541E;&#x5410;&#x91CF;&#xFF0C;&#x6709;&#x4E9B;&#x5E94;&#x7528;&#x5982;&#x6570;&#x636E;&#x5E93;&#xFF0C;&#x90AE;&#x4EF6;&#x670D;&#x52A1;&#x5668;&#x662F;&#x4E0D;&#x5BB9;&#x8BB8;&#x4E00;&#x70B9;&#x6570;&#x636E;&#x4E22;&#x5931;&#x7684;&#x3002;<br>posix&#x5E94;&#x7528;&#x4F7F;&#x7528;&#x5237;&#x76D8;&#xFF08;disk flush&#xFF09;&#x6765;&#x4FDD;&#x8BC1;&#x5199;&#x7684;&#x987A;&#x5E8F;&#xFF0C;&#x4ECE;&#x800C;&#x786E;&#x4FDD;&#x5373;&#x4F7F;&#x5D29;&#x6E83;&#x4E86;&#x4ECD;&#x7136;&#x80FD;&#x591F;&#x4FDD;&#x8BC1;&#x4E00;&#x81F4;&#x6027;&#xFF0C;&#x4F46;&#x662F;flush&#x4F1A;&#x6709;write barrier&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x964D;&#x4F4E;&#x4E86;&#x5E76;&#x53D1;&#x6027;&#x3002;<br>Blizzard&#x5E76;&#x884C;&#x5730;&#x628A;&#x5BF9;&#x865A;&#x62DF;&#x76D8;&#x7684;&#x8BFB;&#x5199;&#x53D1;&#x5230;&#x8FDC;&#x7A0B;disk&#x4E0A;&#xFF0C;&#x6709;&#x51E0;&#x4E2A;&#x7279;&#x6027;&#xFF1A;<br>1&#xFF09;&#x67B6;&#x6784;&#x5728;CLOS&#x7F51;&#x7EDC;&#x4E0A;&#xFF0C;&#x5168;&#x5BF9;&#x5206;&#x7F51;&#x7EDC;&#xFF0C;&#x8BFB;&#x5199;&#x6BCF;&#x5757;disk&#x90FD;&#x80FD;&#x8FBE;&#x5230;&#x5168;&#x901F;&#xFF0C;&#x6BCF;&#x4E2A;server<br>2&#xFF09;Nested striping&#xFF0C;&#x4F20;&#x7EDF;&#x7684;&#x4F1A;&#x5B58;&#x5728;IOp convoy dilation&#x95EE;&#x9898;&#xFF0C;&#x5927;&#x7684;io&#x4F1A;&#x88AB;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x62C6;&#x5206;&#x6210;&#x5C0F;io&#xFF0C;&#x8FD9;&#x4E9B;&#x5C0F;io&#x4F1A;&#x4ECE;&#x5BA2;&#x6237;&#x7AEF;&#x53D1;&#x5230;&#x4E00;&#x4E2A;&#x8FDC;&#x7A0B;disk&#xFF0C;&#x8FD9;&#x4E9B;io&#x90FD;&#x5C5E;&#x4E8E;&#x4E00;&#x4E2A;&#x5927;&#x7684;io&#x64CD;&#x4F5C;&#xFF0C;&#x7F51;&#x7EDC;&#x6296;&#x52A8;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x670D;&#x52A1;&#x5668;&#x7684;&#x8C03;&#x5EA6;&#x5F02;&#x5E38;&#x90FD;&#x4F1A;&#x4F7F;&#x5F97;&#x8BF7;&#x6C42;&#x95F4;&#x7684;&#x95F4;&#x9694;&#x589E;&#x52A0;&#xFF0C;&#x800C;Bllizard&#x4F7F;&#x7528;Nested striping&#x6765;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x63D0;&#x9AD8;&#x5E76;&#x53D1;&#x6027;&#xFF0C;&#x51CF;&#x5C11;&#x78C1;&#x76D8;&#x7684;&#x70ED;&#x70B9;&#x3002;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x8BF4;&#x4E00;&#x4E2A;&#x5927;&#x7684;&#x7528;&#x6237;io&#x4F1A;&#x62C6;&#x5206;&#x6210;&#x591A;&#x4E2A;&#x5C0F;&#x7684;io&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E9B;io&#x5206;&#x522B;&#x5230;&#x8FBE;&#x8FDC;&#x7A0B;disk&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x4E9B;&#x8BF7;&#x6C42;&#x5230;&#x8FBE;&#x8FDC;&#x7A0B;disk&#x65F6;&#x95F4;&#x95F4;&#x9694;&#x5F88;&#x77ED;&#xFF0C;&#x8FDC;&#x7A0B;disk&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#xFF0C;&#x7136;&#x540E;&#x4E00;&#x6B21;&#x5BFB;&#x9053;&#x5C31;&#x53EF;&#x4EE5;&#x8BFB;&#x5199;&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x679C;&#x7F51;&#x7EDC;&#x6296;&#x52A8;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x670D;&#x52A1;&#x5668;&#x7684;&#x8C03;&#x5EA6;&#x5F02;&#x5E38;&#x90FD;&#x4F1A;&#x4F7F;&#x5F97;&#x8BF7;&#x6C42;&#x95F4;&#x7684;&#x95F4;&#x9694;&#x589E;&#x52A0;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x4F1A;&#x9020;&#x6210;&#x8FDC;&#x7A0B;disk&#x8981;&#x591A;&#x6B21;io&#xFF0C;&#x964D;&#x4F4E;&#x4E86;&#x6027;&#x80FD;&#x3002;<br>3&#xFF09;Fast flushes with prefix write commits&#xFF08;&#x5F02;&#x6B65;&#x5237;&#x6570;&#x636E;&#xFF09;&#xFF0C;&#x5F53;&#x6536;&#x5230;flush&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x540E;&#x53F0;&#x5F02;&#x6B65;&#x5730;&#x6267;&#x884C;flush&#x3002;&#x5373;&#x4F7F;&#x5BA2;&#x6237;&#x7AEF;&#x6216;&#x8005;&#x865A;&#x62DF;&#x5377;&#x5D29;&#x6E83;&#xFF0C;&#x8BE5;&#x76D8;&#x4ECD;&#x7136;&#x80FD;&#x591F;&#x6062;&#x590D;&#x5230;&#x4E00;&#x81F4;&#x7684;&#x72B6;&#x6001;&#xFF0C;&#x4E0D;&#x540C;flush epoch&#x7684;&#x5199;&#x64CD;&#x4F5C;&#x4E0D;&#x4F1A;&#x76F8;&#x4E92;&#x6DF7;&#x4E71;&#xFF0C;&#x4E0D;&#x8FC7;&#x67D0;&#x4E2A;epoch&#x4E4B;&#x540E;&#x7684;&#x6570;&#x636E;&#x4F1A;&#x4E22;&#x5931;&#x3002;&#x4F7F;&#x7528;&#x5F02;&#x6B65;&#x5199;&#x6765;&#x63D0;&#x4F9B;&#x6027;&#x80FD;&#xFF0C;&#x4E0D;&#x8FC7;&#x4F1A;&#x6709;&#x6570;&#x636E;&#x4E22;&#x5931;&#x7684;&#x53EF;&#x80FD;&#x3002;<br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/08/06/blizzard/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/08/06/petal/" itemprop="url">
+                  petal:Distributed Virtual Disks
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-08-06T14:47:44+08:00" content="2015-08-06">
+              2015-08-06
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/paper/" itemprop="url" rel="index">
+                    <span itemprop="name">paper</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/08/06/petal/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/06/petal/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x82B1;&#x74E3;&#x7CFB;&#x7EDF;&#x662F;&#x4E00;&#x4E2A;&#x5206;&#x5E03;&#x5F0F;&#x865A;&#x62DF;&#x76D8;&#xFF0C;&#x5177;&#x6709;&#x5982;&#x4E0B;&#x7279;&#x70B9;&#xFF1A;</p>
+<ul>
+<li>&#x5355;&#x76D8;&#x652F;&#x6301;2^64 byte &#x7684;&#x5B58;&#x50A8;&#x7A7A;&#x95F4;&#xFF1B;</li>
+<li>&#x65E0;&#x5355;&#x70B9;</li>
+<li>&#x5728;&#x7EBF;&#x6269;&#x5C55;&#xFF08;&#x65B0;&#x589E;server&#x548C;disk&#xFF09;</li>
+<li>&#x6309;&#x9700;&#x5206;&#x914D;&#x7A7A;&#x95F4;</li>
+<li>load balance</li>
+<li>&#x652F;&#x6301;&#x5907;&#x4EFD;&#x548C;&#x6062;&#x590D;&#xFF0C;&#x5FEB;&#x7167;&#x3002;<h1 id="&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;"><a href="#&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;" class="headerlink" title="&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;"></a>&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;</h1><img src="/2015/08/06/petal/petal-arch.png" alt="petal-arch"><br>petal&#x4F7F;&#x7528;rpc&#x8C03;&#x7528;&#x8BBF;&#x95EE;&#x865A;&#x62DF;&#x76D8;&#xFF0C;&#x5168;&#x5C40;&#x7684;&#x72B6;&#x6001;&#x5728;&#x6BCF;&#x53F0;server&#x91CC;&#x90FD;&#x6709;&#x8BB0;&#x5F55;&#xFF0C;&#x901A;&#x8FC7;paxos&#x534F;&#x8BAE;&#x786E;&#x4FDD;&#x4E00;&#x81F4;&#xFF0C;clients&#x4FDD;&#x5B58;&#x5C11;&#x91CF;&#x7684;&#x6620;&#x5C04;&#x4FE1;&#x606F;&#x6765;&#x51B3;&#x5B9A;&#x8BF7;&#x6C42;&#x5206;&#x53D1;&#x5230;&#x54EA;&#x53F0;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x6837;&#x8BF7;&#x6C42;&#x5931;&#x8D25;&#xFF0C;&#x670D;&#x52A1;&#x5668;&#x4F1A;&#x8FD4;&#x56DE;error&#xFF0C;&#x7136;&#x540E;client&#x66F4;&#x65B0;&#x6620;&#x5C04;&#xFF0C;&#x5E76;&#x4E14;&#x91CD;&#x8BD5;&#x8BF7;&#x6C42;&#x3002;</li></ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/08/06/petal/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/08/23/tgt-arch/" itemprop="url">
+                  tgt程序框架
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-08-23T21:39:11+08:00" content="2014-08-23">
+              2014-08-23
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/iscsi/" itemprop="url" rel="index">
+                    <span itemprop="name">iscsi</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/08/23/tgt-arch/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/08/23/tgt-arch/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>tgt&#x662F;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;iscsi target&#xFF0C;&#x800C;iet&#xFF08;iscsi enterprise target&#xFF09;&#x662F;&#x5728;&#x5185;&#x6838;&#x6001;&#x5B9E;&#x73B0;&#x7684;target&#xFF0C;tgt&#x76F8;&#x6BD4;&#x4E8E;iet&#x6765;&#x8BF4;&#xFF0C;&#x56E0;&#x4E3A;&#x5176;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#xFF0C;&#x65B9;&#x4FBF;&#x8C03;&#x8BD5;&#xFF0C;&#x65B0;&#x52A0;&#x5165;&#x4E00;&#x4E9B;&#x529F;&#x80FD;&#x7B49;&#xFF0C;&#x4E0D;&#x8FC7;&#x6027;&#x80FD;&#x76F8;&#x6BD4;iet&#x6765;&#x8BF4;&#x8981;&#x7A0D;&#x5DEE;&#x4E00;&#x70B9;&#x3002;&#x4E0B;&#x9762;&#x5C31;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;tgt&#x7684;&#x7A0B;&#x5E8F;&#x6846;&#x67B6;&#xFF08;&#x7565;&#x8FC7;iscsi&#x534F;&#x8BAE;&#x89E3;&#x6790;&#x5904;&#x7406;&#x90E8;&#x5206;&#xFF09;&#xFF0C;&#x4EE5;&#x4FBF;&#x4E8E;&#x6574;&#x4F53;&#x628A;&#x63E1;tgt&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x65B9;&#x4FBF;&#x540E;&#x7EED;&#x7684;&#x4E00;&#x4E9B;&#x4FEE;&#x6539;&#x3002;</p>
+<h1 id="1-&#x6574;&#x4F53;&#x6846;&#x67B6;"><a href="#1-&#x6574;&#x4F53;&#x6846;&#x67B6;" class="headerlink" title="1.&#x6574;&#x4F53;&#x6846;&#x67B6;"></a>1.&#x6574;&#x4F53;&#x6846;&#x67B6;</h1><p>&#x8FD9;&#x91CC;&#x501F;&#x7528;tgt&#x5B98;&#x7F51;&#x7ED9;&#x51FA;&#x7684;&#x4E00;&#x5F20;&#x56FE;&#x3002;<br><img src="/2014/08/23/tgt-arch/tgt-arch.png" alt="tgt-arch"><br>tgt&#x4E2D;&#x547D;&#x4EE4;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x4E0E;initiator&#x7AEF;&#x7684;&#x901A;&#x4FE1;&#x90FD;&#x662F;&#x901A;&#x8FC7;epoll&#x6765;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x4E0B;&#x9762;&#x5206;&#x522B;&#x5BF9;&#x8FD9;&#x4E24;&#x90E8;&#x5206;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;<br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/08/23/tgt-arch/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/06/20/bcache-analysis/" itemprop="url">
+                  bcache浅析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-06-20T17:43:08+08:00" content="2014-06-20">
+              2014-06-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/06/20/bcache-analysis/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/06/20/bcache-analysis/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="1-&#x7B80;&#x4ECB;"><a href="#1-&#x7B80;&#x4ECB;" class="headerlink" title="1.&#x7B80;&#x4ECB;"></a>1.&#x7B80;&#x4ECB;</h1><p>bcache&#x662F;linux&#x5185;&#x6838;&#x5757;&#x8BBE;&#x5907;&#x5C42;cache&#xFF0C;&#x7C7B;&#x4F3C;&#x4E8E;flashcache&#x4F7F;&#x7528;ssd&#x4F5C;&#x4E3A;hdd&#x7684;&#x7F13;&#x5B58;&#x65B9;&#x6848;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;flashcache&#xFF0C;bcache&#x66F4;&#x52A0;&#x7075;&#x6D3B;&#xFF0C;&#x652F;&#x6301;ssd&#x4F5C;&#x4E3A;&#x591A;&#x5757;hdd&#x7684;&#x5171;&#x4EAB;&#x7F13;&#x5B58;&#xFF0C;&#x5E76;&#x4E14;&#x8FD8;&#x652F;&#x6301;&#x591A;&#x5757;ssd&#xFF08;&#x8FD8;&#x672A;&#x5B8C;&#x5584;&#xFF09;&#xFF0C;&#x80FD;&#x591F;&#x5728;&#x8FD0;&#x884C;&#x4E2D;&#x52A8;&#x6001;&#x589E;&#x52A0;&#xFF0C;&#x5220;&#x9664;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#x548C;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x3002;&#x4ECE;3.10&#x5F00;&#x59CB;&#xFF0C;bcache&#x8FDB;&#x5165;&#x5185;&#x6838;&#x4E3B;&#x7EBF;&#x3002;bcache&#x652F;&#x6301;writeback&#x3001;writethrough&#x3001;writearoud&#x4E09;&#x79CD;&#x7B56;&#x7565;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F;wriththrough&#xFF0C;&#x53EF;&#x4EE5;&#x52A8;&#x6001;&#x4FEE;&#x6539;&#xFF0C;&#x7F13;&#x5B58;&#x66FF;&#x6362;&#x65B9;&#x5F0F;&#x652F;&#x6301;lru&#x3001;fifo&#x548C;random&#x4E09;&#x79CD;&#x3002;&#x4E0B;&#x9762;&#x4ECE;&#x51E0;&#x4E2A;&#x65B9;&#x9762;&#x4ECB;&#x7ECD;bcache&#x7684;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x3002;</p>
+<h1 id="2-&#x603B;&#x4F53;&#x7ED3;&#x6784;"><a href="#2-&#x603B;&#x4F53;&#x7ED3;&#x6784;" class="headerlink" title="2.&#x603B;&#x4F53;&#x7ED3;&#x6784;"></a>2.&#x603B;&#x4F53;&#x7ED3;&#x6784;</h1><p>bcache&#x7684;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;<br><img src="/2014/06/20/bcache-analysis/arch.png" alt="arch"><br>bcache&#x4E2D;&#x662F;&#x4EE5;cache set&#x6765;&#x5212;&#x5206;&#x4E0D;&#x540C;&#x5B58;&#x50A8;&#x96C6;&#x5408;&#xFF0C;&#x4E00;&#x4E2A;cache set&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;ssd&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;hdd&#xFF09;&#x3002;bcache&#x5BF9;&#x5916;&#x8F93;&#x51FA;&#x7ED9;&#x7528;&#x6237;&#x4F7F;&#x7528;&#x7684;&#x662F;/dev/bcache<N>&#x8FD9;&#x79CD;&#x8BBE;&#x5907;&#xFF0C;&#x6BCF;&#x4E2A;bcache<N>&#x8BBE;&#x5907;&#x90FD;&#x4E0E;&#x4E00;&#x4E2A;&#x540E;&#x7AEF;&#x7269;&#x7406;&#x76D8;&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;&#x7528;&#x6237;&#x5BF9;&#x4E0D;&#x540C;bcache&#x8BBE;&#x5907;&#x7684;io&#x4F1A;&#x7F13;&#x5B58;&#x5728;ssd&#x4E2D;&#xFF0C;&#x5237;&#x810F;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5199;&#x5230;&#x5404;&#x81EA;&#x5BF9;&#x5E94;&#x7684;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x4E0A;&#x3002;&#x56E0;&#x6B64;&#xFF0C;bcache&#x6269;&#x5BB9;&#x5F88;&#x5BB9;&#x6613;&#xFF0C;&#x53EA;&#x8981;&#x6CE8;&#x518C;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x5373;&#x53EF;&#x3002;<br></N></N></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/06/20/bcache-analysis/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/05/29/bcache-use/" itemprop="url">
+                  bcache使用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-05-29T17:34:40+08:00" content="2014-05-29">
+              2014-05-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/05/29/bcache-use/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/05/29/bcache-use/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="1-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"><a href="#1-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;" class="headerlink" title="1.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"></a>1.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone http://evilpiepirate.org/git/bcache-tools.git</span></span><br></pre></td></tr></table></figure>
+<p>&#x5B89;&#x88C5;&#x524D;&#x9700;&#x8981;&#x4E24;&#x4E2A;&#x4F9D;&#x8D56;&#x5305;pkg-config&#x548C;libblkid-dev<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apt-get install pkg-config libblkid-dev</span></span><br></pre></td></tr></table></figure></p>
+<p>&#x7136;&#x540E;&#x7F16;&#x8BD1;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># make</span></span><br><span class="line">cc -O2 -Wall -g `pkg-config --cflags uuid blkid` make-bcache.c bcache.o `pkg-config --libs uuid blkid` -o make-bcache</span><br><span class="line">cc -O2 -Wall -g `pkg-config --cflags uuid blkid` probe-bcache.c `pkg-config --libs uuid blkid` -o probe-bcache</span><br><span class="line">cc -O2 -Wall -g -std=gnu99 bcache-super-show.c bcache.o `pkg-config --libs uuid` -o bcache-super-show</span><br><span class="line"><span class="comment"># make install</span></span><br><span class="line">install -m0755 make-bcache bcache-super-show	/usr/sbin/</span><br><span class="line">install -m0755 probe-bcache bcache-register	 /lib/udev/</span><br><span class="line">install -m0644 69-bcache.rules	/lib/udev/rules.d/</span><br><span class="line">install -T -m0755 initramfs/hook	/usr/share/initramfs-tools/hooks/bcache</span><br><span class="line"><span class="keyword">if</span> [ <span class="_">-d</span> /lib/dracut/modules.d ]; \</span><br><span class="line"> <span class="keyword">then</span> install -D -m0755 dracut/module-setup.sh /lib/dracut/modules.d/90bcache/module-setup.sh; \</span><br><span class="line"> <span class="keyword">fi</span></span><br><span class="line">install -m0644 -- *.8 /usr/share/man/man8/</span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/05/29/bcache-use/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/05/19/directio-merge/" itemprop="url">
+                  direct IO中io合并的奇怪现象分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-05-19T17:07:13+08:00" content="2014-05-19">
+              2014-05-19
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/05/19/directio-merge/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/05/19/directio-merge/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x300A;&#x5757;&#x8BBE;&#x5907;&#x5185;&#x6838;&#x53C2;&#x6570;max_segments&#x548C;max_sectors_kb&#x89E3;&#x6790;&#x300B;&#x4ECB;&#x7ECD;&#x4E86;max_sectors_kb&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x5BF9;device mapper&#x8BBE;&#x5907;&#x548C;&#x8F6F;raid&#x8BBE;&#x5907;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x5B9E;&#x9645;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#xFF0C;&#x53D1;&#x73B0;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x73B0;&#x8C61;&#xFF1A;&#x4E00;&#x5757;&#x7269;&#x7406;&#x76D8;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x76D8;&#x4E0A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;device mapper&#x8BBE;&#x5907;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x8FD9;&#x4E2A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;direct IO&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5927;&#x5757;&#x5199;&#x6216;&#x8005;&#x987A;&#x5E8F;&#x5927;&#x5757;&#x5199;&#xFF08;&#x968F;&#x673A;&#x8BFB;&#x548C;&#x987A;&#x5E8F;&#x8BFB;&#x6CA1;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x8981;&#x5927;&#x4E8E;dm&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#xFF0C;&#x4F46;&#x662F;&#x5C0F;&#x4E8E;dm&#x5E95;&#x5C42;&#x8BBE;&#x5907;&#xFF08;&#x8FD9;&#x91CC;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF09;&#x7684;max_sectors_kb&#xFF0C;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x53D1;&#x73B0;&#x5728;3.2&#x5185;&#x6838;&#x91CC;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x5E76;&#x6CA1;&#x6709;&#x5408;&#x5E76;&#xFF0C;&#x4F46;&#x662F;&#x5728;3.10&#x5185;&#x6838;&#x4E0B;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x786E;&#x662F;&#x5408;&#x5E76;&#x4E86;&#xFF08;&#x5408;&#x5E76;&#x540E;&#x7684;&#x5927;&#x5C0F;&#x4E3A;&#x7528;&#x6237;&#x53D1;&#x7684;io&#x5757;&#x5927;&#x5C0F;&#xFF09;&#x3002;&#x5177;&#x4F53;&#x73B0;&#x8C61;&#x4E0B;&#x9762;&#x4EE5;&#x4F8B;&#x5B50;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
+<h1 id="1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"><a href="#1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;" class="headerlink" title="1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"></a>1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;</h1><p>&#x8FD9;&#x91CC;&#x9009;&#x53D6;3.2.57&#x5185;&#x6838;&#x548C;3.10.11&#x5185;&#x6838;&#x4F5C;&#x4E3A;&#x5BF9;&#x6BD4;&#x3002;</p>
+<h2 id="1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"><a href="#1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;" class="headerlink" title="1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"></a>1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;</h2><p>&#x7269;&#x7406;&#x76D8;sdg&#xFF0C;&#x5728;&#x5176;&#x4E0A;&#x521B;&#x5EFA;&#x7684;10G&#x7684;device mapper&#x8BBE;&#x5907;dmtest1&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x8BBE;&#x5907;&#x4E3A;dm-71<br>1&#xFF09;&#x9ED8;&#x8BA4;&#x7684;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_segments</span></span><br><span class="line">128</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_segments</span></span><br><span class="line">128</span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/05/19/directio-merge/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2014/05/12/max-seg-max-sec/" itemprop="url">
+                  块设备内核参数max_segments和max_sectors_kb解析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-05-12T16:47:03+08:00" content="2014-05-12">
+              2014-05-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/05/12/max-seg-max-sec/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/05/12/max-seg-max-sec/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x5728;DMA&#x8BBE;&#x5907;&#x4E0D;&#x91C7;&#x7528;S/G&#xFF08;&#x5206;&#x6563;/&#x805A;&#x96C6;&#xFF09;&#x6A21;&#x5F0F;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5FC5;&#x987B;&#x4FDD;&#x8BC1;&#x7F13;&#x51B2;&#x533A;&#x662F;&#x7269;&#x7406;&#x4E0A;&#x8FDE;&#x7EED;&#x7684;&#xFF0C;linux&#x5185;&#x6838;&#x6709;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x7528;&#x6765;&#x5206;&#x914D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#xFF1A;kmalloc()&#x548C;<strong>get_free_pages()&#x3002;&#x8FD9;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x90FD;&#x6709;&#x5206;&#x914D;&#x8FDE;&#x7EED;&#x5185;&#x5B58;&#x7684;&#x6700;&#x5927;&#x503C;&#xFF0C;kmalloc&#x4EE5;&#x5206;&#x914D;&#x5B57;&#x8282;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x7EA6;&#x4E3A;64KB&#xFF0C;</strong>get_free_pages()&#x4EE5;&#x5206;&#x914D;&#x9875;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x6700;&#x5927;&#x80FD;&#x5206;&#x914D;2^order&#x6570;&#x76EE;&#x7684;&#x9875;</p>
+<p>&#x4F7F;&#x7528;DMA&#x7F13;&#x51B2;&#x533A;&#x7684;&#x4E3B;&#x8981;&#x95EE;&#x9898;&#x662F;&#xFF1A;&#x5F53;&#x5927;&#x4E8E;&#x4E00;&#x9875;&#x65F6;&#xFF0C;&#x5B83;&#x4EEC;&#x5FC5;&#x987B;&#x5360;&#x636E;&#x8FDE;&#x63A5;&#x7684;&#x7269;&#x7406;&#x9875;&#xFF0C;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;ISA&#x6216;&#x8005;PCI&#x7CFB;&#x7EDF;&#x603B;&#x7EBF;&#x4F20;&#x8F93;&#x6570;&#x636E;&#xFF0C;&#x800C;&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;&#x7684;&#x90FD;&#x662F;&#x7269;&#x7406;&#x5730;&#x5740;</p>
+<p>linux&#x5757;&#x8BBE;&#x5907;&#x5728;&#x5904;&#x7406;io&#x65F6;&#x4F1A;&#x53D7;&#x5230;&#x4E00;&#x4E9B;&#x53C2;&#x6570;&#xFF08;&#x8BBE;&#x5907;&#x7684;queue limits&#x53C2;&#x6570;&#xFF0C;&#x4EE5;&#x4E0B;&#x7B80;&#x79F0;limits&#x53C2;&#x6570;&#xFF09;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x6BD4;&#x5982;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x4E2D;&#x5141;&#x8BB8;&#x7684;&#x6700;&#x5927;&#x6247;&#x533A;&#x6570;&#xFF0C;&#x6700;&#x5927;segment&#x6570;&#x7B49;&#x3002;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x53EF;&#x4EE5;&#x5728;/sys/block/<device>/queue/&#x4E0B;&#x67E5;&#x770B;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x5728;&#x521D;&#x59CB;&#x5316;&#x65F6;&#x4F1A;&#x8BBE;&#x7F6E;&#x9ED8;&#x8BA4;&#x503C;&#x3002;&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x5206;&#x6790;max_segments&#x548C;max_sectors_kb&#x3002;</device></p>
+<h1 id="1-&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><h2 id="1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"><a href="#1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;" class="headerlink" title="1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"></a>1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;</h2><p>&#x9996;&#x5148;&#x5C31;&#x9700;&#x8981;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;&#x4EC0;&#x4E48;&#x662F;&#x6BB5;&#xFF08;segment&#xFF09;&#x3002;<br>&#x4E00;&#x4E2A;&#x6BB5;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5B83;&#x4EEC;&#x5305;&#x542B;&#x78C1;&#x76D8;&#x4E0A;&#x7269;&#x7406;&#x76F8;&#x90BB;&#x7684;&#x6570;&#x636E;&#x5757;&#x3002;<br>&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;io&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#x3002;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x6570;&#x636E;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x53EA;&#x8981;&#x5411;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x53D1;&#x9001;&#x9002;&#x5F53;&#x7684;&#x547D;&#x4EE4;&#x5C31;&#x53EF;&#x4EE5;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x4E00;&#x65E6;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x5C31;&#x4F1A;&#x53D1;&#x51FA;&#x4E00;&#x4E2A;&#x4E2D;&#x65AD;&#x901A;&#x77E5;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x3002;<br>DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x7684;&#x662F;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x867D;&#x7136;&#x4E5F;&#x5141;&#x8BB8;&#x4F20;&#x9001;&#x4E0D;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;&#x6BD4;&#x8F83;&#x4F4E;&#x6548;&#xFF0C;&#x56E0;&#x4E3A;&#x78C1;&#x5934;&#x79FB;&#x52A8;&#x6162;&#x3002;<br>&#x8001;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x4EC5;&#x4EC5;&#x652F;&#x6301;&#x201C;&#x7B80;&#x5355;&#x201D;&#x7684;DMA&#x65B9;&#x5F0F;&#xFF1A;&#x78C1;&#x76D8;&#x5FC5;&#x987B;&#x4E0E;RAM&#x4E2D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x5355;&#x5143;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;&#x4F46;&#x662F;&#x65B0;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;&#xFF08;scatter-gather&#xFF09;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x78C1;&#x76D8;&#x53EF;&#x4EE5;&#x4E0E;&#x4E00;&#x4E9B;&#x975E;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;<br>&#x4E3A;&#x4E86;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x5FC5;&#x987B;&#x80FD;&#x591F;&#x5904;&#x7406;&#x79F0;&#x4E3A;&#x6BB5;&#x7684;&#x6570;&#x636E;&#x5B58;&#x50A8;&#x5355;&#x5143;&#xFF0C;&#x4E00;&#x6B21;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x53EF;&#x4EE5;&#x4F20;&#x9001;&#x51E0;&#x4E2A;&#x6BB5;&#x3002;<br>&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x6B63;&#x597D;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#xFF0C;&#x8FD9;&#x79CD;&#x5408;&#x5E76;&#x65B9;&#x5F0F;&#x4EA7;&#x751F;&#x7684;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x5C31;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/05/12/max-seg-max-sec/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -501,7 +1497,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -534,7 +1530,7 @@
       <section class="site-overview sidebar-panel  sidebar-panel-active ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/default_avatar.jpg"
+               src="/images/avatar.png"
                alt="Wu Dong" />
           <p class="site-author-name" itemprop="name">Wu Dong</p>
           <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
@@ -542,7 +1538,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">12</span>
+              <span class="site-state-item-count">23</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -550,7 +1546,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -559,7 +1555,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

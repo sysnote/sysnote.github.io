@@ -1,0 +1,677 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="glibc,link," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="System Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;#x901A;&amp;#x5E38;&amp;#x60C5;&amp;#x51B5;&amp;#x4E0B;&amp;#x6211;&amp;#x4EEC;&amp;#x90FD;&amp;#x662F;&amp;#x76F4;&amp;#x63A5;&amp;#x4F7F;&amp;#x7528;glibc&amp;#x63D0;&amp;#x4F9B;&amp;#x7684;&amp;#x4E00;&amp;#x4E9B;&amp;#x5E93;&amp;#x51FD;&amp;#x6570;&amp;#xFF0C;&amp;#x4F46;&amp;#x662F;&amp;#x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何使用新的glibc来编译自己的程序">
+<meta property="og:url" content="http://yoursite.com/2015/08/25/use-new-glibc/index.html">
+<meta property="og:site_name" content="System Notes">
+<meta property="og:description" content="&amp;#x901A;&amp;#x5E38;&amp;#x60C5;&amp;#x51B5;&amp;#x4E0B;&amp;#x6211;&amp;#x4EEC;&amp;#x90FD;&amp;#x662F;&amp;#x76F4;&amp;#x63A5;&amp;#x4F7F;&amp;#x7528;glibc&amp;#x63D0;&amp;#x4F9B;&amp;#x7684;&amp;#x4E00;&amp;#x4E9B;&amp;#x5E93;&amp;#x51FD;&amp;#x6570;&amp;#xFF0C;&amp;#x4F46;&amp;#x662F;&amp;#x">
+<meta property="og:updated_time" content="2016-05-13T09:02:26.085Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何使用新的glibc来编译自己的程序">
+<meta name="twitter:description" content="&amp;#x901A;&amp;#x5E38;&amp;#x60C5;&amp;#x51B5;&amp;#x4E0B;&amp;#x6211;&amp;#x4EEC;&amp;#x90FD;&amp;#x662F;&amp;#x76F4;&amp;#x63A5;&amp;#x4F7F;&amp;#x7528;glibc&amp;#x63D0;&amp;#x4F9B;&amp;#x7684;&amp;#x4E00;&amp;#x4E9B;&amp;#x5E93;&amp;#x51FD;&amp;#x6570;&amp;#xFF0C;&amp;#x4F46;&amp;#x662F;&amp;#x">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 如何使用新的glibc来编译自己的程序 | System Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">System Notes</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                如何使用新的glibc来编译自己的程序
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-08-25T15:20:58+08:00" content="2015-08-25">
+              2015-08-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/tools/" itemprop="url" rel="index">
+                    <span itemprop="name">tools</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/08/25/use-new-glibc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/25/use-new-glibc/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x6211;&#x4EEC;&#x90FD;&#x662F;&#x76F4;&#x63A5;&#x4F7F;&#x7528;glibc&#x63D0;&#x4F9B;&#x7684;&#x4E00;&#x4E9B;&#x5E93;&#x51FD;&#x6570;&#xFF0C;&#x4F46;&#x662F;&#x67D0;&#x4E9B;&#x7279;&#x6B8A;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x6BD4;&#x5982;&#x8981;&#x4FEE;&#x6539;glibc&#x7684;&#x4E00;&#x4E9B;&#x4EE3;&#x7801;&#x6216;&#x8005;&#x52A0;&#x5165;glibc&#x7684;&#x4E00;&#x4E9B;&#x7F16;&#x8BD1;&#x9009;&#x9879;&#x6216;&#x8005;&#x8981;&#x4F7F;&#x7528;&#x5176;&#x4ED6;&#x7248;&#x672C;&#x7684;glibc&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x9700;&#x8981;&#x91CD;&#x65B0;&#x7F16;&#x8BD1;glibc&#x3002;<br>&#x7F16;&#x8BD1;glibc&#x65F6;&#x7279;&#x522B;&#x8981;&#x6CE8;&#x610F;&#xFF0C;&#x4E0D;&#x80FD;&#x53BB;&#x66FF;&#x6362;&#x7CFB;&#x7EDF;&#x81EA;&#x5E26;&#x7684;glibc&#xFF0C;&#x56E0;&#x4E3A;glibc&#x4F5C;&#x4E3A;linux&#x7CFB;&#x7EDF;&#x7684;&#x6838;&#x5FC3;&#x5E93;&#xFF0C;&#x5F88;&#x591A;&#x5E95;&#x5C42;&#x6A21;&#x5757;&#x90FD;&#x4F9D;&#x8D56;&#x5B83;&#xFF0C;&#x7A0D;&#x6709;&#x4E0D;&#x614E;&#x5C31;&#x4F1A;&#x628A;&#x7CFB;&#x7EDF;&#x641E;&#x6302;&#x6389;&#x3002;&#x56E0;&#x6B64;&#x6211;&#x4EEC;&#x7F16;&#x8BD1;glibc&#x65F6;&#x6700;&#x597D;&#x8981;&#x6307;&#x5B9A;prefix=/new/path&#xFF0C;<br>&#x8FD9;&#x6837;&#x7F16;&#x8BD1;&#x5B8C;&#x4E86;&#x4E4B;&#x540E;make install&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4E0D;&#x4F1A;&#x53BB;&#x8986;&#x76D6;&#x7CFB;&#x7EDF;&#x81EA;&#x5E26;&#x7684;&#x7248;&#x672C;&#x3002;&#x90A3;&#x4E48;&#x95EE;&#x9898;&#x6765;&#x4E86;&#xFF0C;&#x7F16;&#x8BD1;&#x597D;glibc&#x540E;&#xFF0C;&#x5982;&#x4F55;&#x8BA9;&#x6211;&#x4EEC;&#x7684;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x65B0;&#x7F16;&#x8BD1;&#x7684;glibc&#x5462;&#xFF1F;&#x4E0B;&#x9762;&#x5C31;&#x4EE5;&#x6211;&#x4EEC;&#x5B9E;&#x9645;&#x7F16;&#x8BD1;glibc&#x7684;&#x6B65;&#x9AA4;&#x6765;&#x8BF4;&#x660E;&#x3002;</p>
+<h1 id="1-&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;"><a href="#1-&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;" class="headerlink" title="1.&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;"></a>1.&#x4E0B;&#x8F7D;glibc&#x6E90;&#x4EE3;&#x7801;</h1><p><a href="http://www.gnu.org/software/libc/&#xFF0C;&#x5728;&#x5B98;&#x7F51;&#x4E0A;&#x6709;&#x5404;&#x4E2A;glibc&#x7684;&#x53D1;&#x884C;&#x7248;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x9009;&#x7528;&#x7684;&#x662F;glibc-2.17" target="_blank" rel="external">http://www.gnu.org/software/libc/&#xFF0C;&#x5728;&#x5B98;&#x7F51;&#x4E0A;&#x6709;&#x5404;&#x4E2A;glibc&#x7684;&#x53D1;&#x884C;&#x7248;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x9009;&#x7528;&#x7684;&#x662F;glibc-2.17</a></p>
+<h1 id="2-&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;"><a href="#2-&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;" class="headerlink" title="2.&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;"></a>2.&#x89E3;&#x538B;glibc&#x5230;&#x5F53;&#x524D;&#x76EE;&#x5F55;</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~<span class="comment"># tar zxvf glibc-2.17.tar.gz</span></span><br></pre></td></tr></table></figure>
+<h1 id="3-&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;"><a href="#3-&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;" class="headerlink" title="3.&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;"></a>3.&#x521B;&#x5EFA;glibc&#x7684;build&#x76EE;&#x5F55;</h1><p>&#x4E0D;&#x80FD;&#x5728;glibc-2.17&#x6E90;&#x7801;&#x76EE;&#x5F55;&#x4E0B;./configure&#xFF0C;&#x4F1A;&#x62A5;&#x9519;&#x201C;configure: error: you must configure in a separate build directory&#x201D;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~<span class="comment"># mkdir -p build/glibc-build</span></span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h1 id="4-configure-glibc"><a href="#4-configure-glibc" class="headerlink" title="4.configure glibc"></a>4.configure glibc</h1><p>&#x8FD9;&#x91CC;&#x6211;&#x6307;&#x5B9A;&#x4E86;&#x81EA;&#x5DF1;&#x9700;&#x8981;&#x7684;&#x4E00;&#x4E9B;&#x7F16;&#x8BD1;&#x9009;&#x9879;&#xFF0C;&#x5E76;&#x4E14;&#x6307;&#x5B9A;prefix&#x76EE;&#x5F55;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~/build/glibc-build<span class="comment"># /root/glibc-2.17/configure CFLAGS=&quot;-fno-builtin-strlen -ggdb -O2&quot; FEATURES=&quot;preserve-libs nostrip splitdebug&quot; --prefix=/root/build/glibc-build</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="5-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"><a href="#5-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;" class="headerlink" title="5.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"></a>5.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~/build/glibc-build<span class="comment"># make -j10</span></span><br><span class="line">root@xxx:~/build/glibc-build<span class="comment"># make install</span></span><br></pre></td></tr></table></figure>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;glibc&#x76F8;&#x5173;&#x7684;&#x5E93;&#x90FD;&#x5728;glibc-build&#x76EE;&#x5F55;&#x4E0B;&#x4E86;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~/build/glibc-build<span class="comment"># ls lib</span></span><br><span class="line">audit              libanl.so               libcidn.so     libdl.a     libm.so.6        libnss_db.so.2           libnss_nis-2.17.so      libpthread.so      librt.so.1           Scrt1.o</span><br><span class="line">crt1.o              libanl.so.1           libcidn.so.1     libdl.so     libnsl-2.17.so        libnss_dns-2.17.so     libnss_nisplus-2.17.so  libpthread.so.0      libSegFault.so</span><br><span class="line">crti.o              libBrokenLocale-2.17.so  libc_nonshared.a  libdl.so.2     libnsl.a        libnss_dns.so           libnss_nisplus.so       libresolv-2.17.so  libthread_db-1.0.so</span><br><span class="line">crtn.o              libBrokenLocale.a        libcrypt-2.17.so  libg.a         libnsl.so        libnss_dns.so.2        libnss_nisplus.so.2     libresolv.a      libthread_db.so</span><br><span class="line">gconv              libBrokenLocale.so       libcrypt.a     libieee.a     libnsl.so.1        libnss_files-2.17.so   libnss_nis.so           libresolv.so      libthread_db.so.1</span><br><span class="line">gcrt1.o              libBrokenLocale.so.1     libcrypt.so     libm-2.17.so     libnss_compat-2.17.so    libnss_files.so        libnss_nis.so.2           libresolv.so.2      libutil-2.17.so</span><br><span class="line">ld-2.17.so          libbsd-compat.a           libcrypt.so.1     libm.a         libnss_compat.so    libnss_files.so.2      libpcprofile.so           librpcsvc.a      libutil.a</span><br><span class="line">ld-linux-x86-64.so.2  libc-2.17.so           libc.so         libmcheck.a     libnss_compat.so.2    libnss_hesiod-2.17.so  libpthread-2.17.so      librt-2.17.so      libutil.so</span><br><span class="line">libanl-2.17.so          libc.a               libc.so.6     libmemusage.so  libnss_db-2.17.so    libnss_hesiod.so       libpthread.a           librt.a          libutil.so.1</span><br><span class="line">libanl.a          libcidn-2.17.so           libdl-2.17.so     libm.so     libnss_db.so        libnss_hesiod.so.2     libpthread_nonshared.a  librt.so          Mcrt1.o</span><br></pre></td></tr></table></figure></p>
+<h1 id="6-&#x4F7F;&#x7528;&#x65B0;&#x7684;glibc&#x6765;&#x7F16;&#x8BD1;&#x7A0B;&#x5E8F;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x7F16;&#x8BD1;&#x7684;&#x662F;valgrind"><a href="#6-&#x4F7F;&#x7528;&#x65B0;&#x7684;glibc&#x6765;&#x7F16;&#x8BD1;&#x7A0B;&#x5E8F;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x7F16;&#x8BD1;&#x7684;&#x662F;valgrind" class="headerlink" title="6.&#x4F7F;&#x7528;&#x65B0;&#x7684;glibc&#x6765;&#x7F16;&#x8BD1;&#x7A0B;&#x5E8F;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x7F16;&#x8BD1;&#x7684;&#x662F;valgrind"></a>6.&#x4F7F;&#x7528;&#x65B0;&#x7684;glibc&#x6765;&#x7F16;&#x8BD1;&#x7A0B;&#x5E8F;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x7F16;&#x8BD1;&#x7684;&#x662F;valgrind</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@xxx:~<span class="comment"># tar jxvf valgrind-3.10.1.tar.bz2</span></span><br><span class="line">root@xxx:~<span class="comment"># mkdir -p build/valgrind-build</span></span><br><span class="line">root@xxx:~<span class="comment"># cd valgrind-3.10.1</span></span><br><span class="line">root@xxx:~/valgrind-3.10.1<span class="comment"># ./configure CFLAGS=&quot;-I/root/build/glibc-build/include&quot; LDFLAGS=&quot;-L/home/nbs/glibc/lib -Wl,--rpath=/root/build/glibc-build/lib -Wl,--dynamic-linker=/root/build/glibc-build/lib/ld-linux-x86-64.so.2&quot; --prefix=/root/build/valgrind-build</span></span><br></pre></td></tr></table></figure>
+<p>&#x4E0B;&#x9762;&#x5BF9;configure&#x7684;&#x9009;&#x9879;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#xFF1A;<br><em>CFLAGS=&#x201D;-I/root/build/glibc-build/include&#x201D;</em>        &#x8FD9;&#x4E2A;&#x662F;&#x6307;&#x5B9A;&#x5934;&#x6587;&#x4EF6;&#x7684;&#x67E5;&#x627E;&#x8DEF;&#x5F84;&#xFF0C;&#x53BB;&#x65B0;&#x7F16;&#x8BD1;&#x7684;glibc&#x91CC;&#x67E5;&#x627E;<br><em>LDFLAGS</em>: Makefile&#x7684;&#x94FE;&#x63A5;&#x9009;&#x9879;&#xFF0C;&#x5176;&#x4E2D;<br><strong>-L</strong>: &#x544A;&#x8BC9;&#x94FE;&#x63A5;&#x5668;&#x5148;&#x4ECE;&#x6307;&#x5B9A;&#x7684;&#x8DEF;&#x5F84;&#x67E5;&#x627E;&#x5E93;&#x6765;&#x94FE;&#x63A5;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x627E;&#x5230;&#xFF0C;&#x518D;&#x4ECE;&#x9ED8;&#x8BA4;&#x7684;&#x5730;&#x65B9;&#x627E;&#x3002;&#x7F16;&#x8BD1;&#x65F6;&#x7684;-L&#x9009;&#x9879;&#x5E76;&#x4E0D;&#x5F71;&#x54CD;&#x73AF;&#x5883;&#x53D8;&#x91CF;LD_LIBRARY_PATH&#xFF0C;-L&#x53EA;&#x662F;&#x6307;&#x5B9A;&#x4E86;&#x7A0B;&#x5E8F;&#x7F16;&#x8BD1;&#x8FDE;&#x63A5;&#x65F6;&#x5E93;&#x7684;&#x8DEF;&#x5F84;&#xFF0C;&#x5E76;&#x4E0D;&#x5F71;&#x54CD;&#x7A0B;&#x5E8F;&#x6267;&#x884C;&#x65F6;&#x5E93;&#x7684;&#x8DEF;&#x5F84;&#xFF0C;&#x7CFB;&#x7EDF;&#x8FD8;&#x662F;&#x4F1A;&#x5230;&#x9ED8;&#x8BA4;&#x8DEF;&#x5F84;&#x4E0B;&#x67E5;&#x627E;&#x8BE5;&#x7A0B;&#x5E8F;&#x6240;&#x9700;&#x8981;&#x7684;&#x5E93;&#xFF0C;&#x5982;&#x679C;&#x627E;&#x4E0D;&#x5230;&#xFF0C;&#x8FD8;&#x662F;&#x4F1A;&#x62A5;&#x9519;&#xFF0C;&#x7C7B;&#x4F3C;cannot open shared object file&#x3002;<br>&#x53EF;&#x4EE5;&#x8BBE;&#x5B9A;LD_LIBRARY_PATH&#x6765;&#x8BA9;&#x7A0B;&#x5E8F;&#x5728;&#x8FD0;&#x884C;&#x65F6;&#x67E5;&#x627E;&#x9664;&#x9ED8;&#x8BA4;&#x8DEF;&#x5F84;&#xFF08;&#x9ED8;&#x8BA4;&#x662F;&#x5148;&#x641C;&#x7D22;/lib&#x548C;/usr/lib&#x8FD9;&#x4E24;&#x4E2A;&#x76EE;&#x5F55;&#xFF0C;&#x7136;&#x540E;&#x6309;&#x7167;/etc/ld.so.conf&#x91CC;&#x9762;&#x7684;&#x914D;&#x7F6E;&#x641C;&#x7D22;&#x7EDD;&#x5BF9;&#x8DEF;&#x5F84;&#xFF09;&#x4E4B;&#x5916;&#x7684;&#x5176;&#x4ED6;&#x8DEF;&#x5F84;&#xFF0C;&#x4E0D;&#x8FC7;LD_LIBRARY_PATH&#x7684;&#x8BBE;&#x5B9A;&#x4F5C;&#x7528;&#x662F;&#x5168;&#x5C40;&#x7684;&#xFF0C;&#x5EFA;&#x8BAE;&#x4F7F;&#x7528;gcc&#x7684;&#x7684;-R&#x6216;-rpath&#x9009;&#x9879;&#x6765;&#x5728;&#x7F16;&#x8BD1;&#x65F6;&#x5C31;&#x6307;&#x5B9A;&#x5E93;&#x7684;&#x67E5;&#x627E;&#x8DEF;&#x5F84;&#xFF0C;&#x5E76;&#x4E14;&#x8BE5;&#x5E93;&#x7684;&#x8DEF;&#x5F84;&#x4FE1;&#x606F;&#x4FDD;&#x5B58;&#x5728;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x8FD0;&#x884C;&#x65F6;&#x5B83;&#x4F1A;&#x76F4;&#x63A5;&#x5230;&#x8BE5;&#x8DEF;&#x5F84;&#x67E5;&#x627E;&#x5E93;&#xFF0C;&#x907F;&#x514D;&#x4E86;&#x4F7F;&#x7528;LD_LIBRARY_PATH&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x67E5;&#x627E;&#x3002;<br>&#x56E0;&#x6B64;&#x6211;&#x5728;&#x4E0A;&#x9762;&#x6307;&#x5B9A;&#x4E86;-Wl,&#x2013;rpath=/root/build/glibc-build/lib&#xFF0C;&#x8BF4;&#x660E;&#x4E00;&#x4E0B;&#xFF0C;-Wl,option&#x662F;&#x5C06;&#x9009;&#x9879;&#x4F20;&#x7ED9;&#x94FE;&#x63A5;&#x5668;</p>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x4E5F;&#x9700;&#x8981;&#x4F7F;&#x7528;&#x65B0;&#x7F16;&#x8BD1;&#x7684;&#x94FE;&#x63A5;&#x5668;&#xFF0C;&#x4F7F;&#x7528;<em>&#x2013;dynamic-linker</em>&#x6307;&#x5B9A;&#x94FE;&#x63A5;&#x5668;<br>&#x7136;&#x540E;&#x518D;&#x4F7F;&#x7528;make &amp;&amp; make install&#x5C31;&#x53EF;&#x4EE5;&#x7F16;&#x8BD1;&#x5B8C;&#x6210;&#xFF0C;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5B89;&#x88C5;&#x7684;&#x4E1C;&#x897F;&#x90FD;&#x5728;/root/build/valgrind-build/&#x4E0B;&#x3002;</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/glibc/" rel="tag">#glibc</a>
+          
+            <a href="/tags/link/" rel="tag">#link</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/20/IET/" rel="next" title="IET架构解析">
+                <i class="fa fa-chevron-left"></i> IET架构解析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/20/ceph-rbd-obj/" rel="prev" title="ceph rbd中的对象解析">
+                ceph rbd中的对象解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2015/08/25/use-new-glibc/"
+           data-title="如何使用新的glibc来编译自己的程序" data-url="http://yoursite.com/2015/08/25/use-new-glibc/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Wu Dong" />
+          <p class="site-author-name" itemprop="name">Wu Dong</p>
+          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">23</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-下载glibc源代码"><span class="nav-number">1.</span> <span class="nav-text">1.下载glibc源代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-解压glibc到当前目录"><span class="nav-number">2.</span> <span class="nav-text">2.解压glibc到当前目录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-创建glibc的build目录"><span class="nav-number">3.</span> <span class="nav-text">3.创建glibc的build目录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-configure-glibc"><span class="nav-number">4.</span> <span class="nav-text">4.configure glibc</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-编译安装"><span class="nav-number">5.</span> <span class="nav-text">5.编译安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-使用新的glibc来编译程序，这里我编译的是valgrind"><span class="nav-number">6.</span> <span class="nav-text">6.使用新的glibc来编译程序，这里我编译的是valgrind</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wu Dong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sysnote"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
