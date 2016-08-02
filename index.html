@@ -261,6 +261,129 @@
             
               
                 
+                <a class="post-title-link" href="/2016/08/02/ceph-recover-optimize/" itemprop="url">
+                  ceph恢复优化
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-02T19:46:23+08:00" content="2016-08-02">
+              2016-08-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/02/ceph-recover-optimize/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/02/ceph-recover-optimize/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="1-&#x80CC;&#x666F;"><a href="#1-&#x80CC;&#x666F;" class="headerlink" title="1.&#x80CC;&#x666F;"></a>1.&#x80CC;&#x666F;</h1><p>&#x5728;&#x5BF9;ceph&#x5757;&#x5B58;&#x50A8;&#x8FDB;&#x884C;&#x6027;&#x80FD;&#x6D4B;&#x8BD5;&#x65F6;&#x53D1;&#x73B0;&#xFF0C;&#x5F53;&#x6709;osd&#x91CD;&#x542F;&#x6216;&#x8005;&#x5B58;&#x50A8;&#x673A;&#x91CD;&#x542F;&#x65F6;&#xFF0C;I/O&#x6027;&#x80FD;&#x4F1A;&#x6025;&#x5267;&#x4E0B;&#x964D;&#xFF0C;&#x5C24;&#x5176;&#x5728;&#x968F;&#x673A;&#x5199;&#x7684;&#x8D1F;&#x8F7D;&#x4E0B;&#xFF0C;&#x4E0B;&#x964D;&#x5E45;&#x5EA6;&#x8FBE;&#x5230;90%&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x6301;&#x7EED;&#x4E00;&#x6BB5;&#x65F6;&#x5019;&#x624D;&#x6162;&#x6162;&#x6062;&#x590D;&#x5230;&#x6B63;&#x5E38;&#x6C34;&#x5E73;&#x3002;&#x4E00;&#x5F00;&#x59CB;&#x6211;&#x4EEC;&#x4E5F;&#x5C1D;&#x8BD5;&#x5C06;&#x6062;&#x590D;&#x76F8;&#x5173;&#x7684;&#x53C2;&#x6570;&#x8C03;&#x4F4E;&#xFF08;osd_recovery_max_active=1&#x3001;osd_recovery_max_chunk=131072&#x3001;osd_max_backfills=1&#xFF09;&#xFF0C;&#x4EE5;&#x53CA;&#x8C03;&#x6574;&#x6B63;&#x5E38;I/O&#x548C;&#x6062;&#x590D;I/O&#x7684;&#x4F18;&#x5148;&#x7EA7;&#xFF08;osd_recovery_op_priority=10&#x3001;osd_client_op_priority=63&#xFF09;&#xFF0C;&#x4F46;&#x662F;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x6765;&#x770B;&#xFF0C;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x7684;&#x8C03;&#x6574;&#x6CA1;&#x6709;&#x591A;&#x5927;&#x7684;&#x6548;&#x679C;&#xFF0C;&#x968F;&#x673A;&#x5199;&#x8D1F;&#x8F7D;&#x4E0B;&#x6027;&#x80FD;&#x4E0B;&#x964D;&#x4ECD;&#x7136;&#x5F88;&#x5927;&#x3002;</p>
+<h1 id="2-&#x539F;&#x56E0;&#x5206;&#x6790;"><a href="#2-&#x539F;&#x56E0;&#x5206;&#x6790;" class="headerlink" title="2.&#x539F;&#x56E0;&#x5206;&#x6790;"></a>2.&#x539F;&#x56E0;&#x5206;&#x6790;</h1><p>&#x5728;&#x300A;ceph&#x57FA;&#x4E8E;pglog&#x7684;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#x300B;&#x4E00;&#x6587;&#x4E2D;&#x5206;&#x6790;&#x4E86;ceph&#x7684;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#xFF0C;&#x4ECE;&#x4E2D;&#x6211;&#x4EEC;&#x5F97;&#x77E5;&#x5728;osd&#x91CD;&#x542F;&#x3001;&#x5B58;&#x50A8;&#x673A;&#x91CD;&#x542F;&#x7B49;&#x573A;&#x666F;&#x4E0B;&#x57FA;&#x4E8E;pglog&#x7684;&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5728;peering&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x6839;&#x636E;pglog&#x6765;&#x6784;&#x5EFA;&#x51FA;missing&#x5217;&#x8868;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x6062;&#x590D;&#x65F6;&#x6839;&#x636E;missing&#x5217;&#x8868;&#x9010;&#x4E2A;&#x8FDB;&#x884C;&#x6062;&#x590D;&#xFF0C;&#x6062;&#x590D;&#x7684;&#x7C92;&#x5EA6;&#x662F;&#x6574;&#x4E2A;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#xFF08;&#x9ED8;&#x8BA4;4MB&#xFF0C;&#x6709;&#x53EF;&#x80FD;&#x6709;&#x7684;&#x5BF9;&#x8C61;&#x4E0D;&#x8DB3;4MB&#xFF0C;&#x5C31;&#x6309;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#xFF09;&#xFF0C;&#x5373;&#x4F7F;&#x53EA;&#x4FEE;&#x6539;&#x4E86;&#x4E00;&#x4E2A;4KB&#xFF0C;&#x4E5F;&#x9700;&#x8981;&#x5C06;4MB&#x7684;&#x5BF9;&#x8C61;&#x62F7;&#x8D1D;&#x8FC7;&#x6765;&#xFF0C;&#x8FD9;&#x6837;100&#x4E2A;io&#x5C31;&#x4F1A;&#x8FBE;&#x5230;400MB&#x7684;&#x5E26;&#x5BBD;&#xFF0C;&#x5BF9;&#x7F51;&#x7EDC;&#x53CA;&#x78C1;&#x76D8;&#x4EA7;&#x751F;&#x8F83;&#x5927;&#x7684;&#x5F71;&#x54CD;&#x3002;&#x5F53;&#x5199;io&#x547D;&#x4E2D;&#x6B63;&#x5728;&#x4FEE;&#x590D;&#x7684;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x4E5F;&#x662F;&#x5148;&#x4FEE;&#x590D;&#x539F;&#x6765;4MB&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x5373;&#x9700;&#x8981;&#x5C06;4MB&#x7684;&#x6570;&#x636E;&#x901A;&#x8FC7;&#x7F51;&#x7EDC;&#x62F7;&#x8D1D;&#x8FC7;&#x6765;&#xFF0C;&#x5EF6;&#x8FDF;&#x5C31;&#x4F1A;&#x589E;&#x52A0;&#x5F88;&#x591A;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x5165;&#x6570;&#x636E;&#xFF0C;&#x5BF9;&#x4E8E;&#x968F;&#x673A;&#x5199;&#x7684;&#x573A;&#x666F;&#x5C24;&#x5176;&#x4E25;&#x91CD;&#xFF0C;&#x57FA;&#x672C;&#x90FD;&#x662F;&#x547D;&#x4E2D;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5E26;&#x6765;&#x76F8;&#x5F53;&#x5927;&#x7684;&#x5EF6;&#x8FDF;&#xFF0C;&#x4ECE;&#x800C;iops&#x4E0B;&#x964D;&#xFF08;&#x4E0B;&#x964D;&#x5E45;&#x5EA6;80%~90%&#xFF09;&#x3002;&#x8FD9;&#x4E2A;&#x5F71;&#x54CD;&#x65F6;&#x95F4;&#x53D6;&#x51B3;&#x4E8E;&#x4E0A;&#x5C42;&#x7684;&#x4E1A;&#x52A1;&#x91CF;&#x548C;osd&#x505C;&#x670D;&#x7684;&#x65F6;&#x95F4;&#x3002;<br><img src="/2016/08/02/ceph-recover-optimize/recover-whole.png" alt="ceph-recover-optimize"><br></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/08/02/ceph-recover-optimize/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/02/28/ceph-rbd-snap/" itemprop="url">
                   ceph rbd快照原理解析
                 </a>
@@ -1371,142 +1494,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/08/20/IET/" itemprop="url">
-                  IET架构解析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-08-20T15:15:29+08:00" content="2015-08-20">
-              2015-08-20
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/iscsi/" itemprop="url" rel="index">
-                    <span itemprop="name">iscsi</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/08/20/IET/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/08/20/IET/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>IET&#xFF08;iSCSI Enterprise Target&#xFF09;&#x662F;&#x5185;&#x6838;&#x6001;&#x5B9E;&#x73B0;&#x7684;iscsi target&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;target&#xFF08;&#x6BD4;&#x5982;tgt&#xFF09;&#xFF0C;iet&#x6BD4;&#x8F83;&#x7A33;&#x5B9A;&#xFF0C;&#x5E76;&#x4E14;&#x4E5F;&#x7B97;&#x662F;&#x5386;&#x53F2;&#x60A0;&#x4E45;&#xFF0C;io&#x90FD;&#x76F4;&#x63A5;&#x7ECF;&#x8FC7;&#x5185;&#x6838;&#x6001;&#xFF0C;&#x6027;&#x80FD;&#x6BD4;&#x8F83;&#x597D;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x9488;&#x5BF9;IET&#x7684;&#x7A0B;&#x5E8F;&#x67B6;&#x6784;&#xFF0C;&#x4ECE;&#x7A0B;&#x5E8F;&#x6A21;&#x5757;&#xFF0C;&#x547D;&#x4EE4;&#x64CD;&#x4F5C;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#xFF0C;initiator&#x4E0E;target&#x7684;&#x4EA4;&#x4E92;&#xFF0C;I/O&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
-<h1 id="1-&#x7A0B;&#x5E8F;&#x6A21;&#x5757;"><a href="#1-&#x7A0B;&#x5E8F;&#x6A21;&#x5757;" class="headerlink" title="1.&#x7A0B;&#x5E8F;&#x6A21;&#x5757;"></a>1.&#x7A0B;&#x5E8F;&#x6A21;&#x5757;</h1><p>IET&#x5305;&#x542B;3&#x90E8;&#x5206;&#xFF1A;ietadm&#xFF0C;ietd&#xFF0C;iscsi_trgt&#xFF0C;&#x5176;&#x4E2D;ietadm&#x662F;&#x547D;&#x4EE4;&#x884C;&#x5DE5;&#x5177;&#xFF0C;&#x63D0;&#x4F9B;target&#xFF0C;lun&#x7684;&#x521B;&#x5EFA;&#x3001;&#x5220;&#x9664;&#x3001;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;&#x7B49;&#x64CD;&#x4F5C;&#xFF1B;&#x800C;ietd&#x662F;&#x4E00;&#x4E2A;&#x7528;&#x6237;&#x6001;&#x7A0B;&#x5E8F;&#xFF0C;&#x7528;&#x4E8E;&#x548C;ietadm&#x4EE5;&#x53CA;initiator&#x7684;&#x4EA4;&#x4E92;&#xFF0C;&#x5E76;&#x8FDB;&#x884C;&#x5BF9;&#x5E94;&#x7684;&#x5904;&#x7406;&#xFF0C;iscsi&#x76F8;&#x5173;&#x7684;&#x53D1;&#x73B0;&#x3001;&#x767B;&#x5F55;&#x3001;&#x8BA4;&#x8BC1;&#x3001;&#x767B;&#x51FA;&#x7B49;&#x64CD;&#x4F5C;&#x90FD;&#x5728;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#xFF1B;iscsi_trgt&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x6838;&#x6A21;&#x5757;&#xFF0C;iscsi&#x534F;&#x8BAE;&#x7684;&#x89E3;&#x6790;&#x5904;&#x7406;&#xFF0C;I/O&#x5904;&#x7406;&#x90FD;&#x5728;&#x8FD9;&#x4E2A;&#x5185;&#x6838;&#x6001;&#x6A21;&#x5757;&#x5185;&#x5B8C;&#x6210;&#x3002;</p>
-<p>1&#xFF09;ietdadm&#x4E0E;ietd&#x901A;&#x8FC7;IPC&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF0C;IPC&#x5728;ietd&#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x8FDB;&#x884C;&#x521D;&#x59CB;&#x5316;&#xFF1B;<br>2&#xFF09;ietd&#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x8FD8;&#x4F1A;&#x521B;&#x5EFA;&#x76D1;&#x542C;socket&#xFF08;&#x9ED8;&#x8BA4;&#x7684;&#x7AEF;&#x53E3;&#x662F;3260&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x4E3A;&#x8BE5;&#x673A;&#x5668;&#x4E0A;&#x7684;&#x6BCF;&#x4E2A;ip&#x90FD;&#x751F;&#x6210;&#x4E00;&#x4E2A;&#x76D1;&#x542C;socket&#xFF0C;initiator&#x5728;&#x53D1;&#x73B0;target&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x6307;&#x5B9A;ip&#x548C;port&#xFF09;&#xFF0C;initiator&#x5C31;&#x901A;&#x8FC7;socket&#x4E0E;ietd&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF0C;&#x4E00;&#x4E2A;initiator&#x548C;&#x4E00;&#x4E2A;target&#x5EFA;&#x7ACB;&#x8D77;&#x4E00;&#x4E2A;&#x957F;&#x8FDE;&#x63A5;&#xFF08;iscsi&#x534F;&#x8BAE;&#x6807;&#x51C6;&#x8BF4;&#x7684;&#x662F;&#x81F3;&#x5C11;1&#x4E2A;&#x8FDE;&#x63A5;&#xFF09;&#xFF0C;&#x540E;&#x7EED;&#x7684;I/O&#x90FD;&#x662F;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x8FDE;&#x63A5;&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF1B;<br>3&#xFF09;ietd&#x4E0E;iscsi_trgt&#x4F7F;&#x7528;ioctl&#x8FDB;&#x884C;&#x4EA4;&#x4E92;&#xFF0C;&#x4E00;&#x4E9B;&#x64CD;&#x4F5C;&#xFF08;&#x6BD4;&#x5982;&#x521B;&#x5EFA;&#x5220;&#x9664;target&#xFF0C;&#x521B;&#x5EFA;&#x5220;&#x9664;lun&#x7B49;&#xFF09;&#x90FD;&#x7531;ietd&#x5728;&#x7528;&#x6237;&#x6001;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x540E;&#xFF0C;&#x5C06;&#x547D;&#x4EE4;&#x901A;&#x8FC7;ioctl&#x53D1;&#x5230;iscsi_trgt&#xFF0C;&#x7136;&#x540E;iscsi_trgt&#x5728;&#x5185;&#x6838;&#x6001;&#x4E0B;&#x8FDB;&#x884C;&#x76F8;&#x5173;&#x5904;&#x7406;&#xFF1B;<br></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2015/08/20/IET/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1552,7 +1539,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">23</span>
+              <span class="site-state-item-count">24</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
