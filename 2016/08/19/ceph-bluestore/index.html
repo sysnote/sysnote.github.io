@@ -1,0 +1,690 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ceph," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="System Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="ceph&amp;#x540E;&amp;#x7AEF;&amp;#x652F;&amp;#x6301;&amp;#x591A;&amp;#x79CD;&amp;#x5B58;&amp;#x50A8;&amp;#x5F15;&amp;#x64CE;&amp;#xFF0C;&amp;#x4EE5;&amp;#x63D2;&amp;#x4EF6;&amp;#x5F0F;&amp;#x7684;&amp;#x65B9;&amp;#x5F0F;&amp;#x6765;&amp;#x8FDB;&amp;#x884C;&amp;#x7BA1;&amp;#x7406;&amp;#x4F7F;&amp;#x7">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceph存储引擎bluestore解析">
+<meta property="og:url" content="http://yoursite.com/2016/08/19/ceph-bluestore/index.html">
+<meta property="og:site_name" content="System Notes">
+<meta property="og:description" content="ceph&amp;#x540E;&amp;#x7AEF;&amp;#x652F;&amp;#x6301;&amp;#x591A;&amp;#x79CD;&amp;#x5B58;&amp;#x50A8;&amp;#x5F15;&amp;#x64CE;&amp;#xFF0C;&amp;#x4EE5;&amp;#x63D2;&amp;#x4EF6;&amp;#x5F0F;&amp;#x7684;&amp;#x65B9;&amp;#x5F0F;&amp;#x6765;&amp;#x8FDB;&amp;#x884C;&amp;#x7BA1;&amp;#x7406;&amp;#x4F7F;&amp;#x7">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/arch.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/metadata.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/iosplit.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/newblob.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/writetoblob.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/overwrite.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/overwrite_wal.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/writeflow.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/readio.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/clone.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/cloneio.png">
+<meta property="og:updated_time" content="2016-08-19T11:00:16.496Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceph存储引擎bluestore解析">
+<meta name="twitter:description" content="ceph&amp;#x540E;&amp;#x7AEF;&amp;#x652F;&amp;#x6301;&amp;#x591A;&amp;#x79CD;&amp;#x5B58;&amp;#x50A8;&amp;#x5F15;&amp;#x64CE;&amp;#xFF0C;&amp;#x4EE5;&amp;#x63D2;&amp;#x4EF6;&amp;#x5F0F;&amp;#x7684;&amp;#x65B9;&amp;#x5F0F;&amp;#x6765;&amp;#x8FDB;&amp;#x884C;&amp;#x7BA1;&amp;#x7406;&amp;#x4F7F;&amp;#x7">
+<meta name="twitter:image" content="http://yoursite.com/2016/08/19/ceph-bluestore/arch.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> ceph存储引擎bluestore解析 | System Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">System Notes</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ceph存储引擎bluestore解析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-19T18:21:56+08:00" content="2016-08-19">
+              2016-08-19
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/19/ceph-bluestore/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/19/ceph-bluestore/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>ceph&#x540E;&#x7AEF;&#x652F;&#x6301;&#x591A;&#x79CD;&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#xFF0C;&#x4EE5;&#x63D2;&#x4EF6;&#x5F0F;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x8FDB;&#x884C;&#x7BA1;&#x7406;&#x4F7F;&#x7528;&#xFF0C;&#x76EE;&#x524D;&#x652F;&#x6301;filestore&#xFF0C;kvstore&#xFF0C;memstore&#x4EE5;&#x53CA;&#x6700;&#x65B0;&#x7684;bluestore&#xFF0C;&#x76EE;&#x524D;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;&#x7684;filestore&#xFF0C;&#x4F46;&#x662F;&#x56E0;&#x4E3A;filestore&#x5728;&#x5199;&#x6570;&#x636E;&#x524D;&#x9700;&#x8981;&#x5148;&#x5199;journal&#xFF0C;&#x4F1A;&#x6709;&#x4E00;&#x500D;&#x7684;&#x5199;&#x653E;&#x5927;&#xFF0C;&#x5E76;&#x4E14;filestore&#x4E00;&#x5F00;&#x59CB;&#x53EA;&#x662F;&#x5BF9;&#x4E8E;&#x673A;&#x68B0;&#x76D8;&#x8FDB;&#x884C;&#x8BBE;&#x8BA1;&#x7684;&#xFF0C;&#x6CA1;&#x6709;&#x4E13;&#x95E8;&#x9488;&#x5BF9;ssd&#x505A;&#x4F18;&#x5316;&#x8003;&#x8651;&#xFF0C;&#x56E0;&#x6B64;&#x8BDE;&#x751F;&#x7684;bluestore&#x521D;&#x8877;&#x5C31;&#x662F;&#x4E3A;&#x4E86;&#x51CF;&#x5C11;&#x5199;&#x653E;&#x5927;&#xFF0C;&#x5E76;&#x9488;&#x5BF9;ssd&#x505A;&#x4F18;&#x5316;&#xFF0C;&#x800C;&#x4E14;&#x76F4;&#x63A5;&#x7BA1;&#x7406;&#x88F8;&#x76D8;&#xFF0C;&#x4ECE;&#x7406;&#x8BBA;&#x4E0A;&#x8FDB;&#x4E00;&#x6B65;&#x51CF;&#x5C11;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5982;ext4/xfs&#x7B49;&#x90E8;&#x5206;&#x7684;&#x5F00;&#x9500;&#xFF0C;&#x76EE;&#x524D;bluestore&#x8FD8;&#x5904;&#x4E8E;&#x5F00;&#x53D1;&#x4F18;&#x5316;&#x9636;&#x6BB5;&#xFF0C;&#x5728;jewel&#x7248;&#x672C;&#x8FD8;&#x662F;&#x8BD5;&#x7528;&#x7248;&#x672C;&#xFF0C;&#x5E76;&#x4E14;&#x6700;&#x65B0;&#x7684;master&#x76F8;&#x6BD4;jewel&#x5DF2;&#x7ECF;&#x505A;&#x4E86;&#x5927;&#x7684;&#x91CD;&#x6784;&#xFF0C;&#x9884;&#x671F;&#x4F1A;&#x5728;&#x540E;&#x7EED;&#x7684;&#x5927;&#x7248;&#x672C;&#x4E2D;&#x7A33;&#x5B9A;&#x4E0B;&#x6765;&#x6210;&#x4E3A;&#x9ED8;&#x8BA4;&#x7684;&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x3002;&#x672C;&#x6587;&#x57FA;&#x4E8E;master&#x5206;&#x652F;&#x5BF9;bluestore&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
+<h1 id="bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;"><a href="#bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;" class="headerlink" title="bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;"></a>bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;</h1><p><img src="/2016/08/19/ceph-bluestore/arch.png" alt="ceph-bluestore"></p>
+<p>bluestore&#x76F4;&#x63A5;&#x7BA1;&#x7406;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x629B;&#x5F03;&#x4E86;ext4/xfs&#x7B49;&#x672C;&#x5730;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;BlockDevice&#x5B9E;&#x73B0;&#x5728;&#x7528;&#x6237;&#x6001;&#x4E0B;&#x4F7F;&#x7528;linux aio&#x76F4;&#x63A5;&#x5BF9;&#x88F8;&#x8BBE;&#x5907;&#x8FDB;&#x884C;I/O&#x64CD;&#x4F5C;&#x3002;&#x65E2;&#x7136;&#x662F;&#x76F4;&#x63A5;&#x7BA1;&#x7406;&#x88F8;&#x8BBE;&#x5907;&#x5C31;&#x5FC5;&#x7136;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x88F8;&#x8BBE;&#x5907;&#x7684;&#x7A7A;&#x95F4;&#x7BA1;&#x7406;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F;Allocator&#xFF0C;&#x76EE;&#x524D;&#x652F;&#x6301;StupidAllocator&#x548C;BitmapAllocator&#x4E24;&#x79CD;&#x5206;&#x914D;&#x5668;&#x3002;&#x76F8;&#x5173;&#x7684;&#x5143;&#x6570;&#x636E;&#x4EE5;kv&#x7684;&#x5F62;&#x5F0F;&#x4FDD;&#x5B58;&#x5230;kv&#x6570;&#x636E;&#x5E93;&#x91CC;&#xFF0C;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;&#x7684;&#x662F;rocksdb&#xFF0C;&#x7531;&#x4E8E;rocksdb&#x672C;&#x8EAB;&#x662F;&#x57FA;&#x4E8E;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#xFF0C;&#x4E0D;&#x662F;&#x76F4;&#x63A5;&#x64CD;&#x4F5C;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x4F46;&#x662F;rocksdb&#x4E5F;&#x6BD4;&#x8F83;&#x7075;&#x6D3B;&#xFF0C;&#x5C06;&#x7CFB;&#x7EDF;&#x76F8;&#x5173;&#x7684;&#x5904;&#x7406;&#x62BD;&#x8C61;&#x6210;Env&#xFF0C;&#x7528;&#x6237;&#x53EF;&#x7528;&#x5B9E;&#x73B0;&#x76F8;&#x5E94;&#x7684;&#x63A5;&#x53E3;&#xFF0C;rocksdb&#x9ED8;&#x8BA4;&#x7684;Env&#x662F;PosixEnv&#xFF0C;&#x76F4;&#x63A5;&#x5BF9;&#x63A5;&#x672C;&#x5730;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x4E3A;&#x6B64;&#xFF0C;bluestore&#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x4E2A;BlueRocksEnv&#xFF0C;&#x7EE7;&#x627F;&#x81EA;EnvWrapper&#xFF0C;&#x6765;&#x4E3A;rocksdb&#x63D0;&#x4F9B;&#x5E95;&#x5C42;&#x7CFB;&#x7EDF;&#x7684;&#x5C01;&#x88C5;&#xFF0C;&#x4E3A;&#x4E86;&#x5BF9;&#x63A5;BlueRocksEnv&#xFF0C;&#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x4E2A;&#x5C0F;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;BlueFS&#xFF0C;&#x53EA;&#x5B9E;&#x73B0;rocksdb Env&#x9700;&#x8981;&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x5728;&#x7CFB;&#x7EDF;&#x542F;&#x52A8;mount&#x8FD9;&#x4E2A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x65F6;&#x5019;&#x5C06;&#x6240;&#x6709;&#x7684;&#x5143;&#x6570;&#x636E;&#x90FD;&#x52A0;&#x8F7D;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;BluesFS&#x7684;&#x6570;&#x636E;&#x548C;&#x65E5;&#x5FD7;&#x6587;&#x4EF6;&#x90FD;&#x901A;&#x8FC7;BlockDevice&#x4FDD;&#x5B58;&#x5230;&#x88F8;&#x8BBE;&#x5907;&#x4E0A;&#xFF0C;BlueFS&#x548C;BlueStore&#x53EF;&#x4EE5;&#x5171;&#x4EAB;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x5206;&#x522B;&#x6307;&#x5B9A;&#x4E0D;&#x540C;&#x7684;&#x8BBE;&#x5907;&#x3002;<br><a id="more"></a></p>
+<h1 id="bluestore&#x5143;&#x6570;&#x636E;"><a href="#bluestore&#x5143;&#x6570;&#x636E;" class="headerlink" title="bluestore&#x5143;&#x6570;&#x636E;"></a>bluestore&#x5143;&#x6570;&#x636E;</h1><p><img src="/2016/08/19/ceph-bluestore/metadata.png" alt="ceph-bluestore"><br>&#x5728;&#x4E4B;&#x524D;&#x7684;&#x5B58;&#x50A8;&#x5F15;&#x64CE;filestore&#x91CC;&#xFF0C;&#x5BF9;&#x8C61;&#x7684;&#x8868;&#x73B0;&#x5F62;&#x5F0F;&#x662F;&#x5BF9;&#x5E94;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x91CC;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x9ED8;&#x8BA4;4MB&#x5927;&#x5C0F;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x4F46;&#x662F;&#x5728;bluestore&#x91CC;&#xFF0C;&#x5DF2;&#x7ECF;&#x6CA1;&#x6709;&#x4F20;&#x7EDF;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x800C;&#x662F;&#x81EA;&#x5DF1;&#x7BA1;&#x7406;&#x88F8;&#x76D8;&#xFF0C;&#x56E0;&#x6B64;&#x9700;&#x8981;&#x6709;&#x5143;&#x6570;&#x636E;&#x6765;&#x7BA1;&#x7406;&#x5BF9;&#x8C61;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F;Onode&#xFF0C;Onode&#x662F;&#x5E38;&#x9A7B;&#x5185;&#x5B58;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x6301;&#x4E45;&#x5316;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x4EE5;kv&#x7684;&#x5F62;&#x5F0F;&#x5B58;&#x5230;rocksdb&#x91CC;&#x3002;</p>
+<p>&#x5728;onode&#x91CC;&#x53C8;&#x5206;&#x4E3A;lextent&#xFF0C;&#x8868;&#x793A;&#x903B;&#x8F91;&#x7684;&#x6570;&#x636E;&#x5757;&#xFF0C;&#x7528;&#x4E00;&#x4E2A;map&#x6765;&#x8BB0;&#x5F55;&#xFF0C;&#x4E00;&#x4E2A;onode&#x91CC;&#x4F1A;&#x5B58;&#x5728;&#x591A;&#x4E2A;lextent&#xFF0C;lextent&#x901A;&#x8FC7;blob&#x7684;id&#x5BF9;&#x5E94;&#x5230;blob&#xFF08;bluestore_blob_t &#xFF09;&#xFF0C;blob&#x91CC;&#x901A;&#x8FC7;pextent&#x5BF9;&#x5E94;&#x5230;&#x5B9E;&#x9645;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;&#x533A;&#x57DF;&#xFF08;pextent&#x91CC;&#x5C31;&#x662F;offset&#x548C;length&#x6765;&#x5B9A;&#x4F4D;&#x7269;&#x7406;&#x76D8;&#x7684;&#x4F4D;&#x7F6E;&#x533A;&#x57DF;&#xFF09;&#x3002;&#x4E00;&#x4E2A;onode&#x91CC;&#x7684;&#x591A;&#x4E2A;lextent&#x53EF;&#x80FD;&#x5728;&#x540C;&#x4E00;&#x4E2A;blob&#x91CC;&#xFF0C;&#x800C;&#x4E00;&#x4E2A;blob&#x4E5F;&#x53EF;&#x80FD;&#x5BF9;&#x5E94;&#x5230;&#x591A;&#x4E2A;pextent&#x3002;<br>&#x53E6;&#x5916;&#x8FD8;&#x6709;Bnode&#x8FD9;&#x4E2A;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x5B83;&#x662F;&#x7528;&#x6765;&#x8868;&#x793A;&#x591A;&#x4E2A;object&#x53EF;&#x80FD;&#x5171;&#x4EAB;extent&#xFF0C;&#x76EE;&#x524D;&#x5728;&#x505A;&#x4E86;&#x5FEB;&#x7167;&#x540E;&#x5199;I/O&#x89E6;&#x53D1;&#x7684;cow&#x8FDB;&#x884C;clone&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x7528;&#x5230;&#x3002;</p>
+<h1 id="I-O&#x8BFB;&#x5199;&#x6620;&#x5C04;&#x903B;&#x8F91;"><a href="#I-O&#x8BFB;&#x5199;&#x6620;&#x5C04;&#x903B;&#x8F91;" class="headerlink" title="I/O&#x8BFB;&#x5199;&#x6620;&#x5C04;&#x903B;&#x8F91;"></a>I/O&#x8BFB;&#x5199;&#x6620;&#x5C04;&#x903B;&#x8F91;</h1><h2 id="&#x5199;I-O&#x5904;&#x7406;"><a href="#&#x5199;I-O&#x5904;&#x7406;" class="headerlink" title="&#x5199;I/O&#x5904;&#x7406;"></a>&#x5199;I/O&#x5904;&#x7406;</h2><p>&#x5230;&#x8FBE;bluestore&#x7684;I/O&#x7684;offset&#x548C;length&#x90FD;&#x662F;&#x5BF9;&#x8C61;&#x5185;&#xFF08;onode&#xFF09;&#x7684;&#xFF0C;offset&#x662F;&#x76F8;&#x5BF9;&#x4E8E;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x8D77;&#x59CB;&#x4F4D;&#x7F6E;&#x7684;&#x504F;&#x79FB;&#xFF0C;&#x5728;_do_write&#x91CC;&#x9996;&#x5148;&#x5C31;&#x4F1A;&#x6839;&#x636E;&#x6700;&#x5C0F;&#x5206;&#x914D;&#x5355;&#x4F4D;min_alloc_size&#x8FDB;&#x884C;&#x5224;&#x65AD;&#xFF0C;&#x4ECE;&#x800C;&#x5C06;I/O&#x5206;&#x4E3A;&#x5BF9;&#x9F50;&#x548C;&#x975E;&#x5BF9;&#x9F50;&#x7684;&#x3002;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;<br><img src="/2016/08/19/ceph-bluestore/iosplit.png" alt="ceph-bluestore"><br>&#x5F53;&#x4E00;&#x4E2A;&#x5199;&#x8BF7;&#x6C42;&#x6309;&#x7167;min_alloc_size&#x8FDB;&#x884C;&#x62C6;&#x5206;&#x540E;&#xFF0C;&#x5C31;&#x4F1A;&#x5206;&#x4E3A;&#x5BF9;&#x9F50;&#x5199;&#xFF0C;&#x5BF9;&#x5E94;&#x5230;do_write_big&#xFF0C;&#x975E;&#x5BF9;&#x9F50;&#x5199;&#xFF08;&#x5373;&#x843D;&#x5230;&#x67D0;&#x4E00;&#x4E2A;min_alloc_size&#x533A;&#x95F4;&#x7684;&#x5199;I/O&#xFF08;&#x5BF9;&#x5E94;&#x5230;do_write_small&#xFF09;&#x3002;</p>
+<h3 id="do-write-big"><a href="#do-write-big" class="headerlink" title="do_write_big"></a>do_write_big</h3><p>&#x5BF9;&#x9F50;&#x5230;min_alloc_size&#x7684;&#x5199;&#x8BF7;&#x6C42;&#x5904;&#x7406;&#x8D77;&#x6765;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x6709;&#x53EF;&#x80FD;&#x662F;&#x591A;&#x4E2A;min_alloc_size&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x5728;&#x5904;&#x7406;&#x65F6;&#x4F1A;&#x6839;&#x636E;&#x5B9E;&#x9645;&#x5927;&#x5C0F;&#x65B0;&#x751F;&#x6210;lextent&#x548C;blob&#xFF0C;&#x8FD9;&#x4E2A;lextent&#x8DE8;&#x8D8A;&#x7684;&#x533A;&#x57DF;&#x662F;min_alloc_size&#x7684;&#x6574;&#x6570;&#x500D;&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x6BB5;&#x533A;&#x95F4;&#x662F;&#x4E4B;&#x524D;&#x5199;&#x8FC7;&#x7684;&#xFF0C;&#x4F1A;&#x5C06;&#x4E4B;&#x524D;&#x7684;lextent&#x8BB0;&#x5F55;&#x4E0B;&#x6765;&#x4FBF;&#x4E8E;&#x540E;&#x7EED;&#x7684;&#x7A7A;&#x95F4;&#x56DE;&#x6536;&#x3002;</p>
+<h3 id="do-write-small"><a href="#do-write-small" class="headerlink" title="do_write_small"></a>do_write_small</h3><p>&#x5728;&#x5904;&#x7406;&#x843D;&#x5230;&#x67D0;&#x4E2A;min_alloc_size&#x533A;&#x95F4;&#x7684;&#x5199;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x4F1A;&#x9996;&#x5148;&#x6839;&#x636E;offset&#x53BB;&#x67E5;&#x627E;&#x6709;&#x6CA1;&#x6709;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob&#xFF0C;&#x56E0;&#x4E3A;&#x6700;&#x5C0F;&#x5206;&#x914D;&#x5355;&#x5143;&#x662F;min_alloc_size&#xFF0C;&#x9ED8;&#x8BA4;64KB&#xFF0C;&#x5982;&#x679C;&#x4E00;&#x4E2A;4KB&#x7684;&#x5199;I/O&#x5C31;&#x53EA;&#x4F1A;&#x7528;&#x5230;blob&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;blob&#x91CC;&#x5269;&#x4F59;&#x7684;&#x8FD8;&#x80FD;&#x653E;&#x5176;&#x4ED6;&#x7684;&#x3002;</p>
+<h4 id="1&#xFF09;&#x6CA1;&#x6709;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob&#xFF0C;&#x65B0;&#x751F;&#x6210;blob"><a href="#1&#xFF09;&#x6CA1;&#x6709;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob&#xFF0C;&#x65B0;&#x751F;&#x6210;blob" class="headerlink" title="1&#xFF09;&#x6CA1;&#x6709;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob&#xFF0C;&#x65B0;&#x751F;&#x6210;blob"></a>1&#xFF09;&#x6CA1;&#x6709;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob&#xFF0C;&#x65B0;&#x751F;&#x6210;blob</h4><p><img src="/2016/08/19/ceph-bluestore/newblob.png" alt="ceph-bluestore"><br>&#x5728;&#x5904;&#x7406;&#x8FD8;&#x8FD8;&#x9700;&#x8981;&#x6839;&#x636E;offset&#x548C;len&#x662F;&#x5426;&#x5BF9;&#x9F50;&#x5230;block_size&#xFF08;&#x9ED8;&#x8BA4;&#x662F;4KB&#xFF09;&#x8FDB;&#x884C;&#x8865;&#x96F6;&#x5BF9;&#x9F50;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x4E4B;&#x6240;&#x4EE5;&#x9700;&#x8981;&#x8865;&#x9F50;&#x662F;&#x4E0E;&#x540E;&#x7EED;&#x7684;&#x5199;&#x76D8;&#x64CD;&#x4F5C;&#x6709;&#x5173;&#xFF0C;&#x771F;&#x6B63;&#x5199;&#x76D8;&#x65F6;&#x6709;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#xFF0C;&#x4E00;&#x79CD;&#x662F;Direct I/O&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x8FD9;&#x79CD;&#x8981;&#x6C42;&#x504F;&#x79FB;&#x548C;&#x7F13;&#x51B2;&#x533A;&#x90FD;&#x5BF9;&#x9F50;&#x7684;&#xFF0C;&#x53E6;&#x5916;&#x4E00;&#x79CD;&#x975E;Direct I/O&#xFF0C;&#x5373;Buffered I/O&#xFF0C;&#x8FD9;&#x79CD;&#x53EF;&#x4EE5;&#x4E0D;&#x5BF9;&#x9F50;&#xFF0C;&#x4F46;&#x662F;&#x662F;&#x5199;&#x5230;cache&#x91CC;&#xFF0C;&#x7136;&#x540E;&#x518D;sync&#x5237;&#x5230;&#x78C1;&#x76D8;&#x4E0A;&#xFF0C;&#x6BD4;&#x5982;&#x53EA;&#x5199;&#x4E86;100&#x5B57;&#x8282;&#xFF0C;&#x5728;&#x5185;&#x6838;&#x91CC;&#x662F;&#x9700;&#x8981;&#x5148;&#x4ECE;&#x8BBE;&#x5907;&#x4E0A;&#x8BFB;&#x51FA;&#x6765;&#x8865;&#x9F50;&#x6210;&#x4E00;&#x4E2A;&#x5B8C;&#x6574;&#x7684;&#x6247;&#x533A;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5237;&#x7684;&#xFF0C;&#x8FD9;&#x6837;&#x53CD;&#x800C;&#x964D;&#x4F4E;&#x4E86;&#x6548;&#x7387;&#x3002;&#x56E0;&#x6B64;&#x5728;bluestore&#x91CC;&#x76F4;&#x63A5;&#x5904;&#x7406;&#x597D;&#x5BF9;&#x9F50;&#xFF0C;&#x5BF9;&#x4E8E;&#x540E;&#x9762;&#x7684;&#x5199;&#x76D8;&#x6765;&#x8BF4;&#x6BD4;&#x8F83;&#x6709;&#x5229;&#xFF0C;&#x8FD9;&#x91CC;&#x5BF9;&#x9F50;&#x5230;block_size&#xFF0C;&#x662F;&#x4E2A;&#x53EF;&#x914D;&#x7F6E;&#x7684;&#x53C2;&#x6570;&#x3002;</p>
+<p>&#x8FDB;&#x884C;&#x5BF9;&#x9F50;&#x8865;&#x96F6;&#x65F6;&#x5C31;&#x662F;&#x6309;&#x7167;&#x5982;&#x4E0A;&#x56FE;&#x90A3;&#x6837;&#x628A;&#x524D;&#x540E;&#x5BF9;&#x9F50;&#x5230;block_size&#xFF0C;&#x7136;&#x540E;&#x518D;&#x628A;&#x5BF9;&#x9F50;&#x540E;&#x7684;offset&#x548C;len&#x4F5C;&#x4E3A;lextent&#xFF0C;&#x8FDB;&#x800C;&#x653E;&#x5230;blob&#x91CC;&#x3002;</p>
+<h4 id="2&#xFF09;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob"><a href="#2&#xFF09;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob" class="headerlink" title="2&#xFF09;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob"></a>2&#xFF09;&#x627E;&#x5230;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob</h4><p>&#x5BF9;&#x4E8E;&#x53EF;&#x4EE5;&#x590D;&#x7528;&#x7684;blob&#xFF0C;&#x4E5F;&#x662F;&#x5148;&#x6309;&#x7167;block_size&#x8FDB;&#x884C;&#x5BF9;&#x9F50;&#x8865;&#x96F6;&#x7684;&#x52A8;&#x4F5C;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5224;&#x65AD;&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4F7F;&#x7528;blob&#x91CC;&#x7A7A;&#x95F2;&#x7684;&#x7A7A;&#x95F4;&#x8FDB;&#x884C;&#x533A;&#x5206;&#x505A;&#x4E0D;&#x540C;&#x7684;&#x5904;&#x7406;&#x3002;</p>
+<p><strong>a&#xFF09;&#x76F4;&#x63A5;&#x5199;&#x5728;blob&#x672A;&#x4F7F;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x4E0A;</strong></p>
+<p>&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#x76F4;&#x63A5;&#x65B0;&#x751F;&#x6210;lextent&#x653E;&#x5230;blob&#x91CC;&#x3002;<br><img src="/2016/08/19/ceph-bluestore/writetoblob.png" alt="ceph-bluestore"><br><strong>b&#xFF09;&#x8986;&#x76D6;&#x5199;&#x7684;&#x60C5;&#x51B5;</strong></p>
+<p>&#x6BD4;&#x5982;&#x4E0B;&#x9762;&#x7684;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#xFF0C;&#x5199;I/O&#x4F1A;&#x8986;&#x76D6;&#x90E8;&#x5206;&#x5DF2;&#x7ECF;&#x5199;&#x8FC7;&#x7684;&#x6570;&#x636E;&#x3002;<br><img src="/2016/08/19/ceph-bluestore/overwrite.png" alt="ceph-bluestore"><br>&#x5BF9;&#x4E8E;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x7684;&#x5904;&#x7406;&#x5982;&#x4E0B;&#x56FE;&#xFF1A;&#x4E5F;&#x662F;&#x9700;&#x8981;&#x5148;&#x5904;&#x7406;&#x5BF9;&#x9F50;&#x8865;&#x96F6;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5982;&#x679C;&#x8986;&#x76D6;&#x7684;&#x533A;&#x57DF;&#x521A;&#x597D;&#x662F;&#x5DF2;&#x7ECF;&#x5BF9;&#x9F50;&#x5230;block_size&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x4E0D;&#x9700;&#x8981;&#x4ECE;&#x78C1;&#x76D8;&#x8BFB;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x679C;&#x8986;&#x76D6;&#x7684;&#x533A;&#x57DF;&#x6CA1;&#x6709;&#x5BF9;&#x9F50;&#x5230;block_size&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x9700;&#x8981;&#x628A;&#x4E0D;&#x5BF9;&#x9F50;&#x7684;&#x90A3;&#x90E8;&#x5206;&#x8BFB;&#x51FA;&#x6765;&#xFF0C;&#x62FC;&#x6210;&#x4E00;&#x4E2A;&#x5BF9;&#x9F50;&#x7684;buffer&#xFF0C;&#x7136;&#x540E;&#x65B0;&#x751F;&#x6210;lextent&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x5BF9;&#x539F;&#x6765;&#x90A3;&#x4E2A;lextent&#x8FDB;&#x884C;&#x8C03;&#x6574;&#xFF0C;&#x4F1A;&#x8BB0;&#x5F55;&#x9700;&#x8981;&#x56DE;&#x6536;&#x7684;&#x90A3;&#x90E8;&#x5206;&#x533A;&#x57DF;&#x3002;&#x5BF9;&#x4E8E;&#x8986;&#x76D6;&#x5199;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x90FD;&#x4E0D;&#x662F;&#x76F4;&#x63A5;&#x5199;&#x76D8;&#xFF0C;&#x800C;&#x662F;&#x901A;&#x8FC7;wal&#x5199;&#x5230;rocksdb&#x3002;<br><img src="/2016/08/19/ceph-bluestore/overwrite_wal.png" alt="ceph-bluestore"></p>
+<h3 id="&#x6574;&#x4F53;&#x5199;I-O&#x7684;&#x903B;&#x8F91;"><a href="#&#x6574;&#x4F53;&#x5199;I-O&#x7684;&#x903B;&#x8F91;" class="headerlink" title="&#x6574;&#x4F53;&#x5199;I/O&#x7684;&#x903B;&#x8F91;"></a>&#x6574;&#x4F53;&#x5199;I/O&#x7684;&#x903B;&#x8F91;</h3><p>&#x4E4B;&#x524D;&#x7EC4;&#x5185;&#x540C;&#x4E8B;&#x753B;&#x8FC7;&#x4E00;&#x4E2A;&#x6D41;&#x7A0B;&#x56FE;&#xFF0C;&#x8FD9;&#x91CC;&#x501F;&#x7528;&#x4E00;&#x4E0B;&#x7B97;&#x662F;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x603B;&#x7ED3;&#x3002;<br><img src="/2016/08/19/ceph-bluestore/writeflow.png" alt="ceph-bluestore"></p>
+<h2 id="&#x8BFB;I-O&#x7684;&#x5904;&#x7406;"><a href="#&#x8BFB;I-O&#x7684;&#x5904;&#x7406;" class="headerlink" title="&#x8BFB;I/O&#x7684;&#x5904;&#x7406;"></a>&#x8BFB;I/O&#x7684;&#x5904;&#x7406;</h2><p><img src="/2016/08/19/ceph-bluestore/readio.png" alt="ceph-bluestore"><br>&#x8BFB;I/O&#x8BF7;&#x6C42;&#x7684;&#x5904;&#x7406;&#x65F6;&#x4E5F;&#x662F;&#x901A;&#x8FC7;&#x5BFB;&#x627E;&#x76F8;&#x5173;&#x8054;&#x7684;lextent&#xFF0C;&#x53EF;&#x80FD;&#x4F1A;&#x5B58;&#x5728;&#x7A7A;&#x6D1E;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5373;&#x8BFB;&#x5230;&#x672A;&#x5199;&#x8FC7;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x8FD9;&#x90E8;&#x5206;&#x5C31;&#x76F4;&#x63A5;&#x8865;&#x96F6;&#x3002;</p>
+<h2 id="clone&#x53CA;extent&#x5171;&#x4EAB;"><a href="#clone&#x53CA;extent&#x5171;&#x4EAB;" class="headerlink" title="clone&#x53CA;extent&#x5171;&#x4EAB;"></a>clone&#x53CA;extent&#x5171;&#x4EAB;</h2><p>&#x524D;&#x9762;&#x8BF4;&#x5230;Bnode&#x5C31;&#x662F;&#x7528;&#x6765;&#x8BB0;&#x5F55;&#x5171;&#x4EAB;&#x7684;lextent&#xFF0C;&#x76EE;&#x524D;&#x662F;&#x5728;&#x505A;&#x5B8C;&#x5FEB;&#x7167;&#x540E;&#x5BF9;&#x539F;&#x5377;&#x8FDB;&#x884C;&#x5199;I/O&#x4F1A;&#x89E6;&#x53D1;cow&#xFF0C;&#x4ECE;&#x800C;&#x4EA7;&#x751F;clone&#x64CD;&#x4F5C;&#x3002;clone&#x65F6;&#x5C31;&#x662F;&#x5C06;&#x539F;&#x5BF9;&#x8C61;&#x7684;blob&#x4ECE;onode-&gt;blob_map&#x79FB;&#x5230;onode-&gt;bnode-&gt;blob_map&#xFF0C;&#x5E76;&#x4E14;&#x5C06;blob id&#x7F6E;&#x4E3A;&#x8D1F;&#x7684;&#xFF0C;&#x5E76;&#x8BBE;&#x7F6E;&#x5171;&#x4EAB;&#x6807;&#x8BB0;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x65B0;&#x7684;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#x7684;onode-&gt;bnode&#x6307;&#x5411;&#x539F;&#x5BF9;&#x8C61;&#x7684;onode-&gt;bnode&#xFF0C;&#x5E76;&#x4E14;&#x7528;&#x539F;onode&#x91CC;&#x7684;lextents&#x91CC;&#x7684;&#x503C;&#x8D4B;&#x7ED9;&#x65B0;&#x7684;onode&#x7684;lextents&#xFF0C;&#x4ECE;&#x800C;&#x8FBE;&#x5230;&#x5171;&#x4EAB;extent&#x7684;&#x76EE;&#x7684;&#xFF0C;&#x56FE;&#x793A;&#x4EC5;&#x4F9B;&#x53C2;&#x8003;&#x3002;<br><img src="/2016/08/19/ceph-bluestore/clone.png" alt="ceph-bluestore"><br>&#x5728;clone&#x5B8C;&#x4E4B;&#x540E;&#xFF0C;&#x7EE7;&#x7EED;&#x5BF9;&#x539F;&#x5BF9;&#x8C61;&#x8FDB;&#x884C;&#x5199;I/O&#x64CD;&#x4F5C;&#x65F6;&#xFF0C;&#x5F53;&#x78B0;&#x5230;&#x5171;&#x4EAB;&#x7684;blob&#x65F6;&#x5C31;&#x9700;&#x8981;&#x8DF3;&#x8FC7;&#xFF0C;&#x65B0;&#x751F;&#x6210;blob&#xFF0C;&#x5E76;&#x4E14;&#x53D6;&#x6D88;&#x5BF9;&#x539F;&#x6765;&#x90A3;&#x90E8;&#x5206;lextent&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x5728;&#x540E;&#x7EED;&#x7684;&#x7A7A;&#x95F4;&#x91CA;&#x653E;&#x65F6;&#x7684;&#x5224;&#x65AD;&#x4F9D;&#x636E;&#x5C31;&#x662F;&#x5426;&#x8FD8;&#x6709;&#x5F15;&#x7528;&#x3002;<br><img src="/2016/08/19/ceph-bluestore/cloneio.png" alt="ceph-bluestore"></p>
+<h1 id="&#x5C0F;&#x7ED3;"><a href="#&#x5C0F;&#x7ED3;" class="headerlink" title="&#x5C0F;&#x7ED3;"></a>&#x5C0F;&#x7ED3;</h1><p>&#x672C;&#x6587;&#x603B;&#x4F53;&#x4E0A;&#x4ECB;&#x7ECD;&#x4E86;bluestore&#x7684;&#x67B6;&#x6784;&#x3001;&#x76F8;&#x5173;&#x5143;&#x6570;&#x636E;&#x53CA;&#x5185;&#x90E8;I/O&#x6620;&#x5C04;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x8FD9;&#x8FD8;&#x53EA;&#x662F;bluestore&#x7684;&#x51B0;&#x5C71;&#x4E00;&#x89D2;&#xFF0C;&#x540E;&#x7EED;&#x4F1A;&#x9646;&#x7EED;&#x5BF9;bluestore&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x3001;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x5668;&#x3001;&#x7F13;&#x5B58;&#x7BA1;&#x7406;&#x3001;&#x538B;&#x7F29;&#x7B49;&#x5B9E;&#x73B0;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ceph/" rel="tag">#ceph</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/02/ceph-recover-optimize/" rel="next" title="ceph恢复优化">
+                <i class="fa fa-chevron-left"></i> ceph恢复优化
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/08/19/ceph-bluestore/"
+           data-title="ceph存储引擎bluestore解析" data-url="http://yoursite.com/2016/08/19/ceph-bluestore/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Wu Dong" />
+          <p class="site-author-name" itemprop="name">Wu Dong</p>
+          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">25</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#bluestore整体架构"><span class="nav-number">1.</span> <span class="nav-text">bluestore整体架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#bluestore元数据"><span class="nav-number">2.</span> <span class="nav-text">bluestore元数据</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#I-O读写映射逻辑"><span class="nav-number">3.</span> <span class="nav-text">I/O读写映射逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#写I-O处理"><span class="nav-number">3.1.</span> <span class="nav-text">写I/O处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#do-write-big"><span class="nav-number">3.1.1.</span> <span class="nav-text">do_write_big</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#do-write-small"><span class="nav-number">3.1.2.</span> <span class="nav-text">do_write_small</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1）没有找到可以复用的blob，新生成blob"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">1）没有找到可以复用的blob，新生成blob</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2）找到可以复用的blob"><span class="nav-number">3.1.2.2.</span> <span class="nav-text">2）找到可以复用的blob</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整体写I-O的逻辑"><span class="nav-number">3.1.3.</span> <span class="nav-text">整体写I/O的逻辑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读I-O的处理"><span class="nav-number">3.2.</span> <span class="nav-text">读I/O的处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#clone及extent共享"><span class="nav-number">3.3.</span> <span class="nav-text">clone及extent共享</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wu Dong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sysnote"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

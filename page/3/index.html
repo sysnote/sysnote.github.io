@@ -261,6 +261,130 @@
             
               
                 
+                <a class="post-title-link" href="/2014/05/19/directio-merge/" itemprop="url">
+                  direct IO中io合并的奇怪现象分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-05-19T17:07:13+08:00" content="2014-05-19">
+              2014-05-19
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/05/19/directio-merge/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/05/19/directio-merge/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x300A;&#x5757;&#x8BBE;&#x5907;&#x5185;&#x6838;&#x53C2;&#x6570;max_segments&#x548C;max_sectors_kb&#x89E3;&#x6790;&#x300B;&#x4ECB;&#x7ECD;&#x4E86;max_sectors_kb&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x5BF9;device mapper&#x8BBE;&#x5907;&#x548C;&#x8F6F;raid&#x8BBE;&#x5907;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x5B9E;&#x9645;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#xFF0C;&#x53D1;&#x73B0;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x73B0;&#x8C61;&#xFF1A;&#x4E00;&#x5757;&#x7269;&#x7406;&#x76D8;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x76D8;&#x4E0A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;device mapper&#x8BBE;&#x5907;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x8FD9;&#x4E2A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;direct IO&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5927;&#x5757;&#x5199;&#x6216;&#x8005;&#x987A;&#x5E8F;&#x5927;&#x5757;&#x5199;&#xFF08;&#x968F;&#x673A;&#x8BFB;&#x548C;&#x987A;&#x5E8F;&#x8BFB;&#x6CA1;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x8981;&#x5927;&#x4E8E;dm&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#xFF0C;&#x4F46;&#x662F;&#x5C0F;&#x4E8E;dm&#x5E95;&#x5C42;&#x8BBE;&#x5907;&#xFF08;&#x8FD9;&#x91CC;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF09;&#x7684;max_sectors_kb&#xFF0C;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x53D1;&#x73B0;&#x5728;3.2&#x5185;&#x6838;&#x91CC;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x5E76;&#x6CA1;&#x6709;&#x5408;&#x5E76;&#xFF0C;&#x4F46;&#x662F;&#x5728;3.10&#x5185;&#x6838;&#x4E0B;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x786E;&#x662F;&#x5408;&#x5E76;&#x4E86;&#xFF08;&#x5408;&#x5E76;&#x540E;&#x7684;&#x5927;&#x5C0F;&#x4E3A;&#x7528;&#x6237;&#x53D1;&#x7684;io&#x5757;&#x5927;&#x5C0F;&#xFF09;&#x3002;&#x5177;&#x4F53;&#x73B0;&#x8C61;&#x4E0B;&#x9762;&#x4EE5;&#x4F8B;&#x5B50;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
+<h1 id="1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"><a href="#1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;" class="headerlink" title="1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"></a>1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;</h1><p>&#x8FD9;&#x91CC;&#x9009;&#x53D6;3.2.57&#x5185;&#x6838;&#x548C;3.10.11&#x5185;&#x6838;&#x4F5C;&#x4E3A;&#x5BF9;&#x6BD4;&#x3002;</p>
+<h2 id="1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"><a href="#1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;" class="headerlink" title="1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"></a>1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;</h2><p>&#x7269;&#x7406;&#x76D8;sdg&#xFF0C;&#x5728;&#x5176;&#x4E0A;&#x521B;&#x5EFA;&#x7684;10G&#x7684;device mapper&#x8BBE;&#x5907;dmtest1&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x8BBE;&#x5907;&#x4E3A;dm-71<br>1&#xFF09;&#x9ED8;&#x8BA4;&#x7684;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_segments</span></span><br><span class="line">128</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_segments</span></span><br><span class="line">128</span><br></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/05/19/directio-merge/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2014/05/12/max-seg-max-sec/" itemprop="url">
                   块设备内核参数max_segments和max_sectors_kb解析
                 </a>
@@ -793,7 +917,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">24</span>
+              <span class="site-state-item-count">25</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
