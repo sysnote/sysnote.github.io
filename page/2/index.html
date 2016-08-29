@@ -261,6 +261,132 @@
             
               
                 
+                <a class="post-title-link" href="/2015/11/25/ceph-osd-rw1/" itemprop="url">
+                  ceph OSD读写流程（1）–主OSD的处理流程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2015-11-25T15:48:55+08:00" content="2015-11-25">
+              2015-11-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2015/11/25/ceph-osd-rw1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/11/25/ceph-osd-rw1/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&#x672C;&#x6587;&#x57FA;&#x4E8E;hammer&#x7248;&#x672C;&#x5BF9;OSD&#x7684;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;&#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF0C;&#x5BF9;&#x4E8E;&#x6D88;&#x606F;&#x7684;&#x63A5;&#x6536;&#x5904;&#x7406;&#x540E;&#x7EED;&#x4F1A;&#x5355;&#x72EC;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;<br><img src="/2015/11/25/ceph-osd-rw1/primary-path.png" alt="primary-path"><br>&#x5177;&#x4F53;&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x4ECE;&#x56FE;&#x4E2D;&#x5C31;&#x53EF;&#x4EE5;&#x4F53;&#x73B0;&#x51FA;&#x6765;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x4F5C;&#x8FC7;&#x591A;&#x7684;&#x63CF;&#x8FF0;&#xFF0C;&#x9700;&#x8981;&#x63D0;&#x7684;&#x51E0;&#x70B9;&#xFF1A;</p>
+<ul>
+<li>1&#xFF09;&#x8BFB;&#x8BF7;&#x6C42;&#x7531;Primary OSD&#x6765;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF1B;</li>
+<li>2&#xFF09;&#x5BF9;&#x4E8E;&#x5199;&#x8BF7;&#x6C42;&#xFF0C;Primary OSD&#x5148;&#x53D1;&#x6D88;&#x606F;&#x5230;&#x526F;&#x672C;OSD&#xFF0C;&#x7136;&#x540E;&#x8BB0;&#x5F55;PGLog&#xFF08;&#x5728;log_operation&#x91CC;&#x53EA;&#x662F;&#x6784;&#x9020;transaction&#xFF0C;&#x771F;&#x6B63;&#x5199;&#x5230;&#x76D8;&#x662F;&#x548C;journal&#x4E00;&#x8D77;&#x5199;&#x7684;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x751F;&#x6210;&#x672C;&#x5730;&#x4E8B;&#x52A1;&#x8FDB;&#x884C;&#x672C;&#x5730;&#x5199;&#x7684;&#x5904;&#x7406;&#xFF1B;</li>
+<li>3&#xFF09;&#x5199;&#x8BF7;&#x6C42;&#x6D89;&#x53CA;&#x5230;&#x4E24;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x5199;journal&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x5199;&#x5230;&#x672C;&#x5730;&#x7F13;&#x5B58;&#xFF08;page cache&#xFF09;&#xFF0C;&#x5BF9;&#x4E8E;&#x6BCF;&#x4E00;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x6709;&#x8FD9;&#x4E24;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x6BCF;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x662F;&#x5148;&#x5199;journal&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x5230;&#x672C;&#x5730;&#x7F13;&#x5B58;&#xFF0C;&#x5982;&#x679C;&#x662F;3&#x526F;&#x672C;&#xFF0C;&#x5C31;&#x6D89;&#x53CA;&#x5230;6&#x6B21;&#x5199;&#x64CD;&#x4F5C;&#xFF1B;</li>
+<li>4&#xFF09;Primary OSD&#x521B;&#x5EFA;&#x4E86;2&#x4E2A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x6765;&#x5904;&#x7406;&#x5199;journal&#x548C;&#x5199;&#x5230;&#x7F13;&#x5B58;&#xFF08;&#x5206;&#x522B;&#x662F;<strong>C_OSD_RepopCommit</strong>&#x548C;<strong>C_OSD_RepOpApplied</strong>&#xFF09;&#xFF0C;&#x4E3B;&#x526F;&#x672C;&#x7684;&#x5199;&#x548C;&#x4ECE;&#x526F;&#x672C;&#x7684;&#x5199;&#x6CA1;&#x6709;&#x5148;&#x540E;&#x987A;&#x5E8F;&#xFF0C;&#x6709;&#x53EF;&#x80FD;&#x4E3B;&#x7684;journal&#x5148;&#x5199;&#x5B8C;&#xFF0C;&#x4E5F;&#x6709;&#x53EF;&#x80FD;&#x4ECE;&#x7684;journal&#x5148;&#x5199;&#x5B8C;&#xFF0C;ceph&#x4E0D;&#x7BA1;&#x8FD9;&#x4E2A;&#x987A;&#x5E8F;&#xFF0C;&#x53EA;&#x8981;&#x4FDD;&#x8BC1;3&#x526F;&#x672C;&#x90FD;&#x5199;&#x5B8C;&#x4E86;&#x4E4B;&#x540E;&#x624D;&#x8FD4;&#x56DE;&#x5BA2;&#x6237;&#x7AEF;&#x54CD;&#x5E94;&#xFF08;degrade&#x60C5;&#x51B5;&#x4E0B;&#x4F8B;&#x5916;&#xFF09;&#xFF0C;3&#x4E2A;&#x526F;&#x672C;&#x7684;journal&#x5199;&#x5B8C;&#x6210;&#xFF08;all_commit&#xFF09;&#xFF0C;&#x4F1A;&#x8FD4;&#x56DE;&#x5BA2;&#x6237;&#x7AEF;&#x201C;&#x5199;&#x64CD;&#x4F5C;&#x5B8C;&#x6210;&#x201D;&#xFF0C;&#x800C;3&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x5199;&#x672C;&#x5730;&#x7F13;&#x5B58;&#x5B8C;&#x6210;&#x540E;&#xFF08;all_applied&#xFF09;&#xFF0C;&#x624D;&#x8FD4;&#x56DE;&#x5BA2;&#x6237;&#x7AEF;&#x201C;&#x6570;&#x636E;&#x53EF;&#x8BFB;&#x201D;&#xFF1B;</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2015/10/20/ceph-rbd-obj/" itemprop="url">
                   ceph rbd中的对象解析
                 </a>
@@ -1388,129 +1514,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2014/06/20/bcache-analysis/" itemprop="url">
-                  bcache浅析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-06-20T17:43:08+08:00" content="2014-06-20">
-              2014-06-20
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/storage/" itemprop="url" rel="index">
-                    <span itemprop="name">storage</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2014/06/20/bcache-analysis/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/06/20/bcache-analysis/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="1-&#x7B80;&#x4ECB;"><a href="#1-&#x7B80;&#x4ECB;" class="headerlink" title="1.&#x7B80;&#x4ECB;"></a>1.&#x7B80;&#x4ECB;</h1><p>bcache&#x662F;linux&#x5185;&#x6838;&#x5757;&#x8BBE;&#x5907;&#x5C42;cache&#xFF0C;&#x7C7B;&#x4F3C;&#x4E8E;flashcache&#x4F7F;&#x7528;ssd&#x4F5C;&#x4E3A;hdd&#x7684;&#x7F13;&#x5B58;&#x65B9;&#x6848;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;flashcache&#xFF0C;bcache&#x66F4;&#x52A0;&#x7075;&#x6D3B;&#xFF0C;&#x652F;&#x6301;ssd&#x4F5C;&#x4E3A;&#x591A;&#x5757;hdd&#x7684;&#x5171;&#x4EAB;&#x7F13;&#x5B58;&#xFF0C;&#x5E76;&#x4E14;&#x8FD8;&#x652F;&#x6301;&#x591A;&#x5757;ssd&#xFF08;&#x8FD8;&#x672A;&#x5B8C;&#x5584;&#xFF09;&#xFF0C;&#x80FD;&#x591F;&#x5728;&#x8FD0;&#x884C;&#x4E2D;&#x52A8;&#x6001;&#x589E;&#x52A0;&#xFF0C;&#x5220;&#x9664;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#x548C;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x3002;&#x4ECE;3.10&#x5F00;&#x59CB;&#xFF0C;bcache&#x8FDB;&#x5165;&#x5185;&#x6838;&#x4E3B;&#x7EBF;&#x3002;bcache&#x652F;&#x6301;writeback&#x3001;writethrough&#x3001;writearoud&#x4E09;&#x79CD;&#x7B56;&#x7565;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F;wriththrough&#xFF0C;&#x53EF;&#x4EE5;&#x52A8;&#x6001;&#x4FEE;&#x6539;&#xFF0C;&#x7F13;&#x5B58;&#x66FF;&#x6362;&#x65B9;&#x5F0F;&#x652F;&#x6301;lru&#x3001;fifo&#x548C;random&#x4E09;&#x79CD;&#x3002;&#x4E0B;&#x9762;&#x4ECE;&#x51E0;&#x4E2A;&#x65B9;&#x9762;&#x4ECB;&#x7ECD;bcache&#x7684;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x3002;</p>
-<h1 id="2-&#x603B;&#x4F53;&#x7ED3;&#x6784;"><a href="#2-&#x603B;&#x4F53;&#x7ED3;&#x6784;" class="headerlink" title="2.&#x603B;&#x4F53;&#x7ED3;&#x6784;"></a>2.&#x603B;&#x4F53;&#x7ED3;&#x6784;</h1><p>bcache&#x7684;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;<br><img src="/2014/06/20/bcache-analysis/arch.png" alt="arch"><br>bcache&#x4E2D;&#x662F;&#x4EE5;cache set&#x6765;&#x5212;&#x5206;&#x4E0D;&#x540C;&#x5B58;&#x50A8;&#x96C6;&#x5408;&#xFF0C;&#x4E00;&#x4E2A;cache set&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;ssd&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;hdd&#xFF09;&#x3002;bcache&#x5BF9;&#x5916;&#x8F93;&#x51FA;&#x7ED9;&#x7528;&#x6237;&#x4F7F;&#x7528;&#x7684;&#x662F;/dev/bcache<N>&#x8FD9;&#x79CD;&#x8BBE;&#x5907;&#xFF0C;&#x6BCF;&#x4E2A;bcache<N>&#x8BBE;&#x5907;&#x90FD;&#x4E0E;&#x4E00;&#x4E2A;&#x540E;&#x7AEF;&#x7269;&#x7406;&#x76D8;&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;&#x7528;&#x6237;&#x5BF9;&#x4E0D;&#x540C;bcache&#x8BBE;&#x5907;&#x7684;io&#x4F1A;&#x7F13;&#x5B58;&#x5728;ssd&#x4E2D;&#xFF0C;&#x5237;&#x810F;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5199;&#x5230;&#x5404;&#x81EA;&#x5BF9;&#x5E94;&#x7684;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x4E0A;&#x3002;&#x56E0;&#x6B64;&#xFF0C;bcache&#x6269;&#x5BB9;&#x5F88;&#x5BB9;&#x6613;&#xFF0C;&#x53EA;&#x8981;&#x6CE8;&#x518C;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x5373;&#x53EF;&#x3002;<br></N></N></p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2014/06/20/bcache-analysis/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1556,7 +1559,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">26</span>
+              <span class="site-state-item-count">27</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

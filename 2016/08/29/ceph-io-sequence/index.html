@@ -1,0 +1,682 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ceph," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="System Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5206;&amp;#x5E03;&amp;#x5F0F;&amp;#x7CFB;&amp;#x7EDF;&amp;#x4E2D;&amp;#x7ECF;&amp;#x5E38;&amp;#x9700;&amp;#x8981;&amp;#x8003;&amp;#x8651;&amp;#x5BF9;&amp;#x8C61;&amp;#xFF08;&amp;#x6216;&amp;#x8005;&amp;#x8BB0;&amp;#x5F55;&amp;#x3001;&amp;#x6587;&amp;#x4EF6;&amp;#x3001;&amp;#x6570;&amp;#x636E;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceph中对象读写的顺序性及并发性保证">
+<meta property="og:url" content="http://yoursite.com/2016/08/29/ceph-io-sequence/index.html">
+<meta property="og:site_name" content="System Notes">
+<meta property="og:description" content="&amp;#x5206;&amp;#x5E03;&amp;#x5F0F;&amp;#x7CFB;&amp;#x7EDF;&amp;#x4E2D;&amp;#x7ECF;&amp;#x5E38;&amp;#x9700;&amp;#x8981;&amp;#x8003;&amp;#x8651;&amp;#x5BF9;&amp;#x8C61;&amp;#xFF08;&amp;#x6216;&amp;#x8005;&amp;#x8BB0;&amp;#x5F55;&amp;#x3001;&amp;#x6587;&amp;#x4EF6;&amp;#x3001;&amp;#x6570;&amp;#x636E;">
+<meta property="og:image" content="http://yoursite.com/2016/08/29/ceph-io-sequence/pg.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/29/ceph-io-sequence/msg.png">
+<meta property="og:image" content="http://yoursite.com/2016/08/29/ceph-io-sequence/obj_lock.png">
+<meta property="og:updated_time" content="2016-08-29T12:06:00.239Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceph中对象读写的顺序性及并发性保证">
+<meta name="twitter:description" content="&amp;#x5206;&amp;#x5E03;&amp;#x5F0F;&amp;#x7CFB;&amp;#x7EDF;&amp;#x4E2D;&amp;#x7ECF;&amp;#x5E38;&amp;#x9700;&amp;#x8981;&amp;#x8003;&amp;#x8651;&amp;#x5BF9;&amp;#x8C61;&amp;#xFF08;&amp;#x6216;&amp;#x8005;&amp;#x8BB0;&amp;#x5F55;&amp;#x3001;&amp;#x6587;&amp;#x4EF6;&amp;#x3001;&amp;#x6570;&amp;#x636E;">
+<meta name="twitter:image" content="http://yoursite.com/2016/08/29/ceph-io-sequence/pg.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> ceph中对象读写的顺序性及并发性保证 | System Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">System Notes</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ceph中对象读写的顺序性及并发性保证
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-29T19:54:23+08:00" content="2016-08-29">
+              2016-08-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/29/ceph-io-sequence/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/29/ceph-io-sequence/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x5206;&#x5E03;&#x5F0F;&#x7CFB;&#x7EDF;&#x4E2D;&#x7ECF;&#x5E38;&#x9700;&#x8981;&#x8003;&#x8651;&#x5BF9;&#x8C61;&#xFF08;&#x6216;&#x8005;&#x8BB0;&#x5F55;&#x3001;&#x6587;&#x4EF6;&#x3001;&#x6570;&#x636E;&#x5757;&#x7B49;&#xFF09;&#x7684;&#x8BFB;&#x5199;&#x7684;&#x987A;&#x5E8F;&#x4EE5;&#x53CA;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x95EE;&#x9898;&#x3002;&#x901A;&#x5E38;&#x6765;&#x8BF4;&#xFF0C;&#x5982;&#x679C;&#x4E24;&#x4E2A;&#x5BF9;&#x8C61;&#x6CA1;&#x6709;&#x5171;&#x4EAB;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5E76;&#x53D1;&#x7684;&#x8BBF;&#x95EE;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x5171;&#x4EAB;&#x7684;&#x90E8;&#x5206;&#xFF0C;&#x5C31;&#x9700;&#x8981;&#x5BF9;&#x8FD9;&#x90E8;&#x5206;&#x8D44;&#x6E90;&#x8FDB;&#x884C;&#x52A0;&#x9501;&#xFF1B;&#x800C;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x8BFB;&#x5199;&#xFF08;&#x5C24;&#x5176;&#x662F;&#x5E76;&#x53D1;&#x5199;&#x66F4;&#x65B0;&#x65F6;&#xFF09;&#xFF0C;&#x5C31;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x987A;&#x5E8F;&#x6027;&#x4EE5;&#x53CA;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x7684;&#x63A7;&#x5236;&#xFF0C;&#x4EE5;&#x514D;&#x6570;&#x636E;&#x9519;&#x4E71;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5BF9;ceph&#x4E2D;&#x5BF9;&#x8C61;&#x8BFB;&#x5199;&#x7684;&#x987A;&#x5E8F;&#x53CA;&#x5E76;&#x53D1;&#x6027;&#x4FDD;&#x8BC1;&#x673A;&#x5236;&#x8FDB;&#x884C;&#x4ECB;&#x7ECD;&#x3002;</p>
+<h1 id="PG&#x7684;&#x6982;&#x5FF5;"><a href="#PG&#x7684;&#x6982;&#x5FF5;" class="headerlink" title="PG&#x7684;&#x6982;&#x5FF5;"></a>PG&#x7684;&#x6982;&#x5FF5;</h1><p>ceph&#x4E2D;&#x5F15;&#x5165;PG&#xFF08;Placement Group&#xFF09;&#x7684;&#x6982;&#x5FF5;&#xFF0C;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x903B;&#x8F91;&#x4E0A;&#x7684;&#x7EC4;&#xFF0C;&#x901A;&#x8FC7;crush&#x7B97;&#x6CD5;&#x6620;&#x5C04;&#x5230;&#x4E00;&#x7EC4;OSD&#x4E0A;&#xFF0C;&#x6BCF;&#x4E2A;PG&#x91CC;&#x5305;&#x542B;&#x5B8C;&#x6574;&#x7684;&#x526F;&#x672C;&#x5173;&#x7CFB;&#xFF0C;&#x6BD4;&#x5982;3&#x4E2A;&#x6570;&#x636E;&#x526F;&#x672C;&#x5206;&#x5E03;&#x5230;&#x4E00;&#x4E2A;PG&#x91CC;&#x7684;3&#x4E2A;&#x4E0D;&#x540C;&#x7684;OSD&#x4E0A;&#x3002;&#x4E0B;&#x9762;&#x5F15;&#x7528;ceph&#x8BBA;&#x6587;&#x4E2D;&#x7684;&#x4E00;&#x5F20;&#x56FE;&#x5C31;&#x53EF;&#x4EE5;&#x6BD4;&#x8F83;&#x76F4;&#x89C2;&#x7684;&#x7406;&#x89E3;&#x4E86;&#x3002;&#x5C06;&#x6587;&#x4EF6;&#x6309;&#x7167;&#x6307;&#x5B9A;&#x7684;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#x5206;&#x5272;&#x6210;&#x591A;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x6BCF;&#x4E2A;&#x5BF9;&#x8C61;&#x6839;&#x636E;hash&#x6620;&#x5C04;&#x5230;&#x67D0;&#x4E2A;pg&#xFF0C;&#x7136;&#x540E;&#x518D;&#x6839;&#x636E;crush&#x7B97;&#x6CD5;&#x6620;&#x5C04;&#x5230;&#x540E;&#x7AEF;&#x7684;&#x67D0;&#x51E0;&#x4E2A;osd&#x4E0A;&#x3002;<br><img src="/2016/08/29/ceph-io-sequence/pg.png" alt="ceph-io-sequence"></p>
+<h1 id="&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;"><a href="#&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;" class="headerlink" title="&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;"></a>&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;</h1><p>&#x4E0D;&#x540C;&#x7684;&#x5BF9;&#x8C61;&#x6709;&#x53EF;&#x80FD;&#x843D;&#x5230;&#x540C;&#x4E00;&#x4E2A;pg&#x91CC;&#xFF0C;ceph&#x5B9E;&#x73B0;&#x91CC;&#xFF0C;&#x5728;OSD&#x7684;&#x5904;&#x7406;&#x7EBF;&#x7A0B;&#x4E2D;&#x5C31;&#x4F1A;&#x7ED9;PG&#x52A0;&#x9501;&#xFF0C;&#x4E00;&#x76F4;&#x5230;queue_transactions&#x91CC;&#x628A;&#x4E8B;&#x52A1;&#x653E;&#x5230;journal&#x7684;&#x961F;&#x5217;&#x91CC;&#xFF08;&#x4EE5;filestore&#x4E3A;&#x4F8B;&#xFF09;&#x624D;&#x91CA;&#x653E;PG&#x7684;&#x9501;&#x3002;&#x4ECE;&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;PG&#x91CC;&#x7684;&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#xFF0C;&#x662F;&#x901A;&#x8FC7;PG&#x9501;&#x6765;&#x8FDB;&#x884C;&#x5E76;&#x53D1;&#x7684;&#x63A7;&#x5236;&#xFF0C;&#x597D;&#x5728;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x4E2D;&#x6CA1;&#x6709;&#x6D89;&#x53CA;&#x5230;&#x5BF9;&#x8C61;&#x7684;I/O&#xFF0C;&#x4E0D;&#x4F1A;&#x592A;&#x5F71;&#x54CD;&#x6548;&#x7387;&#xFF1B;&#x5BF9;&#x4E8E;&#x4E0D;&#x540C;PG&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8FDB;&#x884C;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x3002;<br><a id="more"></a></p>
+<h1 id="&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x987A;&#x5E8F;&#x63A7;&#x5236;"><a href="#&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x987A;&#x5E8F;&#x63A7;&#x5236;" class="headerlink" title="&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x987A;&#x5E8F;&#x63A7;&#x5236;"></a>&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x987A;&#x5E8F;&#x63A7;&#x5236;</h1><p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x4ECB;&#x7ECD;&#x53EF;&#x4EE5;&#x5F97;&#x77E5;&#xFF0C;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x8BBF;&#x95EE;&#x4E5F;&#x4F1A;&#x53D7;&#x5230;PG&#x9501;&#x7684;&#x9650;&#x5236;&#xFF0C;&#x4F46;&#x8FD9;&#x662F;&#x5728;OSD&#x7684;&#x5904;&#x7406;&#x903B;&#x8F91;&#x91CC;&#x3002;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x8BBF;&#x95EE;&#xFF0C;&#x8981;&#x8003;&#x8651;&#x7684;&#x60C5;&#x51B5;&#x6BD4;&#x8F83;&#x590D;&#x6742;&#x3002;&#x4ECE;&#x7528;&#x6237;&#x4F7F;&#x7528;&#x573A;&#x666F;&#x4E0A;&#x6765;&#x8BF4;&#xFF0C;&#x6709;&#x4E24;&#x79CD;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x3002;&#x6BD4;&#x5982;&#xFF1A;<br>1&#xFF09;&#x4E00;&#x4E2A;client&#x60C5;&#x51B5;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x5BF9;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x66F4;&#x65B0;&#x5904;&#x7406;&#x903B;&#x8F91;&#x662F;&#x4E32;&#x884C;&#x7684;&#xFF0C;&#x8981;&#x7B49;&#x524D;&#x4E00;&#x6B21;&#x5199;&#x8BF7;&#x6C42;&#x5B8C;&#x6210;&#xFF0C;&#x518D;&#x8FDB;&#x884C;&#x540E;&#x4E00;&#x6B21;&#x7684;&#x8BFB;&#x53D6;&#x6216;&#x8005;&#x5199;&#x66F4;&#x65B0;&#xFF1B;<br>2&#xFF09;&#x591A;&#x4E2A;client&#x5BF9;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#xFF0C;&#x8FD9;&#x6837;&#x7684;&#x5E94;&#x7528;&#x573A;&#x666F;&#x7C7B;&#x4F3C;&#x4E8E;NFS&#xFF0C;&#x76EE;&#x524D;&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x7CFB;&#x7EDF;&#x91CC;&#x5F88;&#x5C11;&#x80FD;&#x505A;&#x5230;&#xFF0C;&#x6D89;&#x53CA;&#x5230;&#x591A;&#x4E2A;client&#x540C;&#x65F6;&#x66F4;&#x65B0;&#x5E26;&#x6765;&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x95EE;&#x9898;&#xFF0C;&#x4E00;&#x822C;&#x90FD;&#x9700;&#x8981;&#x96C6;&#x7FA4;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x652F;&#x6301;&#xFF1B;</p>
+<p>&#x5BF9;&#x4E8E;&#x591A;client&#x7684;&#x573A;&#x666F;&#xFF0C;ceph&#x7684;rbd&#x4E5F;&#x662F;&#x4E0D;&#x80FD;&#x4FDD;&#x8BC1;&#x7684;&#xFF0C;cephfs&#x6216;&#x8BB8;&#x53EF;&#x4EE5;&#xFF08;&#x6CA1;&#x6DF1;&#x5165;&#x7814;&#x7A76;&#x8FC7;&#xFF0C;&#x5F85;&#x53D6;&#x8BC1;&#xFF09;&#x3002;&#x56E0;&#x6B64;&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x4EE5;&#x5355;client&#x8BBF;&#x95EE;ceph rbd&#x5757;&#x8BBE;&#x5907;&#x7684;&#x573A;&#x666F;&#x8FDB;&#x884C;&#x9610;&#x8FF0;&#xFF0C;&#x770B;&#x4E00;&#x4E2A;&#x6781;&#x7AEF;&#x7684;&#x4F8B;&#x5B50;&#xFF1A;<strong>&#x540C;&#x4E00;&#x4E2A;client&#x5148;&#x540E;&#x53D1;&#x9001;&#x4E86;2&#x6B21;&#x5BF9;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5F02;&#x6B65;&#x5199;&#x8BF7;&#x6C42;</strong>&#x3002;&#x4EE5;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#x5C55;&#x5F00;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
+<h2 id="tcp&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;"><a href="#tcp&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;" class="headerlink" title="tcp&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;"></a>tcp&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;</h2><p>&#x4E86;&#x89E3;tcp&#x7684;&#x90FD;&#x77E5;&#x9053;&#xFF0C;tcp&#x4F7F;&#x7528;&#x5E8F;&#x53F7;&#x6765;&#x4FDD;&#x8BC1;&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x3002;&#x53D1;&#x9001;&#x65B9;&#x6BCF;&#x6B21;&#x53D1;&#x9001;&#x6570;&#x636E;&#x65F6;&#xFF0C;TCP&#x5C31;&#x7ED9;&#x6BCF;&#x4E2A;&#x6570;&#x636E;&#x5305;&#x5206;&#x914D;&#x4E00;&#x4E2A;&#x5E8F;&#x5217;&#x53F7;&#x5E76;&#x4E14;&#x5728;&#x4E00;&#x4E2A;&#x7279;&#x5B9A;&#x7684;&#x65F6;&#x95F4;&#x5185;&#x7B49;&#x5F85;&#x63A5;&#x6536;&#x4E3B;&#x673A;&#x5BF9;&#x5206;&#x914D;&#x7684;&#x8FD9;&#x4E2A;&#x5E8F;&#x5217;&#x53F7;&#x8FDB;&#x884C;&#x786E;&#x8BA4;&#xFF0C;&#x5982;&#x679C;&#x53D1;&#x9001;&#x65B9;&#x5728;&#x4E00;&#x4E2A;&#x7279;&#x5B9A;&#x65F6;&#x95F4;&#x5185;&#x6CA1;&#x6709;&#x6536;&#x5230;&#x63A5;&#x6536;&#x65B9;&#x7684;&#x786E;&#x8BA4;&#xFF0C;&#x5219;&#x53D1;&#x9001;&#x65B9;&#x4F1A;&#x91CD;&#x4F20;&#x6B64;&#x6570;&#x636E;&#x5305;&#x3002;&#x63A5;&#x6536;&#x65B9;&#x5229;&#x7528;&#x5E8F;&#x5217;&#x53F7;&#x5BF9;&#x63A5;&#x6536;&#x7684;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x786E;&#x8BA4;&#xFF0C;&#x4EE5;&#x4FBF;&#x68C0;&#x6D4B;&#x5BF9;&#x65B9;&#x53D1;&#x9001;&#x7684;&#x6570;&#x636E;&#x662F;&#x5426;&#x6709;&#x4E22;&#x5931;&#x6216;&#x8005;&#x4E71;&#x5E8F;&#x7B49;&#xFF0C;&#x63A5;&#x6536;&#x65B9;&#x4E00;&#x65E6;&#x6536;&#x5230;&#x5DF2;&#x7ECF;&#x987A;&#x5E8F;&#x5316;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x5B83;&#x5C31;&#x5C06;&#x8FD9;&#x4E9B;&#x6570;&#x636E;&#x6309;&#x6B63;&#x786E;&#x7684;&#x987A;&#x5E8F;&#x91CD;&#x7EC4;&#x6210;&#x6570;&#x636E;&#x6D41;&#x5E76;&#x4F20;&#x9012;&#x5230;&#x5E94;&#x7528;&#x5C42;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x3002;&#x6CE8;&#x610F;&#xFF1A;tcp&#x7684;&#x5E8F;&#x53F7;&#x662F;&#x7528;&#x6765;&#x4FDD;&#x8BC1;&#x540C;&#x4E00;&#x4E2A;tcp&#x8FDE;&#x63A5;&#x4E0A;&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x3002;</p>
+<h2 id="ceph&#x6D88;&#x606F;&#x5C42;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;"><a href="#ceph&#x6D88;&#x606F;&#x5C42;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;" class="headerlink" title="ceph&#x6D88;&#x606F;&#x5C42;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;"></a>ceph&#x6D88;&#x606F;&#x5C42;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;</h2><p>ceph&#x7684;&#x6D88;&#x606F;&#x91CC;&#x6709;&#x4E2A;seq&#x5E8F;&#x53F7;&#xFF0C;&#x4EE5;simple&#x6D88;&#x606F;&#x6A21;&#x578B;&#x4E3A;&#x4F8B;&#xFF0C;Pipe&#x91CC;&#x6709;3&#x4E2A;&#x5E8F;&#x53F7;&#xFF1A;in_seq&#xFF0C;in_seq_acked&#xFF0C;out_seq&#x3002;in_seq&#x662F;&#x5BF9;&#x4E8E;Reader&#x6765;&#x8BF4;&#xFF0C;&#x5DF2;&#x7ECF;&#x6536;&#x5230;&#x7684;&#x6D88;&#x606F;&#x7684;&#x5E8F;&#x53F7;&#xFF1B;in_seq_acked&#x8868;&#x793A;&#x6210;&#x529F;&#x5904;&#x7406;&#x5E76;&#x5E94;&#x7B54;&#x7684;&#x6D88;&#x606F;&#x5E8F;&#x53F7;&#xFF0C;&#x63A5;&#x6536;&#x7AEF;&#x6536;&#x5230;&#x53D1;&#x9001;&#x7AEF;&#x7684;&#x6D88;&#x606F;&#x5E76;&#x5904;&#x7406;&#x5B8C;&#x6210;&#x540E;&#x5C06;ack&#x6210;&#x529F;&#x53D1;&#x5230;&#x53D1;&#x9001;&#x7AEF;&#x540E;&#x8BBE;&#x7F6E;&#x7684;&#xFF1B;out_seq&#x662F;&#x53D1;&#x9001;&#x7AEF;&#x751F;&#x6210;&#x7684;&#xFF0C;&#x4E00;&#x822C;&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;&#x8FDE;&#x63A5;&#x65F6;&#x662F;&#x968F;&#x673A;&#x751F;&#x6210;&#x4E00;&#x4E2A;&#x5E8F;&#x53F7;&#xFF0C;&#x7136;&#x540E;&#x540E;&#x7EED;&#x7684;&#x6D88;&#x606F;&#x53D1;&#x9001;&#x65F6;out_seq&#x9012;&#x589E;&#x8D4B;&#x503C;&#x7ED9;&#x6D88;&#x606F;&#x7684;&#x5E8F;&#x53F7;m-&gt;seq&#x3002;<br><img src="/2016/08/29/ceph-io-sequence/msg.png" alt="ceph-io-sequence"></p>
+<p>&#x5F53;&#x7F51;&#x7EDC;&#x5F02;&#x5E38;&#x5BFC;&#x81F4;tcp&#x8FDE;&#x63A5;&#x4E2D;&#x65AD;&#x540E;&#xFF0C;&#x4F1A;&#x8C03;&#x7528;Pipe::fault&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x5C31;&#x662F;&#x5173;&#x95ED;socket&#xFF0C;&#x8C03;&#x7528;requeue_sent&#x628A;&#x6CA1;&#x6709;&#x6536;&#x5230;ack&#x7684;&#x6D88;&#x606F;&#x91CD;&#x65B0;&#x653E;&#x5165;out_q&#x961F;&#x5217;&#x5934;&#xFF08;&#x653E;&#x5728;&#x5934;&#x90E8;&#x4EE5;&#x4FBF;&#x4E8E;&#x53EF;&#x4EE5;&#x4F18;&#x5148;&#x5904;&#x7406;&#xFF09;&#xFF0C;&#x800C;&#x4E14;out_seq&#x4F1A;&#x9012;&#x51CF;&#xFF0C;&#x540E;&#x7EED;&#x4F1A;&#x4E0D;&#x65AD;&#x5C1D;&#x8BD5;&#x91CD;&#x65B0;&#x5EFA;&#x7ACB;&#x8FDE;&#x63A5;&#x3002;&#x8FD9;&#x6837;&#x518D;&#x91CD;&#x65B0;&#x5EFA;&#x7ACB;&#x8FDE;&#x63A5;&#x91CD;&#x53D1;&#x7684;&#x6D88;&#x606F;&#x6240;&#x5E26;&#x7684;seq&#x8FD8;&#x662F;&#x8DDF;&#x4E4B;&#x524D;&#x7684;&#x4E00;&#x6837;&#x3002;</p>
+<p>&#x56E0;&#x4E3A;&#x53D1;&#x9001;&#x7AEF;&#x8FDE;&#x63A5;&#x5F02;&#x5E38;&#x8C03;&#x7528;Pipe::fault&#x91CC;&#x4F1A;&#x5173;&#x95ED;socket&#xFF0C;&#x8FDB;&#x884C;tcp&#x7684;&#x8FDE;&#x63A5;&#x5173;&#x95ED;&#x7684;&#x5904;&#x7406;&#xFF0C;&#x5728;&#x63A5;&#x6536;&#x7AEF;&#x7EE7;&#x7EED;&#x8BFB;&#x7684;&#x65F6;&#x5019;&#x8BFB;&#x5230;0&#x8BA4;&#x4E3A;tcp_read&#x5931;&#x8D25;&#xFF0C;&#x56E0;&#x6B64;&#x4E5F;&#x4F1A;&#x8C03;&#x7528;Pipe::fault()&#x4ECE;&#x800C;&#x8C03;&#x7528;shutdown_socket&#x53BB;&#x5173;&#x95ED;socket&#x3002;&#x56E0;&#x6B64;&#x5BF9;&#x4E8E;&#x8FDE;&#x63A5;&#x5F02;&#x5E38;&#x65AD;&#x5F00;&#x540E;&#x518D;&#x91CD;&#x65B0;&#x5EFA;&#x7ACB;&#x8FDE;&#x63A5;&#x7684;&#x60C5;&#x51B5;&#xFF0C;in_seq&#x4E5F;&#x4E0D;&#x4F1A;&#x63A5;&#x7740;&#x4E4B;&#x524D;&#x7684;&#x5E8F;&#x53F7;&#xFF0C;&#x4ECD;&#x7136;&#x662F;&#x53D6;&#x51B3;&#x4E8E;&#x53D1;&#x9001;&#x7AEF;&#x751F;&#x6210;&#x7684;out_seq&#x3002;&#x56E0;&#x800C;&#x53EF;&#x4EE5;&#x4FDD;&#x8BC1;&#x6D88;&#x606F;&#x7684;&#x987A;&#x5E8F;&#x3002;</p>
+<h2 id="pg&#x5C42;&#x987A;&#x5E8F;&#x4FDD;&#x8BC1;&#x53CA;&#x5BF9;&#x8C61;&#x9501;&#x673A;&#x5236;"><a href="#pg&#x5C42;&#x987A;&#x5E8F;&#x4FDD;&#x8BC1;&#x53CA;&#x5BF9;&#x8C61;&#x9501;&#x673A;&#x5236;" class="headerlink" title="pg&#x5C42;&#x987A;&#x5E8F;&#x4FDD;&#x8BC1;&#x53CA;&#x5BF9;&#x8C61;&#x9501;&#x673A;&#x5236;"></a>pg&#x5C42;&#x987A;&#x5E8F;&#x4FDD;&#x8BC1;&#x53CA;&#x5BF9;&#x8C61;&#x9501;&#x673A;&#x5236;</h2><p>&#x4ECE;&#x6D88;&#x606F;&#x961F;&#x5217;&#x91CC;&#x53D6;&#x6D88;&#x606F;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x65F6;&#xFF0C;osd&#x7AEF;&#x5904;&#x7406;op&#x662F;&#x5212;&#x5206;&#x4E3A;&#x591A;&#x4E2A;shard&#xFF0C;&#x7136;&#x540E;&#x6BCF;&#x4E2A;shard&#x91CC;&#x53EF;&#x4EE5;&#x914D;&#x7F6E;&#x591A;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF0C;pg&#x6309;&#x7167;&#x53D6;&#x6A21;&#x7684;&#x65B9;&#x5F0F;&#x6620;&#x5C04;&#x5230;&#x4E0D;&#x540C;&#x7684;shard&#x91CC;&#x3002;&#x53E6;&#x5916;osd&#x5728;&#x5904;&#x7406;pg&#x65F6;&#xFF0C;&#x4ECE;&#x6D88;&#x606F;&#x961F;&#x5217;&#x91CC;&#x53D6;&#x51FA;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x5BF9;pg&#x52A0;&#x4E86;&#x5199;&#x9501;&#x7684;&#xFF0C;&#x800C;&#x4E14;&#x662F;&#x5728;&#x8BF7;&#x6C42;&#x4E0B;&#x53D1;&#x5230;store&#x540E;&#x7AEF;&#x624D;&#x91CA;&#x653E;&#x7684;&#x9501;&#xFF0C;&#x6240;&#x4EE5;&#x6D88;&#x606F;&#x961F;&#x5217;&#x91CC;&#x8FC7;&#x6765;&#x7684;&#x6D88;&#x606F;&#x6709;&#x5E8F;&#x540E;&#xFF0C;&#x5728;osd&#x7AEF;pg&#x8FD9;&#x4E00;&#x5C42;&#x5904;&#x7406;&#x65F6;&#x4E5F;&#x662F;&#x6709;&#x5E8F;&#x7684;&#x3002;</p>
+<p>&#x5BF9;&#x67D0;&#x4E2A;&#x5BF9;&#x8C61;&#x8FDB;&#x884C;&#x5199;&#x65F6;&#x4F1A;&#x5728;&#x5BF9;&#x8C61;&#x4E0A;&#x8FDB;&#x884C;&#x52A0;&#x9501;&#x64CD;&#x4F5C;ondisk_write_lock()&#xFF0C;&#x5BF9;&#x67D0;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x8BFB;&#x8BF7;&#x6C42;&#x4F1A;&#x5728;&#x5148;&#x5728;&#x5BF9;&#x8C61;&#x4E0A;&#x8FDB;&#x884C;&#x52A0;&#x9501;&#x64CD;&#x4F5C;ondisk_read_lock()&#x3002;&#x8FD9;&#x4E24;&#x4E2A;&#x64CD;&#x4F5C;&#x662F;&#x4E92;&#x65A5;&#x7684;&#xFF0C;&#x5F53;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x6709;&#x5199;&#x64CD;&#x4F5C;&#x8FD8;&#x5728;&#x8FDB;&#x884C;&#x65F6;&#xFF0C;&#x5C1D;&#x8BD5;ondisk_read_lock()&#x4F1A;&#x4E00;&#x76F4;&#x7B49;&#x7740;&#xFF1B;&#x540C;&#x6837;&#x7684;&#xFF0C;&#x5F53;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x6B63;&#x5728;&#x8FDB;&#x884C;&#x8BFB;&#x64CD;&#x4F5C;&#x65F6;&#xFF0C;&#x5C1D;&#x8BD5;ondisk_write_lock()&#x65F6;&#xFF0C;&#x4E5F;&#x662F;&#x4F1A;&#x7B49;&#x3002;&#x4E24;&#x8005;&#x52A0;&#x9501;&#x89E3;&#x9501;&#x7684;&#x5730;&#x65B9;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;&#x8BFB;&#x6570;&#x636E;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#x662F;&#x6301;&#x6709;&#x9501;&#x7684;&#xFF1B;&#x5199;&#x8BF7;&#x6C42;&#x8981;&#x7B49;&#x6570;&#x636E;&#x5199;&#x5230;&#x5E95;&#x5C42;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF08;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7F13;&#x5B58;&#x91CC;&#xFF09;&#x624D;&#x91CA;&#x653E;&#x9501;&#xFF0C;&#x8FD9;&#x6837;&#x540E;&#x7EED;&#x5BF9;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x8BFB;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4ECE;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7F13;&#x5B58;&#x91CC;&#x8BFB;&#x5230;&#xFF08;&#x6216;&#x8005;&#x6570;&#x636E;&#x5237;&#x5230;&#x76D8;&#x4E0A;&#x540E;&#x4ECE;&#x78C1;&#x76D8;&#x4E0A;&#x8BFB;&#x53D6;&#xFF09;&#x3002;<br><img src="/2016/08/29/ceph-io-sequence/obj_lock.png" alt="ceph-io-sequence"></p>
+<p><strong>&#x6CE8;&#x610F;</strong>&#xFF1A;&#x8FD9;&#x91CC;&#x7684;&#x4E24;&#x4E2A;&#x9501;&#x64CD;&#x4F5C;&#x9650;&#x5236;&#x7684;&#x662F;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x4E0A;&#x7684;&#x8BFB;&#x548C;&#x5199;&#x7684;&#x5E76;&#x53D1;&#xFF0C;&#x5BF9;&#x4E8E;&#x8BFB;&#x548C;&#x8BFB;&#xFF0C;&#x5199;&#x548C;&#x5199;&#x7684;&#x5E76;&#x53D1;&#x5E76;&#x6CA1;&#x6709;&#x63A7;&#x5236;&#x3002;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x4E24;&#x4E2A;&#x8BFB;&#x8BF7;&#x6C42;&#x7406;&#x8BBA;&#x6765;&#x8BF4;&#x4E0D;&#x4F1A;&#x51FA;&#x95EE;&#x9898;&#xFF08;&#x5B9E;&#x9645;&#x4E0A;&#x4E0D;&#x4F1A;&#x540C;&#x65F6;&#x53D1;&#x751F;&#xFF0C;&#x56E0;&#x4E3A;&#x4F1A;&#x5148;&#x52A0;PG&#x9501;&#xFF09;&#xFF0C;&#x53EF;&#x662F;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x4E0A;&#x7684;&#x4E24;&#x4E2A;&#x5199;&#x8BF7;&#x6C42;&#x4F1A;&#x4E0D;&#x4F1A;&#x9020;&#x6210;&#x6570;&#x636E;&#x9519;&#x4E71;&#x5462;&#xFF1F;&#x4E0D;&#x8981;&#x5FD8;&#x4E86;&#xFF0C;&#x5728;&#x8FDB;&#x5165;do_op&#x4E4B;&#x524D;&#x5C31;<strong>&#x5DF2;&#x7ECF;&#x52A0;&#x4E86;PG&#x7684;&#x7684;&#x9501;</strong>&#xFF0C;&#x800C;&#x4E14;&#x662F;&#x8BF7;&#x6C42;&#x90FD;&#x4E0B;&#x53D1;&#x5230;store&#x5C42;&#x624D;&#x91CA;&#x653E;&#x7684;PG&#x9501;&#xFF0C;&#x56E0;&#x6B64;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;2&#x4E2A;&#x5199;&#x8BF7;&#x6C42;&#xFF0C;&#x662F;&#x4E0D;&#x4F1A;&#x5E76;&#x53D1;&#x8FDB;&#x5165;pg&#x5C42;&#x5904;&#x7406;&#x7684;&#xFF0C;&#x5FC5;&#x5B9A;&#x662F;&#x6309;&#x7167;&#x987A;&#x5E8F;&#x524D;&#x4E00;&#x4E2A;&#x5199;&#x8BF7;&#x6C42;&#x7ECF;&#x8FC7;pg&#x5C42;&#x7684;&#x5904;&#x7406;&#x540E;&#xFF0C;&#x5230;&#x8FBE;store&#x5C42;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF08;&#x7531;&#x53E6;&#x5916;&#x7684;&#x7EBF;&#x7A0B;&#x6765;&#x8FDB;&#x884C;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x540E;&#x4E00;&#x4E2A;&#x5199;&#x8BF7;&#x6C42;&#x624D;&#x4F1A;&#x8FDB;&#x5165;pg&#x5C42;&#x5904;&#x7406;&#x540E;&#x4E0B;&#x53D1;&#x5230;store&#x5C42;&#x3002;&#x6240;&#x4EE5;&#xFF0C;<strong>&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x4E0A;&#x7684;&#x8BFB;&#x5199;&#x8BF7;&#x6C42;&#xFF0C;&#x4E00;&#x5B9A;&#x662F;&#x6309;&#x7167;&#x987A;&#x5E8F;&#x5728;PG&#x5C42;&#x8FDB;&#x884C;&#x5904;&#x7406;</strong>&#x3002;&#x90A3;&#x4E48;&#x95EE;&#x9898;&#x6765;&#x4E86;&#xFF0C;<strong>&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;2&#x6B21;&#x5199;&#x8BF7;&#x6C42;&#x5230;&#x4E86;store&#x5C42;&#x5904;&#x7406;&#x7684;&#x65F6;&#x5019;&#x4E5F;&#x662F;&#x6709;&#x987A;&#x5E8F;&#x4E0A;&#x7684;&#x4FDD;&#x8BC1;&#x5417;&#xFF1F;</strong></p>
+<h2 id="store&#x5C42;&#x4FDD;&#x8BC1;&#x987A;&#x5E8F;"><a href="#store&#x5C42;&#x4FDD;&#x8BC1;&#x987A;&#x5E8F;" class="headerlink" title="store&#x5C42;&#x4FDD;&#x8BC1;&#x987A;&#x5E8F;"></a>store&#x5C42;&#x4FDD;&#x8BC1;&#x987A;&#x5E8F;</h2><p>ceph&#x7684;store&#x5C42;&#x652F;&#x6301;&#x591A;&#x79CD;&#x5B58;&#x50A8;&#x540E;&#x7AEF;&#xFF0C;&#x4EE5;&#x63D2;&#x4EF6;&#x5316;&#x7684;&#x5F62;&#x5F0F;&#x6765;&#x7BA1;&#x7406;&#xFF0C;&#x4EE5;filestore&#x4E3A;&#x4F8B;&#x6765;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#xFF0C;filestore&#x6709;&#x51E0;&#x79CD;&#x5199;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5;filestore journal writeahead&#x4E3A;&#x4F8B;&#x3002;&#x5199;&#x8BF7;&#x6C42;&#x5230;&#x8FBE;filestore&#x540E;&#xFF08;&#x5165;&#x53E3;&#x662F;queue_transactions&#xFF09;&#xFF0C;&#x4F1A;&#x751F;&#x6210;OpSequencer&#xFF08;&#x5982;&#x679C;&#x8FD9;&#x4E2A;pg&#x4E4B;&#x524D;&#x5DF2;&#x7ECF;&#x751F;&#x6210;&#x8FC7;&#x4E86;&#xFF0C;&#x5C31;&#x76F4;&#x63A5;&#x83B7;&#x53D6;&#xFF0C;<strong>&#x6BCF;&#x4E2A;pg&#x6709;&#x4E00;&#x4E2A;osr&#xFF0C;&#x7C7B;&#x578B;&#x4E3A;ObjectStore::Sequencer&#xFF0C;osr-&gt;p&#x5C31;&#x662F;&#x6307;&#x5411;OpSequencer</strong>&#xFF09;&#xFF0C;OpSequencer&#x5C31;&#x662F;&#x7528;&#x6765;&#x4FDD;&#x8BC1;pg&#x5185;op&#x64CD;&#x4F5C;&#x7684;&#x987A;&#x5E8F;&#x7684;&#xFF0C;&#x540E;&#x9762;&#x4F1A;&#x4ECB;&#x7ECD;&#x5177;&#x4F53;&#x600E;&#x4E48;&#x4F7F;&#x7528;&#x7684;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;&#x5C01;&#x88C5;&#x7684;&#x5199;&#x8BF7;&#x6C42;&#x7684;&#x4E8B;&#x52A1;&#xFF08;<strong>&#x6BCF;&#x4E2A;op&#x90FD;&#x6709;&#x4E00;&#x4E2A;seq&#x5E8F;&#x53F7;</strong>&#xFF0C;&#x9012;&#x589E;&#x7684;&#xFF09;&#xFF0C;&#x6309;&#x7167;&#x987A;&#x5E8F;&#x4F1A;&#x5148;&#x653E;&#x5230;completions&#xFF0C;&#x518D;&#x653E;&#x5230;writeq&#x91CC;&#x540E;&#xFF08;writeq&#x961F;&#x5C3E;&#xFF09;&#xFF0C;&#x901A;&#x77E5;write_thread&#x53BB;&#x5904;&#x7406;&#xFF0C;&#x5728;write_thread&#x4E2D;&#x4F7F;&#x7528;aio&#x5F02;&#x6B65;&#x5C06;&#x4E8B;&#x52A1;&#x5199;&#x5230;journal&#x91CC;&#xFF0C;&#x5E76;&#x5C06;I/O&#x4FE1;&#x606F;&#x653E;&#x5230;aio_queue&#xFF0C;&#x7136;&#x540E;&#x4F7F;&#x7528;write_finish_cond&#x901A;&#x77E5;write_finish_thread&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x5728;write_finish_thread&#x91CC;&#x5BF9;&#x4E8E;&#x5DF2;&#x7ECF;&#x5B8C;&#x6210;&#x7684;I/O&#xFF0C;&#x4F1A;&#x6839;&#x636E;<strong>&#x5B8C;&#x6210;&#x7684;op&#x7684;seq&#x5E8F;&#x53F7;&#x6309;&#x5E8F;&#x653E;&#x5230;journal&#x7684;finisher&#x961F;&#x5217;&#x91CC;&#xFF08;&#x56E0;&#x4E3A;aio&#x5E76;&#x4E0D;&#x4FDD;&#x8BC1;&#x987A;&#x5E8F;&#xFF0C;&#x56E0;&#x6B64;&#x91C7;&#x7528;op&#x7684;seq&#x5E8F;&#x53F7;&#x6765;&#x4FDD;&#x8BC1;&#x5B8C;&#x6210;&#x540E;&#x5904;&#x7406;&#x7684;&#x987A;&#x5E8F;&#xFF09;</strong>&#xFF0C;&#x5982;&#x679C;&#x67D0;&#x4E2A;op&#x4E4B;&#x524D;&#x7684;op&#x8FD8;&#x672A;&#x5B8C;&#x6210;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;op&#x4F1A;&#x7B49;&#x5230;&#x5B83;&#x4E4B;&#x524D;&#x7684;op&#x90FD;&#x5B8C;&#x6210;&#x540E;&#x624D;&#x4E00;&#x8D77;&#x653E;&#x5230;finisher&#x961F;&#x5217;&#x91CC;&#x3002;</p>
+<p>&#x5728;journal&#x7684;finisher&#x5904;&#x7406;&#x51FD;&#x6570;&#x91CC;&#xFF0C;&#x4F1A;&#x5C06;op&#x6309;&#x5E8F;&#x653E;&#x5230;OpSequencer&#x7684;&#x961F;&#x5217;&#x91CC;&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x653E;&#x5230;FileStore::op_wq&#x7684;&#x961F;&#x5217;&#x4E2D;&#xFF0C;FileStore::OpWQ&#x7EBF;&#x7A0B;&#x6C60;&#x8C03;&#x7528;FileStore::_do_op&#xFF0C;&#x5148;<strong>osr-&gt;apply_lock.Lock()</strong>&#x8FDB;&#x884C;&#x52A0;&#x9501;&#x64CD;&#x4F5C;&#xFF0C;&#x7136;&#x540E;&#x4F1A;&#x4ECE;&#x961F;&#x5217;&#x4E2D;&#x53D6;op&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF08;&#x8C03;&#x7528;osr-&gt;peek_queue()&#xFF0C;&#x5E76;&#x6CA1;&#x6709;dequeue&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x8FDB;&#x884C;&#x5199;&#x6570;&#x636E;&#x5230;filesystem&#x7684;&#x64CD;&#x4F5C;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x5728;FileStore::_finish_op&#x91CC;&#x624D;&#x4F1A;osr-&gt;dequeue&#xFF0C;&#x5E76;<strong>osr-&gt;apply_lock.Unlock()</strong>&#x3002;&#x5373;&#x901A;&#x8FC7;OpSequencer&#x6765;&#x63A7;&#x5236;&#x540C;&#x4E00;&#x4E2A;pg&#x5185;&#x5199;I/O&#x5230;filesystem&#x7684;&#x5E76;&#x53D1;&#xFF0C;&#x4F46;&#x662F;&#x5BF9;&#x4E8E;&#x4E0D;&#x540C;pg&#x7684;&#x5199;I/O&#x662F;&#x53EF;&#x4EE5;&#x5728;OpWQ&#x7684;&#x7EBF;&#x7A0B;&#x6C60;&#x91CC;&#x5E76;&#x53D1;&#x5904;&#x7406;&#x7684;&#x3002;</p>
+<p>&#x603B;&#x7684;&#x6765;&#x8BF4;&#xFF0C;<strong>FileStore&#x91CC;&#x5148;&#x901A;&#x8FC7;op&#x7684;seq&#x6765;&#x63A7;&#x5236;&#x6301;&#x4E45;&#x5316;&#x5199;&#x5230;journal&#x7684;&#x987A;&#x5E8F;&#x6027;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x901A;&#x8FC7;OpSequencer&#x6765;&#x4FDD;&#x8BC1;&#x5199;&#x6570;&#x636E;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x987A;&#x5E8F;&#x6027;</strong>&#xFF0C;&#x5E76;&#x4E14;&#x6574;&#x4E2A;&#x5904;&#x7406;&#x8FC7;&#x7A0B;&#x4E2D;&#x90FD;&#x662F;&#x901A;&#x8FC7;FIFO&#x6765;&#x786E;&#x4FDD;&#x51FA;&#x5165;&#x961F;&#x5217;&#x7684;&#x987A;&#x5E8F;&#x3002;&#x7531;&#x6B64;&#x53EF;&#x89C1;&#xFF0C;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;2&#x6B21;&#x5199;&#x8BF7;&#x6C42;&#x6309;&#x7167;&#x987A;&#x5E8F;&#x8FDB;&#x5165;&#x5230;FileStore&#x91CC;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x4E5F;&#x662F;&#x6309;&#x7167;&#x5148;&#x540E;&#x987A;&#x5E8F;&#x5904;&#x7406;&#x5B8C;&#x6210;&#x7684;&#x3002;</p>
+<p>&#x5728;bluestore&#x91CC;&#x4E5F;&#x6709;OpSequencer&#x8FD9;&#x4E2A;&#x673A;&#x5236;&#xFF0C;&#x6BD4;&#x5982;bluestore&#x91CC;&#x662F;&#x901A;&#x8FC7;OpSequencer&#x6765;&#x4FDD;&#x8BC1;&#x67D0;&#x4E2A;&#x8BF7;&#x6C42;&#x4E4B;&#x524D;&#x7684;&#x8BF7;&#x6C42;&#x8FD8;&#x6CA1;&#x6709;&#x5904;&#x7406;&#x5B8C;&#x4E4B;&#x524D;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x8BF7;&#x6C42;&#x5C31;&#x4E0D;&#x4F1A;&#x5904;&#x7406;&#x3002;&#x56E0;&#x6B64;&#x5BF9;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x4E24;&#x4E2A;&#x5199;&#x8BF7;&#x6C42;&#x4F1A;&#x6309;&#x7167;&#x987A;&#x5E8F;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x3002;&#x800C;&#x4E14;&#x5BF9;&#x4E8E;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x8BFB;&#x8BF7;&#x6C42;&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x8FD8;&#x6709;&#x672A;&#x5B8C;&#x6210;&#x7684;&#x5199;&#x8BF7;&#x6C42;&#x5728;&#x5904;&#x7406;&#xFF0C;&#x90A3;&#x4E48;&#x4F1A;&#x7B49;&#x5230;&#x5199;&#x5904;&#x7406;&#x5B8C;&#x6210;&#x624D;&#x80FD;&#x8BFB;&#x53D6;&#x3002;</p>
+<h2 id="primary&#x53D1;&#x5230;replica&#x7684;&#x8BF7;&#x6C42;&#x987A;&#x5E8F;"><a href="#primary&#x53D1;&#x5230;replica&#x7684;&#x8BF7;&#x6C42;&#x987A;&#x5E8F;" class="headerlink" title="primary&#x53D1;&#x5230;replica&#x7684;&#x8BF7;&#x6C42;&#x987A;&#x5E8F;"></a>primary&#x53D1;&#x5230;replica&#x7684;&#x8BF7;&#x6C42;&#x987A;&#x5E8F;</h2><p>&#x6709;&#x4E86;&#x6D88;&#x606F;&#x5C42;&#x7684;&#x987A;&#x5E8F;&#x6027;&#xFF0C;&#x4EE5;&#x53CA;primary&#x5904;&#x7406;&#x4E0A;&#x7684;&#x987A;&#x5E8F;&#x6027;&#xFF0C;&#x518D;&#x5C06;&#x8BF7;&#x6C42;&#x53D1;&#x7ED9;replica&#x7684;&#x65F6;&#x5019;&#x4E5F;&#x662F;&#x6709;&#x5E8F;&#x7684;&#xFF08;&#x5373;&#x5BF9;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x4E24;&#x6B21;&#x5199;&#xFF09;&#xFF0C;replica&#x7AEF;&#x6536;&#x5230;&#x7684;&#x4E24;&#x6B21;&#x5199;&#x7684;&#x987A;&#x5E8F;&#x8DDF;primary&#x7684;&#x4E24;&#x6B21;&#x5199;&#x7684;&#x987A;&#x5E8F;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF08;&#x7531;&#x540C;&#x4E00;&#x4E2A;tcp&#x8FDE;&#x63A5;&#x4E0A;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x548C;ceph&#x6D88;&#x606F;&#x5C42;&#x7684;&#x987A;&#x5E8F;&#x6027;&#x4FDD;&#x8BC1;&#xFF09;&#xFF0C;&#x8FD9;&#x6837;replica&#x7AEF;&#x5728;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x65F6;&#xFF0C;&#x5230;osd&#x4EE5;&#x53CA;&#x540E;&#x7EED;store&#x5C42;&#x7684;&#x5904;&#x7406;&#x4E5F;&#x662F;&#x4FDD;&#x5E8F;&#x7684;&#x3002;<br>&#x8FD9;&#x6837;&#x5C31;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0;primary&#x8DDF;replica&#x4E0A;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x4E24;&#x6B21;&#x5199;&#x4F1A;&#x4E71;&#x5E8F;&#x5BFC;&#x81F4;&#x4E0D;&#x4E00;&#x81F4;&#x3002;</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ceph/" rel="tag">#ceph</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/25/bluestore-work-flow/" rel="next" title="ceph bluestore工作流程">
+                <i class="fa fa-chevron-left"></i> ceph bluestore工作流程
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/08/29/ceph-io-sequence/"
+           data-title="ceph中对象读写的顺序性及并发性保证" data-url="http://yoursite.com/2016/08/29/ceph-io-sequence/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Wu Dong" />
+          <p class="site-author-name" itemprop="name">Wu Dong</p>
+          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">27</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PG的概念"><span class="nav-number">1.</span> <span class="nav-text">PG的概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#不同对象的并发控制"><span class="nav-number">2.</span> <span class="nav-text">不同对象的并发控制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#同一个对象的并发顺序控制"><span class="nav-number">3.</span> <span class="nav-text">同一个对象的并发顺序控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#tcp消息的顺序性保证"><span class="nav-number">3.1.</span> <span class="nav-text">tcp消息的顺序性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ceph消息层的顺序性保证"><span class="nav-number">3.2.</span> <span class="nav-text">ceph消息层的顺序性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pg层顺序保证及对象锁机制"><span class="nav-number">3.3.</span> <span class="nav-text">pg层顺序保证及对象锁机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#store层保证顺序"><span class="nav-number">3.4.</span> <span class="nav-text">store层保证顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#primary发到replica的请求顺序"><span class="nav-number">3.5.</span> <span class="nav-text">primary发到replica的请求顺序</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wu Dong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sysnote"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

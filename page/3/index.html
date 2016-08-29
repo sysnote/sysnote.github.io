@@ -261,6 +261,129 @@
             
               
                 
+                <a class="post-title-link" href="/2014/06/20/bcache-analysis/" itemprop="url">
+                  bcache浅析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-06-20T17:43:08+08:00" content="2014-06-20">
+              2014-06-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/06/20/bcache-analysis/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/06/20/bcache-analysis/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="1-&#x7B80;&#x4ECB;"><a href="#1-&#x7B80;&#x4ECB;" class="headerlink" title="1.&#x7B80;&#x4ECB;"></a>1.&#x7B80;&#x4ECB;</h1><p>bcache&#x662F;linux&#x5185;&#x6838;&#x5757;&#x8BBE;&#x5907;&#x5C42;cache&#xFF0C;&#x7C7B;&#x4F3C;&#x4E8E;flashcache&#x4F7F;&#x7528;ssd&#x4F5C;&#x4E3A;hdd&#x7684;&#x7F13;&#x5B58;&#x65B9;&#x6848;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;flashcache&#xFF0C;bcache&#x66F4;&#x52A0;&#x7075;&#x6D3B;&#xFF0C;&#x652F;&#x6301;ssd&#x4F5C;&#x4E3A;&#x591A;&#x5757;hdd&#x7684;&#x5171;&#x4EAB;&#x7F13;&#x5B58;&#xFF0C;&#x5E76;&#x4E14;&#x8FD8;&#x652F;&#x6301;&#x591A;&#x5757;ssd&#xFF08;&#x8FD8;&#x672A;&#x5B8C;&#x5584;&#xFF09;&#xFF0C;&#x80FD;&#x591F;&#x5728;&#x8FD0;&#x884C;&#x4E2D;&#x52A8;&#x6001;&#x589E;&#x52A0;&#xFF0C;&#x5220;&#x9664;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#x548C;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x3002;&#x4ECE;3.10&#x5F00;&#x59CB;&#xFF0C;bcache&#x8FDB;&#x5165;&#x5185;&#x6838;&#x4E3B;&#x7EBF;&#x3002;bcache&#x652F;&#x6301;writeback&#x3001;writethrough&#x3001;writearoud&#x4E09;&#x79CD;&#x7B56;&#x7565;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F;wriththrough&#xFF0C;&#x53EF;&#x4EE5;&#x52A8;&#x6001;&#x4FEE;&#x6539;&#xFF0C;&#x7F13;&#x5B58;&#x66FF;&#x6362;&#x65B9;&#x5F0F;&#x652F;&#x6301;lru&#x3001;fifo&#x548C;random&#x4E09;&#x79CD;&#x3002;&#x4E0B;&#x9762;&#x4ECE;&#x51E0;&#x4E2A;&#x65B9;&#x9762;&#x4ECB;&#x7ECD;bcache&#x7684;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x3002;</p>
+<h1 id="2-&#x603B;&#x4F53;&#x7ED3;&#x6784;"><a href="#2-&#x603B;&#x4F53;&#x7ED3;&#x6784;" class="headerlink" title="2.&#x603B;&#x4F53;&#x7ED3;&#x6784;"></a>2.&#x603B;&#x4F53;&#x7ED3;&#x6784;</h1><p>bcache&#x7684;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;<br><img src="/2014/06/20/bcache-analysis/arch.png" alt="arch"><br>bcache&#x4E2D;&#x662F;&#x4EE5;cache set&#x6765;&#x5212;&#x5206;&#x4E0D;&#x540C;&#x5B58;&#x50A8;&#x96C6;&#x5408;&#xFF0C;&#x4E00;&#x4E2A;cache set&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;ssd&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;hdd&#xFF09;&#x3002;bcache&#x5BF9;&#x5916;&#x8F93;&#x51FA;&#x7ED9;&#x7528;&#x6237;&#x4F7F;&#x7528;&#x7684;&#x662F;/dev/bcache<N>&#x8FD9;&#x79CD;&#x8BBE;&#x5907;&#xFF0C;&#x6BCF;&#x4E2A;bcache<N>&#x8BBE;&#x5907;&#x90FD;&#x4E0E;&#x4E00;&#x4E2A;&#x540E;&#x7AEF;&#x7269;&#x7406;&#x76D8;&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;&#x7528;&#x6237;&#x5BF9;&#x4E0D;&#x540C;bcache&#x8BBE;&#x5907;&#x7684;io&#x4F1A;&#x7F13;&#x5B58;&#x5728;ssd&#x4E2D;&#xFF0C;&#x5237;&#x810F;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5199;&#x5230;&#x5404;&#x81EA;&#x5BF9;&#x5E94;&#x7684;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x4E0A;&#x3002;&#x56E0;&#x6B64;&#xFF0C;bcache&#x6269;&#x5BB9;&#x5F88;&#x5BB9;&#x6613;&#xFF0C;&#x53EA;&#x8981;&#x6CE8;&#x518C;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x5373;&#x53EF;&#x3002;<br></N></N></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/06/20/bcache-analysis/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2014/05/29/bcache-use/" itemprop="url">
                   bcache使用
                 </a>
@@ -1041,7 +1164,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">26</span>
+              <span class="site-state-item-count">27</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
