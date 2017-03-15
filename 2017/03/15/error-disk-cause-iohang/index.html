@@ -1,0 +1,723 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="kernel,scsi," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="System Notes" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;#x8FD1;&amp;#x671F;&amp;#x7EBF;&amp;#x4E0A;&amp;#x7CFB;&amp;#x7EDF;&amp;#x51FA;&amp;#x73B0;&amp;#x574F;&amp;#x76D8;&amp;#x5BFC;&amp;#x81F4;IO&amp;#x5361;&amp;#x4F4F;&amp;#x7684;&amp;#x95EE;&amp;#x9898;&amp;#xFF0C;&amp;#x6709;&amp;#x4E24;&amp;#x79CD;&amp;#x60C5;&amp;#x51B5;&amp;#xFF1A;
+1&amp;#xF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="坏盘导致IO hang问题分析">
+<meta property="og:url" content="http://yoursite.com/2017/03/15/error-disk-cause-iohang/index.html">
+<meta property="og:site_name" content="System Notes">
+<meta property="og:description" content="&amp;#x8FD1;&amp;#x671F;&amp;#x7EBF;&amp;#x4E0A;&amp;#x7CFB;&amp;#x7EDF;&amp;#x51FA;&amp;#x73B0;&amp;#x574F;&amp;#x76D8;&amp;#x5BFC;&amp;#x81F4;IO&amp;#x5361;&amp;#x4F4F;&amp;#x7684;&amp;#x95EE;&amp;#x9898;&amp;#xFF0C;&amp;#x6709;&amp;#x4E24;&amp;#x79CD;&amp;#x60C5;&amp;#x51B5;&amp;#xFF1A;
+1&amp;#xF">
+<meta property="og:updated_time" content="2017-03-15T08:25:44.018Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="坏盘导致IO hang问题分析">
+<meta name="twitter:description" content="&amp;#x8FD1;&amp;#x671F;&amp;#x7EBF;&amp;#x4E0A;&amp;#x7CFB;&amp;#x7EDF;&amp;#x51FA;&amp;#x73B0;&amp;#x574F;&amp;#x76D8;&amp;#x5BFC;&amp;#x81F4;IO&amp;#x5361;&amp;#x4F4F;&amp;#x7684;&amp;#x95EE;&amp;#x9898;&amp;#xFF0C;&amp;#x6709;&amp;#x4E24;&amp;#x79CD;&amp;#x60C5;&amp;#x51B5;&amp;#xFF1A;
+1&amp;#xF">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 坏盘导致IO hang问题分析 | System Notes </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">System Notes</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                坏盘导致IO hang问题分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-03-15T16:09:40+08:00" content="2017-03-15">
+              2017-03-15
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/storage/" itemprop="url" rel="index">
+                    <span itemprop="name">storage</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/03/15/error-disk-cause-iohang/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/03/15/error-disk-cause-iohang/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x8FD1;&#x671F;&#x7EBF;&#x4E0A;&#x7CFB;&#x7EDF;&#x51FA;&#x73B0;&#x574F;&#x76D8;&#x5BFC;&#x81F4;IO&#x5361;&#x4F4F;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x6709;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#xFF1A;</p>
+<p>1&#xFF09;&#x4E00;&#x79CD;&#x662F;&#x51FA;&#x73B0;&#x574F;&#x76D8;&#x8FC7;&#x7A0B;&#x4E2D;raid&#x5361;&#x7684;&#x884C;&#x4E3A;&#x6709;&#x6240;&#x5F02;&#x5E38;&#xFF0C;&#x5728;&#x8FD9;&#x53F0;&#x673A;&#x5668;&#x4E0A;&#x7684;&#x6267;&#x884C;raid&#x5361;&#x7684;&#x547D;&#x4EE4;megacli&#x90FD;&#x5361;&#x4F4F;&#xFF0C;&#x89C2;&#x5BDF;&#x5230;&#x8FD9;&#x53F0;&#x673A;&#x5668;&#x4E0A;&#x7684;&#x7269;&#x7406;&#x76D8;&#x7684;io&#x90FD;&#x65F6;&#x4E0D;&#x65F6;&#x5F02;&#x5E38;&#x7E41;&#x5FD9;&#xFF08;io&#x4E0D;&#x5927;&#xFF0C;&#x4F46;&#x662F;svctm&#x751A;&#x81F3;&#x8FBE;&#x5230;&#x51E0;&#x5343;ms&#xFF09;&#xFF0C;&#x4ECE;&#x800C;&#x5BFC;&#x81F4;&#x6211;&#x4EEC;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x7684;&#x5377;IO hang&#x4F4F;&#xFF0C;&#x8868;&#x73B0;&#x5C31;&#x662F;&#x7528;&#x6237;&#x7684;&#x5377;io util 100%&#x8F83;&#x957F;&#x65F6;&#x95F4;&#xFF1B;</p>
+<p>2&#xFF09;&#x53E6;&#x5916;&#x4E00;&#x79CD;&#x60C5;&#x51B5;&#x662F;&#x574F;&#x76D8;&#x540E;&#xFF0C;&#x5C06;&#x574F;&#x76D8;&#x4ECE;raid&#x5361;&#x4E2D;&#x5254;&#x9664;&#xFF08;&#x505A;&#x7684;&#x5355;&#x76D8;raid0&#xFF0C;&#x9ED8;&#x8BA4;WB&#x7F13;&#x5B58;&#x7B56;&#x7565;&#xFF0C;&#x76D8;&#x574F;&#x540E;&#x9700;&#x8981;&#x4ECE;raid&#x5361;&#x91CC;&#x5220;&#x9664;&#x903B;&#x8F91;&#x5377;&#xFF09;&#xFF0C;&#x8FD9;&#x53F0;&#x673A;&#x5668;&#x4E0A;&#x7684;&#x7269;&#x7406;&#x76D8;&#x90FD;io&#x5361;&#x4F4F;&#x4E00;&#x4F1A;&#xFF0C;&#x5E76;&#x4E14;megacli&#x547D;&#x4EE4;&#x4E5F;&#x5361;&#x4F4F;&#x3002;&#x4ECE;&#x800C;&#x4E5F;&#x5BFC;&#x81F4;&#x90E8;&#x5206;&#x7528;&#x6237;&#x7684;&#x5377;io util 100%&#x8F83;&#x957F;&#x65F6;&#x95F4;&#xFF1B;</p>
+<p>&#x60C5;&#x51B5;1&#xFF09;&#x901A;&#x8FC7;&#x6536;&#x96C6;&#x65E5;&#x5FD7;&#x53CD;&#x9988;&#x7ED9;&#x5382;&#x5BB6;&#x786E;&#x8BA4;&#x662F;&#x7531;&#x4E8E;&#x7EBF;&#x4E0A;&#x673A;&#x5668;&#x7684;raid&#x5361;&#x7684;&#x56FA;&#x4EF6;&#x7248;&#x672C;&#x6BD4;&#x8F83;&#x4F4E;&#xFF0C;&#x9700;&#x8981;&#x5347;&#x7EA7;raid&#x5361;&#x56FA;&#x4EF6;&#xFF1B;<br>&#x60C5;&#x51B5;2&#xFF09;&#x56E0;&#x4E3A;&#x574F;&#x76D8;&#x540E;&#xFF0C;raid&#x5361;&#x5C31;&#x8FDB;&#x5165;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#xFF0C;&#x7269;&#x7406;&#x76D8;&#x7684;&#x7F13;&#x5B58;&#x7B56;&#x7565;&#x90FD;&#x4ECE;writeback&#x53D8;&#x6210;writethrough&#xFF0C;&#x7136;&#x540E;&#x5254;&#x9664;&#x574F;&#x76D8;&#x65F6;&#xFF0C;&#x5C31;&#x4F1A;&#x5C06;raid&#x5361;&#x7F13;&#x5B58;&#x91CC;&#x7684;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x56DE;&#x5237;&#x5230;&#x78C1;&#x76D8;&#x4E0A;&#xFF0C;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x4E2D;&#x662F;&#x4F1A;&#x6709;&#x77ED;&#x65F6;&#x95F4;&#x7684;&#x7269;&#x7406;&#x76D8;io&#x5361;&#x4F4F;&#xFF1B;</p>
+<p>&#x4E0A;&#x9762;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#xFF0C;&#x7269;&#x7406;&#x76D8;&#x7684;io&#x5361;&#x4F4F;&#x90FD;&#x5728;1&#x5206;&#x949F;&#x5185;&#xFF0C;&#x53EF;&#x662F;&#x4ECE;&#x7528;&#x6237;&#x53CD;&#x9988;&#x6765;&#x770B;&#x7528;&#x6237;&#x5377;&#x7684;io&#x5361;&#x4E86;&#x597D;&#x51E0;&#x5206;&#x949F;&#xFF0C;&#x6BD4;&#x7269;&#x7406;&#x76D8;&#x5361;&#x7684;&#x65F6;&#x95F4;&#x957F;&#x4E0D;&#x5C11;&#x3002;&#x53E6;&#x5916;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x4E2A;&#x7EBF;&#x4E0A;&#x73AF;&#x5883;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x91C7;&#x7528;&#x7684;2&#x526F;&#x672C;&#xFF0C;&#x6709;&#x4E9B;&#x5377;&#x7684;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x526F;&#x672C;&#x843D;&#x5728;&#x574F;&#x76D8;&#x7684;&#x673A;&#x5668;&#x4E0A;&#xFF0C;&#x5361;&#x4E86;&#x8FD9;&#x4E48;&#x4E45;&#x4E3A;&#x4EC0;&#x4E48;&#x6CA1;&#x6709;&#x526F;&#x672C;&#x964D;&#x7EA7;&#x3002;<br><a id="more"></a></p>
+<p>&#x7B80;&#x5355;&#x8BF4;&#x4E00;&#x4E0B;&#x6211;&#x4EEC;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#xFF1A;&#x5B58;&#x50A8;&#x673A;&#x4E0A;&#x91C7;&#x7528;device mapper&#x673A;&#x5236;&#x5C06;&#x7269;&#x7406;&#x76D8;&#x8FDB;&#x884C;&#x5207;&#x7247;&#xFF0C;&#x7136;&#x540E;&#x4E0D;&#x540C;&#x7684;&#x5B58;&#x50A8;&#x5207;&#x7247;&#x901A;&#x8FC7;iscsi&#x5C06;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#x8F93;&#x51FA;&#x5230;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#xFF08;&#x865A;&#x62DF;&#x673A;&#x6240;&#x5728;&#x7684;&#x7269;&#x7406;&#x673A;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x4F7F;&#x7528;&#x8F6F;raid&#x5C06;2&#x4E2A;&#x526F;&#x672C;&#x5206;&#x7247;&#x505A;&#x6210;raid1&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5C06;1&#x4E2A;&#x6216;&#x591A;&#x4E2A;raid1&#x4F7F;&#x7528;device mapper&#x62FC;&#x6210;1&#x4E2A;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#xFF0C;&#x518D;&#x63D0;&#x4F9B;&#x5230;&#x865A;&#x62DF;&#x673A;&#x8FDB;&#x884C;&#x4F7F;&#x7528;&#x3002;&#x8FD9;&#x6837;&#x5BBF;&#x4E3B;&#x673A;&#x5C31;&#x662F;iscsi&#x7684;initiator&#x7AEF;&#xFF0C;&#x5B58;&#x50A8;&#x673A;&#x5C31;&#x662F;iscsi&#x7684;target&#x7AEF;&#x3002;&#x5176;&#x4E2D;iscsi&#x7684;&#x6062;&#x590D;&#x8D85;&#x65F6;&#x65F6;&#x95F4;replacement_timeout&#x8BBE;&#x7F6E;&#x4E3A;10s&#x3002;</p>
+<p>&#x6709;&#x4E86;&#x4E0A;&#x9762;&#x7684;&#x80CC;&#x666F;&#x518D;&#x6765;&#x5206;&#x6790;io hang&#x7684;&#x95EE;&#x9898;&#xFF1A;<br>&#x901A;&#x5E38;&#x5982;&#x679C;&#x662F;&#x5BBF;&#x4E3B;&#x673A;&#x548C;&#x5B58;&#x50A8;&#x673A;&#x7684;&#x7F51;&#x7EDC;&#x5F02;&#x5E38;&#xFF0C;iscsi&#x8FDE;&#x63A5;&#x5C31;&#x4F1A;&#x5F02;&#x5E38;&#x8FDB;&#x5165;iscsi&#x6062;&#x590D;&#x9636;&#x6BB5;&#xFF0C;&#x5982;&#x679C;&#x8D85;&#x8FC7;replacement_timeout&#x7684;&#x8BDD;&#x90A3;&#x8FD9;&#x4E2A;&#x526F;&#x672C;&#x76F4;&#x63A5;io&#x62A5;&#x9519;&#x7ED9;&#x8F6F;raid&#xFF0C;&#x7136;&#x540E;&#x8F6F;raid&#x5C06;&#x8BE5;&#x526F;&#x672C;&#x8BBE;&#x5907;&#x6807;&#x8BB0;&#x4E3A;&#x964D;&#x7EA7;&#xFF0C;&#x964D;&#x7EA7;&#x72B6;&#x6001;&#x4E0B;&#x7684;raid&#x8BFB;&#x5199;&#x90FD;&#x53EA;&#x4F1A;&#x53D1;&#x5230;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x597D;&#x7684;&#x6210;&#x5458;&#x8BBE;&#x5907;&#x3002;</p>
+<p>&#x4E0A;&#x9762;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#x5BFC;&#x81F4;&#x5377;&#x7684;IO hang&#x7684;&#x65F6;&#x95F4;&#x90FD;&#x6BD4;&#x8F83;&#x957F;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x90A3;&#x6BB5;&#x65F6;&#x95F4;&#x5185;&#x4E00;&#x76F4;&#x6CA1;&#x6709;io&#x62A5;&#x9519;&#x7ED9;&#x8F6F;raid&#x6765;&#x89E6;&#x53D1;raid&#x964D;&#x7EA7;&#x3002;&#x90A3;&#x4E48;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x5361;&#x8FD9;&#x4E48;&#x957F;&#x65F6;&#x95F4;&#x800C;&#x4E0D;IO&#x62A5;&#x9519;&#x5462;&#xFF1F;</p>
+<h2 id="&#x6A21;&#x62DF;&#x590D;&#x73B0;&#x574F;&#x76D8;&#x5BFC;&#x81F4;&#x7684;io-hang"><a href="#&#x6A21;&#x62DF;&#x590D;&#x73B0;&#x574F;&#x76D8;&#x5BFC;&#x81F4;&#x7684;io-hang" class="headerlink" title="&#x6A21;&#x62DF;&#x590D;&#x73B0;&#x574F;&#x76D8;&#x5BFC;&#x81F4;&#x7684;io hang"></a>&#x6A21;&#x62DF;&#x590D;&#x73B0;&#x574F;&#x76D8;&#x5BFC;&#x81F4;&#x7684;io hang</h2><p>&#x7531;&#x4E8E;&#x7EBF;&#x4E0A;&#x7CFB;&#x7EDF;&#x4E0D;&#x4FBF;&#x4E8E;&#x8C03;&#x8BD5;&#x5206;&#x6790;&#xFF0C;&#x8981;&#x60F3;&#x5728;&#x6D4B;&#x8BD5;&#x73AF;&#x5883;&#x7A33;&#x5B9A;&#x590D;&#x73B0;&#x574F;&#x76D8;&#x4E5F;&#x6BD4;&#x8F83;&#x96BE;&#xFF0C;&#x627E;&#x8FC7;&#x786C;&#x76D8;&#x5382;&#x5BB6;&#x5BFB;&#x6C42;&#x76F8;&#x5173;&#x786C;&#x76D8;&#x9519;&#x8BEF;&#x6CE8;&#x5165;&#x7684;&#x5DE5;&#x5177;&#xFF0C;&#x4E0D;&#x8FC7;&#x6700;&#x540E;&#x5382;&#x5BB6;&#x7ED9;&#x7684;&#x4E5F;&#x662F;&#x6CE8;&#x5165;io&#x9519;&#x8BEF;&#x7684;&#x529E;&#x6CD5;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x8BA9;&#x786C;&#x76D8;io&#x5361;&#x4F4F;&#x7684;&#x65B9;&#x6CD5;&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x4E3A;&#x4E86;&#x7A33;&#x5B9A;&#x590D;&#x73B0;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#xFF0C;&#x91C7;&#x7528;device mapper&#x8BBE;&#x5907;&#xFF0C;dm&#x8BBE;&#x5907;&#x63D0;&#x4F9B;suspend&#x64CD;&#x4F5C;&#x6765;hang&#x4F4F;io&#xFF0C;&#x4EE5;&#x6B64;&#x4E3A;&#x57FA;&#x7840;&#xFF0C;&#x501F;&#x52A9;iscsi&#x548C;&#x8F6F;raid&#x6765;&#x6A21;&#x62DF;&#x5757;&#x5B58;&#x50A8;&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x3002;</p>
+<h3 id="1-&#x5728;&#x4E24;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x5668;&#x5206;&#x522B;&#x521B;&#x5EFA;&#x51FA;&#x4E24;&#x4E2A;device-mapper&#x8BBE;&#x5907;"><a href="#1-&#x5728;&#x4E24;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x5668;&#x5206;&#x522B;&#x521B;&#x5EFA;&#x51FA;&#x4E24;&#x4E2A;device-mapper&#x8BBE;&#x5907;" class="headerlink" title="1.&#x5728;&#x4E24;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x5668;&#x5206;&#x522B;&#x521B;&#x5EFA;&#x51FA;&#x4E24;&#x4E2A;device mapper&#x8BBE;&#x5907;"></a>1.&#x5728;&#x4E24;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x5668;&#x5206;&#x522B;&#x521B;&#x5EFA;&#x51FA;&#x4E24;&#x4E2A;device mapper&#x8BBE;&#x5907;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">nbs@10-165-160-13:~$ sudo dmsetup create test_chunk_0 &lt;&lt; EOF</span><br><span class="line">&gt; 0 20972800 linear /dev/sdf 1006696448</span><br><span class="line">&gt; EOF</span><br><span class="line"></span><br><span class="line">nbs@10-165-160-14:~$ sudo dmsetup create test_chunk_1 &lt;&lt; EOF</span><br><span class="line">&gt; 0 20972800 linear /dev/sdf 1006696448</span><br><span class="line">&gt; EOF</span><br></pre></td></tr></table></figure>
+<h3 id="2-&#x7136;&#x540E;&#x5206;&#x522B;&#x4F7F;&#x7528;iet&#x5BFC;&#x51FA;chunk&#x8BBE;&#x5907;"><a href="#2-&#x7136;&#x540E;&#x5206;&#x522B;&#x4F7F;&#x7528;iet&#x5BFC;&#x51FA;chunk&#x8BBE;&#x5907;" class="headerlink" title="2.&#x7136;&#x540E;&#x5206;&#x522B;&#x4F7F;&#x7528;iet&#x5BFC;&#x51FA;chunk&#x8BBE;&#x5907;"></a>2.&#x7136;&#x540E;&#x5206;&#x522B;&#x4F7F;&#x7528;iet&#x5BFC;&#x51FA;chunk&#x8BBE;&#x5907;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">nbs@10-165-160-13:~$ sudo ietadm --op new --tid=1000 --params Name=iqn.test.1</span><br><span class="line">nbs@10-165-160-13:~$ sudo ietadm --op new --tid=1000 --lun=0 --params Path=/dev/mapper/test_chunk_0,Type=blockio</span><br><span class="line">nbs@10-165-160-13:~$ cat /proc/net/iet/volume</span><br><span class="line">tid:1000 name:iqn.test.1</span><br><span class="line">	lun:0 state:0 iotype:blockio iomode:wt blocks:20972800 blocksize:512 path:/dev/mapper/test_chunk_0</span><br><span class="line"></span><br><span class="line">nbs@10-165-160-14:~$ sudo ietadm --op new --tid=1000 --params Name=iqn.test.2</span><br><span class="line">nbs@10-165-160-14:~$ sudo ietadm --op new --tid=1000 --lun=0 --params Path=/dev/mapper/test_chunk_1,Type=blockio</span><br><span class="line">nbs@10-165-160-14:~$ cat /proc/net/iet/volume </span><br><span class="line">tid:1000 name:iqn.test.2</span><br><span class="line">	lun:0 state:0 iotype:blockio iomode:wt blocks:20972800 blocksize:512 path:/dev/mapper/test_chunk_1</span><br></pre></td></tr></table></figure>
+<h3 id="3-&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;open-iscsi&#x8FDE;&#x63A5;&#x8FD9;&#x4E24;&#x4E2A;target"><a href="#3-&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;open-iscsi&#x8FDE;&#x63A5;&#x8FD9;&#x4E24;&#x4E2A;target" class="headerlink" title="3.&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;open-iscsi&#x8FDE;&#x63A5;&#x8FD9;&#x4E24;&#x4E2A;target"></a>3.&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;open-iscsi&#x8FDE;&#x63A5;&#x8FD9;&#x4E24;&#x4E2A;target</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m discovery -t st -p 10.165.160.13:3260</span><br><span class="line">10.165.160.13:3260,1 iqn.test.1</span><br><span class="line">10.165.164.13:3260,1 iqn.test.1</span><br><span class="line">10.165.168.13:3260,1 iqn.test.1</span><br><span class="line">10.165.172.13:3260,1 iqn.test.1</span><br><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m node -T iqn.test.1 --op=update --name=node.session.timeo.replacement_timeout --value=10</span><br><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m node -T iqn.test.1 -p 10.165.160.13:3260 -l</span><br><span class="line">Logging in to [iface: default, target: iqn.test.1, portal: 10.165.160.13,3260] (multiple)</span><br><span class="line">Login to [iface: default, target: iqn.test.1, portal: 10.165.160.13,3260] successful.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m discovery -t st -p 10.165.160.14:3260</span><br><span class="line">10.165.160.14:3260,1 iqn.test.2</span><br><span class="line">10.165.164.14:3260,1 iqn.test.2</span><br><span class="line">10.165.168.14:3260,1 iqn.test.2</span><br><span class="line">10.165.172.14:3260,1 iqn.test.2</span><br><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m node -T iqn.test.2 --op=update --name=node.session.timeo.replacement_timeout --value=10</span><br><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m node -T iqn.test.2 -p 10.165.160.14:3260 -l</span><br><span class="line">Logging in to [iface: default, target: iqn.test.2, portal: 10.165.160.14,3260] (multiple)</span><br><span class="line">Login to [iface: default, target: iqn.test.2, portal: 10.165.160.14,3260] successful.</span><br><span class="line"></span><br><span class="line">nbs@10-165-160-15:~$ sudo iscsiadm -m session -P3|grep -A1 Lun</span><br><span class="line">		scsi1 Channel 00 Id 0 Lun: 0</span><br><span class="line">			Attached scsi disk sdq		State: running</span><br><span class="line">--</span><br><span class="line">		scsi2 Channel 00 Id 0 Lun: 0</span><br><span class="line">			Attached scsi disk sdr		State: running</span><br></pre></td></tr></table></figure>
+<h3 id="4-&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;mdadm&#x521B;&#x5EFA;&#x8F6F;raid&#x8BBE;&#x5907;"><a href="#4-&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;mdadm&#x521B;&#x5EFA;&#x8F6F;raid&#x8BBE;&#x5907;" class="headerlink" title="4.&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;mdadm&#x521B;&#x5EFA;&#x8F6F;raid&#x8BBE;&#x5907;"></a>4.&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x7AEF;&#x4F7F;&#x7528;mdadm&#x521B;&#x5EFA;&#x8F6F;raid&#x8BBE;&#x5907;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">nbs@10-165-160-15:~$ sudo mdadm --create /dev/md/mdtest1 --run --force --metadata=0.9 --assume-clean --bitmap=/home/nbs/wd/mdtest1-bitmap --level=1 --raid-devices=2 /dev/sdq /dev/sdr</span><br><span class="line">mdadm: array /dev/md/mdtest1 started.</span><br><span class="line">nbs@10-165-160-15:~$ cat /proc/mdstat </span><br><span class="line">Personalities : [raid1] </span><br><span class="line">md127 : active (auto-read-only) raid1 sdr[1] sdq[0]</span><br><span class="line">      10486336 blocks [2/2] [UU]</span><br><span class="line">      bitmap: 321/321 pages [1284KB], 16KB chunk, file: /home/nbs/wd/mdtest1-bitmap</span><br><span class="line"></span><br><span class="line">unused devices: &lt;none&gt;</span><br><span class="line">nbs@10-165-160-15:~$ sudo mdadm --readwrite /dev/md127</span><br><span class="line">nbs@10-165-160-15:~$ cat /proc/mdstat </span><br><span class="line">Personalities : [raid1] </span><br><span class="line">md127 : active raid1 sdr[1] sdq[0]</span><br><span class="line">      10486336 blocks [2/2] [UU]</span><br><span class="line">      bitmap: 0/321 pages [0KB], 16KB chunk, file: /home/nbs/wd/mdtest1-bitmap</span><br><span class="line"></span><br><span class="line">unused devices: &lt;none&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="5-&#x4F7F;&#x7528;devicemapper&#x518D;&#x5C06;&#x8F6F;raid&#x8BBE;&#x5907;&#x6620;&#x5C04;&#x4E00;&#x6B21;&#xFF0C;&#x505A;&#x6210;&#x8DDF;&#x4E91;&#x786C;&#x76D8;&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x4E00;&#x6837;"><a href="#5-&#x4F7F;&#x7528;devicemapper&#x518D;&#x5C06;&#x8F6F;raid&#x8BBE;&#x5907;&#x6620;&#x5C04;&#x4E00;&#x6B21;&#xFF0C;&#x505A;&#x6210;&#x8DDF;&#x4E91;&#x786C;&#x76D8;&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x4E00;&#x6837;" class="headerlink" title="5.&#x4F7F;&#x7528;devicemapper&#x518D;&#x5C06;&#x8F6F;raid&#x8BBE;&#x5907;&#x6620;&#x5C04;&#x4E00;&#x6B21;&#xFF0C;&#x505A;&#x6210;&#x8DDF;&#x4E91;&#x786C;&#x76D8;&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x4E00;&#x6837;"></a>5.&#x4F7F;&#x7528;devicemapper&#x518D;&#x5C06;&#x8F6F;raid&#x8BBE;&#x5907;&#x6620;&#x5C04;&#x4E00;&#x6B21;&#xFF0C;&#x505A;&#x6210;&#x8DDF;&#x4E91;&#x786C;&#x76D8;&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x4E00;&#x6837;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">nbs@10-165-160-15:~$ sudo dmsetup create nbs_test1 &lt;&lt; EOF</span><br><span class="line">&gt; 0 20971520 linear /dev/md127 0</span><br><span class="line">&gt; EOF</span><br><span class="line">nbs@10-165-160-15:~$ sudo dmsetup table nbs_test1</span><br><span class="line">0 20971520 linear 9:127 0</span><br></pre></td></tr></table></figure>
+<h3 id="6-&#x4F7F;&#x7528;fio&#x6765;&#x6D4B;&#x8BD5;&#x8FD9;&#x5757;&#x903B;&#x8F91;&#x5377;&#xFF0C;&#x4E3A;&#x4E86;&#x4E0D;&#x4EA7;&#x751F;&#x8FC7;&#x591A;&#x7684;io&#x5F71;&#x54CD;&#x5206;&#x6790;&#xFF0C;&#x91C7;&#x7528;fio&#x7684;rate-iops&#x6765;&#x9650;&#x5236;io&#x6570;"><a href="#6-&#x4F7F;&#x7528;fio&#x6765;&#x6D4B;&#x8BD5;&#x8FD9;&#x5757;&#x903B;&#x8F91;&#x5377;&#xFF0C;&#x4E3A;&#x4E86;&#x4E0D;&#x4EA7;&#x751F;&#x8FC7;&#x591A;&#x7684;io&#x5F71;&#x54CD;&#x5206;&#x6790;&#xFF0C;&#x91C7;&#x7528;fio&#x7684;rate-iops&#x6765;&#x9650;&#x5236;io&#x6570;" class="headerlink" title="6.&#x4F7F;&#x7528;fio&#x6765;&#x6D4B;&#x8BD5;&#x8FD9;&#x5757;&#x903B;&#x8F91;&#x5377;&#xFF0C;&#x4E3A;&#x4E86;&#x4E0D;&#x4EA7;&#x751F;&#x8FC7;&#x591A;&#x7684;io&#x5F71;&#x54CD;&#x5206;&#x6790;&#xFF0C;&#x91C7;&#x7528;fio&#x7684;rate_iops&#x6765;&#x9650;&#x5236;io&#x6570;"></a>6.&#x4F7F;&#x7528;fio&#x6765;&#x6D4B;&#x8BD5;&#x8FD9;&#x5757;&#x903B;&#x8F91;&#x5377;&#xFF0C;&#x4E3A;&#x4E86;&#x4E0D;&#x4EA7;&#x751F;&#x8FC7;&#x591A;&#x7684;io&#x5F71;&#x54CD;&#x5206;&#x6790;&#xFF0C;&#x91C7;&#x7528;fio&#x7684;rate_iops&#x6765;&#x9650;&#x5236;io&#x6570;</h3><p>fio&#x914D;&#x7F6E;&#x5982;&#x4E0B;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">#write_iops_log=write_iops_log</span><br><span class="line">rw=randwrite</span><br><span class="line">ioengine=libaio</span><br><span class="line">direct=1</span><br><span class="line">iodepth=1</span><br><span class="line">bsrange=4k-4k</span><br><span class="line">rate_iops=10</span><br><span class="line">runtime=18000</span><br><span class="line">time_based</span><br><span class="line">group_reporting</span><br><span class="line"></span><br><span class="line">[dm-0]</span><br><span class="line">filename=/dev/dm-0</span><br></pre></td></tr></table></figure></p>
+<h3 id="7-&#x5C06;fio&#x8DD1;&#x8D77;&#x6765;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x4F7F;&#x7528;iostat&#x76D1;&#x63A7;dm-0&#x7684;io&#x72B6;&#x51B5;"><a href="#7-&#x5C06;fio&#x8DD1;&#x8D77;&#x6765;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x4F7F;&#x7528;iostat&#x76D1;&#x63A7;dm-0&#x7684;io&#x72B6;&#x51B5;" class="headerlink" title="7.&#x5C06;fio&#x8DD1;&#x8D77;&#x6765;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x4F7F;&#x7528;iostat&#x76D1;&#x63A7;dm-0&#x7684;io&#x72B6;&#x51B5;"></a>7.&#x5C06;fio&#x8DD1;&#x8D77;&#x6765;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x4F7F;&#x7528;iostat&#x76D1;&#x63A7;dm-0&#x7684;io&#x72B6;&#x51B5;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iostat -mxt 1 dm-0|tee dm-0.stats</span><br></pre></td></tr></table></figure>
+<h3 id="8-&#x5C06;&#x5176;&#x4E2D;&#x4E00;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x4E0A;&#x7684;chunk&#x8BBE;&#x5907;suspend&#x4F4F;"><a href="#8-&#x5C06;&#x5176;&#x4E2D;&#x4E00;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x4E0A;&#x7684;chunk&#x8BBE;&#x5907;suspend&#x4F4F;" class="headerlink" title="8.&#x5C06;&#x5176;&#x4E2D;&#x4E00;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x4E0A;&#x7684;chunk&#x8BBE;&#x5907;suspend&#x4F4F;"></a>8.&#x5C06;&#x5176;&#x4E2D;&#x4E00;&#x53F0;&#x5B58;&#x50A8;&#x673A;&#x4E0A;&#x7684;chunk&#x8BBE;&#x5907;suspend&#x4F4F;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nbs@10-180-0-30:~/wd$ sudo dmsetup suspend test_chunk_0</span><br></pre></td></tr></table></figure>
+<h3 id="9-io-hang&#x4F4F;&#x7684;&#x65F6;&#x95F4;&#x7EDF;&#x8BA1;"><a href="#9-io-hang&#x4F4F;&#x7684;&#x65F6;&#x95F4;&#x7EDF;&#x8BA1;" class="headerlink" title="9.io hang&#x4F4F;&#x7684;&#x65F6;&#x95F4;&#x7EDF;&#x8BA1;"></a>9.io hang&#x4F4F;&#x7684;&#x65F6;&#x95F4;&#x7EDF;&#x8BA1;</h3><p>&#x7136;&#x540E;&#x53EF;&#x4EE5;&#x89C2;&#x5BDF;&#x5230;fio&#x7684;io hang&#x4F4F;&#x4E86;&#xFF0C;&#x5E76;&#x4E14;iostat&#x663E;&#x793A;util 100%<br>fio&#x5F00;&#x59CB;&#x540E;&#x7684;10s&#x65F6;&#x523B;suspend&#x4F4F;chunk&#x8BBE;&#x5907;&#xFF0C;&#x89C2;&#x5BDF;&#x5230;fio&#x6062;&#x590D;&#x6B63;&#x5E38;&#x7684;&#x65F6;&#x95F4;&#x70B9;&#x662F;eta 04h:53m:36s&#xFF0C;&#x8FD9;&#x662F;fio&#x7684;&#x5012;&#x8BA1;&#x65F6;&#xFF0C;&#x56E0;&#x6B64;&#x7B97;&#x51FA;&#x6765;fio io hang&#x4E86;6m14s&#xFF0C;&#x7136;&#x540E;&#x5C31;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x8FD9;&#x4E2A;iscsi&#x8BBE;&#x5907;&#x62A5;io error&#x4E86;&#x3002;</p>
+<p>iostat&#x89C2;&#x5BDF;&#x5230;&#x7684;&#x5404;&#x4E2A;&#x65F6;&#x95F4;&#x70B9;&#xFF1A;<br>1&#xFF09;io&#x5F00;&#x59CB;&#x65F6;&#x95F4;&#xFF1A;    04:50:37 PM<br>2&#xFF09;io hang&#x5F00;&#x59CB;&#x65F6;&#x95F4;&#xFF1A; 04:50:47 PM<br>3&#xFF09;io&#x5F00;&#x59CB;&#x6062;&#x590D;&#x65F6;&#x95F4;&#xFF1A;   04:56:58 PM<br>4&#xFF09;&#x56E0;&#x4E3A;&#x662F;sas&#x76D8;&#xFF0C;&#x5806;&#x79EF;&#x7684;io&#x4E00;&#x76F4;&#x5904;&#x7406;&#xFF0C;util &#x8FD8;&#x662F;100%&#xFF0C;&#x6062;&#x590D;&#x6B63;&#x5E38;&#x7684;&#x65F6;&#x95F4;&#xFF1A; 04:57:22 PM<br>&#x53EF;&#x4EE5;&#x7B97;&#x51FA;io hang&#x7684;&#x65F6;&#x95F4;&#x4E3A;6m11s&#xFF0C;&#x8DDF;fio&#x4E0A;&#x89C2;&#x5BDF;&#x5230;&#x7684;&#x5DEE;&#x4E0D;&#x591A;&#x3002;</p>
+<h3 id="10-&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x76D1;&#x63A7;"><a href="#10-&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x76D1;&#x63A7;" class="headerlink" title="10.&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x76D1;&#x63A7;"></a>10.&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x76D1;&#x63A7;</h3><p>&#x7F51;&#x7EDC;&#x8FDE;&#x63A5;&#x72B6;&#x51B5;&#xFF0C;&#x53D1;&#x73B0;&#x4E00;&#x76F4;&#x51FA;&#x9519;&#x540E;&#x91CD;&#x8FDE;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Every 1.0s: sudo ss -apnt |grep 3260                                                                                                                                            </span><br><span class="line"></span><br><span class="line">FIN-WAIT-1 0      481             10.180.0.46:59440          10.180.0.30:3260</span><br><span class="line">FIN-WAIT-1 0      481             10.180.0.46:59446          10.180.0.30:3260</span><br><span class="line">ESTAB      0      480             10.180.0.46:59451          10.180.0.30:3260   users:((&quot;iscsid&quot;,4237,7))</span><br><span class="line">FIN-WAIT-1 0      481             10.180.0.46:59444          10.180.0.30:3260</span><br><span class="line">FIN-WAIT-1 0      481             10.180.0.46:59442          10.180.0.30:3260</span><br><span class="line">FIN-WAIT-1 0      481             10.180.0.46:59449          10.180.0.30:3260</span><br></pre></td></tr></table></figure></p>
+<p>target&#x7684;&#x5185;&#x6838;&#x7EBF;&#x7A0B;&#x67D0;&#x4E2A;&#x65F6;&#x95F4;&#x70B9;&#x540E;&#x4E00;&#x76F4;&#x5904;&#x4E8E;cpu 100%<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND                                                                                                                                        </span><br><span class="line">3138 root      20   0     0    0    0 R   100  0.0 192:04.28 istd1000</span><br></pre></td></tr></table></figure></p>
+<h2 id="&#x6392;&#x67E5;&#x5206;&#x6790;&#x8FC7;&#x7A0B;"><a href="#&#x6392;&#x67E5;&#x5206;&#x6790;&#x8FC7;&#x7A0B;" class="headerlink" title="&#x6392;&#x67E5;&#x5206;&#x6790;&#x8FC7;&#x7A0B;"></a>&#x6392;&#x67E5;&#x5206;&#x6790;&#x8FC7;&#x7A0B;</h2><h3 id="iscsi&#x76F8;&#x5173;&#x8D85;&#x65F6;&#x6392;&#x67E5;"><a href="#iscsi&#x76F8;&#x5173;&#x8D85;&#x65F6;&#x6392;&#x67E5;" class="headerlink" title="iscsi&#x76F8;&#x5173;&#x8D85;&#x65F6;&#x6392;&#x67E5;"></a>iscsi&#x76F8;&#x5173;&#x8D85;&#x65F6;&#x6392;&#x67E5;</h3><p>&#x6839;&#x636E;&#x4E0A;&#x9762;&#x7684;&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x7684;&#x76D1;&#x63A7;&#x53D1;&#x73B0;&#x5F53;&#x6709;&#x5F02;&#x5E38;&#x65F6;&#xFF0C;iscsi&#x7684;&#x8FDE;&#x63A5;&#x4E00;&#x76F4;&#x5728;&#x91CD;&#x8FDE;&#xFF0C;&#x7136;&#x540E;&#x5173;&#x95ED;&#xFF0C;&#x53C8;&#x91CD;&#x8FDE;&#xFF0C;&#x56E0;&#x6B64;&#x9996;&#x5148;&#x5C31;&#x6000;&#x7591;&#x662F;&#x5426;&#x662F;iscsi&#x914D;&#x7F6E;&#x7684;&#x76F8;&#x5173;&#x8D85;&#x65F6;&#x5BFC;&#x81F4;&#x7684;&#xFF0C;iscsi initiator&#x7AEF;&#xFF08;&#x4E5F;&#x5C31;&#x662F;openiscsi&#xFF09;&#x7684;&#x76F8;&#x5173;&#x8D85;&#x65F6;&#x603B;&#x5171;&#x6709;&#x4EE5;&#x4E0B;&#x51E0;&#x9879;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">node.conn[0].timeo.auth_timeout = 45</span><br><span class="line">node.conn[0].timeo.login_timeout = 15</span><br><span class="line">node.conn[0].timeo.logout_timeout = 15</span><br><span class="line">node.conn[0].timeo.noop_out_interval = 5</span><br><span class="line">node.conn[0].timeo.noop_out_timeout = 5</span><br><span class="line">node.session.err_timeo.abort_timeout = 15</span><br><span class="line">node.session.err_timeo.host_reset_timeout = 60</span><br><span class="line">node.session.err_timeo.lu_reset_timeout = 30</span><br><span class="line">node.session.err_timeo.tgt_reset_timeout = 30</span><br><span class="line">node.session.timeo.replacement_timeout = 10</span><br></pre></td></tr></table></figure></p>
+<p>&#x8FD9;&#x4E9B;&#x8D85;&#x65F6;&#x7684;&#x542B;&#x4E49;&#x901A;&#x8FC7;&#x540D;&#x5B57;&#x53EF;&#x4EE5;&#x77E5;&#x6653;&#xFF0C;&#x8FD9;&#x91CC;&#x5177;&#x4F53;&#x8BF4;&#x660E;&#xFF0C;&#x8BE6;&#x7EC6;&#x7684;&#x53EF;&#x4EE5;&#x770B;<a href="https://github.com/open-iscsi/open-iscsi" target="_blank" rel="external">open-iscsi&#x7684;&#x6587;&#x6863;</a>&#x3002;</p>
+<p>&#x901A;&#x8FC7;&#x5C06;&#x8FD9;&#x4E9B;&#x8D85;&#x65F6;&#x503C;&#x8C03;&#x5C0F;&#xFF0C;&#x518D;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#xFF0C;&#x4ECD;&#x7136;&#x662F;&#x4E00;&#x6837;&#x7684;&#x6548;&#x679C;&#xFF0C;fio hang&#x7684;&#x65F6;&#x95F4;&#x4E5F;&#x662F;6&#x5206;&#x591A;&#x949F;&#x3002;&#x8BF4;&#x660E;&#x4E0D;&#x662F;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x5F71;&#x54CD;&#x7684;&#x3002;</p>
+<h3 id="open-iscsi&#x548C;iscsitarget&#x7684;&#x65E5;&#x5FD7;"><a href="#open-iscsi&#x548C;iscsitarget&#x7684;&#x65E5;&#x5FD7;" class="headerlink" title="open-iscsi&#x548C;iscsitarget&#x7684;&#x65E5;&#x5FD7;"></a>open-iscsi&#x548C;iscsitarget&#x7684;&#x65E5;&#x5FD7;</h3><p>io hang&#x4F4F;&#x8FC7;&#x7A0B;&#x4E2D;iscsitarget&#x7684;&#x65E5;&#x5FD7;&#x5982;&#x4E0B;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Jan 13 16:51:48 10-180-0-30 kernel: [2540033.667744] iscsi_trgt: Abort Task (01) issued on tid:1000 lun:0 by sid:281474997486080 (Function Complete)</span><br><span class="line">Jan 13 16:52:50 10-180-0-30 kernel: [2540095.762670] iscsi_trgt: Logical Unit Reset (05) issued on tid:1000 lun:0 by sid:281474997486080 (Function Complete)</span><br><span class="line">Jan 13 16:53:52 10-180-0-30 kernel: [2540157.745521] iscsi_trgt: Abort Task (01) issued on tid:1000 lun:0 by sid:281474997486080 (Function Complete)</span><br><span class="line">Jan 13 16:54:54 10-180-0-30 kernel: [2540219.840457] iscsi_trgt: Logical Unit Reset (05) issued on tid:1000 lun:0 by sid:281474997486080 (Function Complete)</span><br><span class="line">Jan 13 16:55:56 10-180-0-30 kernel: [2540281.823308] iscsi_trgt: Abort Task (01) issued on tid:1000 lun:0 by sid:281474997486080 (Function Complete)</span><br><span class="line">Jan 13 16:56:58 10-180-0-30 kernel: [2540343.790186] iscsi_trgt: Logical Unit Reset (05) issued on tid:1000 lun:0 by sid:281474997486080 (Function Complete)</span><br><span class="line">Jan 13 17:00:48 10-180-0-30 kernel: [2540574.243189] iscsi_trgt: nop_out_start(915) ignore this request 4b000000</span><br><span class="line">Jan 13 17:00:48 10-180-0-30 kernel: [2540574.244276] iscsi_trgt: cmnd_rx_start(1942) 0 4b000000 -7</span><br><span class="line">Jan 13 17:00:48 10-180-0-30 kernel: [2540574.244999] iscsi_trgt: cmnd_skip_pdu(471) 4b000000 0 0 0</span><br></pre></td></tr></table></figure></p>
+<p>&#x4ECE;target&#x7684;&#x9519;&#x8BEF;&#x65E5;&#x5FD7;&#x6765;&#x770B;&#xFF0C;&#x4E5F;&#x53EA;&#x662F;&#x6536;&#x5230;initiator&#x7AEF;&#x53D1;&#x8FC7;&#x6765;&#x7684;abort task&#x6D88;&#x606F;&#x8FDB;&#x884C;&#x5904;&#x7406;&#xFF0C;&#x6CA1;&#x6709;&#x660E;&#x663E;&#x7EBF;&#x7D22;&#x3002;<br>&#x53E6;&#x5916;&#x5F00;&#x542F;&#x4E86;open-iscsi&#x7684;debug&#x65E5;&#x5FD7;&#xFF0C;io hang&#x8FC7;&#x7A0B;&#x4E2D;&#x4F1A;&#x53D1;&#x73B0;&#x5F88;&#x591A;&#x91CD;&#x8FDE;&#x7684;&#x65E5;&#x5FD7;&#xFF0C;&#x8DDF;&#x4E4B;&#x524D;&#x7F51;&#x7EDC;&#x8FDE;&#x63A5;&#x72B6;&#x6001;&#x76D1;&#x63A7;&#x7684;&#x4FE1;&#x606F;&#x4E00;&#x81F4;&#x3002;</p>
+<h3 id="&#x8BBE;&#x5907;&#x7684;timeout"><a href="#&#x8BBE;&#x5907;&#x7684;timeout" class="headerlink" title="&#x8BBE;&#x5907;&#x7684;timeout"></a>&#x8BBE;&#x5907;&#x7684;timeout</h3><p>&#x4E00;&#x76F4;&#x6000;&#x7591;&#x662F;&#x67D0;&#x4E2A;&#x9636;&#x6BB5;&#x7684;&#x8D85;&#x65F6;&#x5BFC;&#x81F4;&#xFF0C;&#x65E2;&#x7136;&#x4ECE;iscsi&#x5C42;&#x9762;&#x6CA1;&#x6709;&#x53D1;&#x73B0;&#x660E;&#x663E;&#x7684;&#x7EBF;&#x7D22;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x8F6C;&#x5230;&#x8BBE;&#x5907;&#x5C42;&#x9762;&#xFF0C;linux&#x7684;&#x5757;&#x8BBE;&#x5907;&#x90FD;&#x6709;&#x4E00;&#x4E2A;timeout&#xFF08;/sys/block/<sdxx>/device/timeout&#xFF09;&#xFF0C;&#x5BF9;&#x4E8E;iscsi&#x8FDE;&#x8FC7;&#x6765;&#x7684;&#x8BBE;&#x5907;&#x8FD9;&#x4E2A;&#x8D85;&#x65F6;&#x503C;&#x9ED8;&#x8BA4;&#x662F;30s&#xFF0C;&#x90A3;&#x4E48;&#x5C06;&#x8FD9;&#x4E2A;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x6539;&#x5C0F;&#x8BD5;&#x8BD5;&#x3002;</sdxx></p>
+<p>1&#xFF09;&#x5C06;iscsi&#x8BBE;&#x5907;&#x7684;&#x8D85;&#x65F6;&#x7531;&#x9ED8;&#x8BA4;&#x7684;30s&#x6539;&#x6210;10s<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">echo 10 &gt; /sys/block/sdu/device/timeout</span><br><span class="line"></span><br><span class="line">iostat io hang&#x7684;&#x65F6;&#x95F4;&#xFF1A; 	11:03:11 AM</span><br><span class="line">iostat io&#x5F00;&#x59CB;&#x6062;&#x590D;&#xFF1A;		11:05:22 AM</span><br><span class="line">iostat io&#x6062;&#x590D;&#x6B63;&#x5E38;&#xFF1A;		11:05:31 AM</span><br><span class="line">&#x603B;&#x5171;io hang&#x7684;&#x65F6;&#x95F4;&#x4E3A;2m10s&#x5DE6;&#x53F3;</span><br></pre></td></tr></table></figure></p>
+<p>2&#xFF09;&#x5C06;scsi&#x7684;timeout&#x518D;&#x6539;&#x77ED;&#x6210;5s<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">echo 5 &gt; /sys/block/sdw/device/timeout</span><br><span class="line"></span><br><span class="line">iostat io hang&#x5F00;&#x59CB;&#x65F6;&#x95F4;&#xFF1A;	04:31:04 PM</span><br><span class="line">iostat io&#x5F00;&#x59CB;&#x6062;&#x590D;&#x65F6;&#x95F4;&#xFF1A;	04:32:13 PM</span><br><span class="line">iostat io&#x5B8C;&#x6210;&#x6062;&#x590D;&#x65F6;&#x95F4;&#xFF1A;	04:32:19 PM</span><br><span class="line">&#x603B;&#x5171;io hang&#x7684;&#x65F6;&#x95F4;1m9s&#x5DE6;&#x53F3;&#x3002;</span><br></pre></td></tr></table></figure></p>
+<p>&#x4E0A;&#x9762;&#x7684;&#x7ED3;&#x679C;&#x663E;&#x793A;&#xFF0C;scsi&#x8BBE;&#x5907;&#x7684;timeout&#x5F71;&#x54CD;&#x4E86;io hang&#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x8D85;&#x65F6;&#x6539;&#x5C0F;&#x540E;&#xFF0C;io hang&#x7684;&#x65F6;&#x95F4;&#x660E;&#x663E;&#x51CF;&#x5C0F;&#x4E86;&#x3002;&#x90A3;&#x4E48;&#x5177;&#x4F53;&#x662F;&#x4EC0;&#x4E48;&#x6837;&#x7684;&#x5173;&#x7CFB;&#x5462;&#xFF1F;&#x4E0B;&#x9762;&#x5C31;&#x7ED3;&#x5408;scsi&#x7684;&#x8C03;&#x8BD5;&#x65E5;&#x5FD7;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
+<h3 id="&#x5F00;&#x542F;scsi&#x8C03;&#x8BD5;&#x65E5;&#x5FD7;"><a href="#&#x5F00;&#x542F;scsi&#x8C03;&#x8BD5;&#x65E5;&#x5FD7;" class="headerlink" title="&#x5F00;&#x542F;scsi&#x8C03;&#x8BD5;&#x65E5;&#x5FD7;"></a>&#x5F00;&#x542F;scsi&#x8C03;&#x8BD5;&#x65E5;&#x5FD7;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ scsi_logging_level -s --error 7 --timeout 7 --all 0</span><br><span class="line">New scsi logging level:</span><br><span class="line">/proc/sys/dev/scsi/logging_level = 63</span><br><span class="line">SCSI_LOG_ERROR=7</span><br><span class="line">SCSI_LOG_TIMEOUT=7</span><br><span class="line">SCSI_LOG_SCAN=0</span><br><span class="line">SCSI_LOG_MLQUEUE=0</span><br><span class="line">SCSI_LOG_MLCOMPLETE=0</span><br><span class="line">SCSI_LOG_LLQUEUE=0</span><br><span class="line">SCSI_LOG_LLCOMPLETE=0</span><br><span class="line">SCSI_LOG_HLQUEUE=0</span><br><span class="line">SCSI_LOG_HLCOMPLETE=0</span><br><span class="line">SCSI_LOG_IOCTL=0</span><br></pre></td></tr></table></figure>
+<p>&#x7136;&#x540E;&#x5BF9;&#x6BD4;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x7684;&#x65E5;&#x5FD7;&#xFF0C;&#x4ECE;&#x65E5;&#x5FD7;&#x4E0A;&#x770B;&#x662F;abort cmd&#x540E;&#x8FDB;&#x5165;&#x5230;scsi error handler&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x4E86;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">Jan 17 10:48:38 10-180-0-46 -su: HISTORY: PID=4475 UID=2010 sudo fio fio.cfg </span><br><span class="line">Jan 17 10:48:45 10-180-0-46 -su: HISTORY: PID=46333 UID=2010 iostat -mxt 1 dm-0 |tee dm-0.stats</span><br><span class="line">Jan 17 10:49:00 10-180-0-46 kernel: [5368505.769870] sd 7:0:0:0: [sdu] scmd ffff883373616200 abort scheduled</span><br><span class="line">Jan 17 10:49:00 10-180-0-46 kernel: [5368505.777865] sd 7:0:0:0: [sdu] aborting command ffff883373616200</span><br><span class="line">Jan 17 10:49:00 10-180-0-46 kernel: [5368505.777978] sd 7:0:0:0: [sdu] scmd ffff883373616200 retry aborted command</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774336] sd 7:0:0:0: [sdu] scmd ffff883373616200 previous abort failed</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774342] Waking error handler thread</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774346] scsi_eh_7: waking up 0/1/1</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774355] sd 7:0:0:0: scsi_eh_prt_fail_stats: cmds failed: 1, cancel: 0</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774362] Total of 1 commands on 1 devices require eh work</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774365] scsi_eh_7: Sending BDR sdev: 0xffff881fb23ff800</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774565] scsi_eh_done scmd: ffff883373616200 result: 2</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774573] scsi_send_eh_cmnd: scmd: ffff883373616200, timeleft: 2500</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774577] scsi_send_eh_cmnd: scsi_eh_completed_normally 2001</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774579] scsi_eh_tur: scmd ffff883373616200 rtn 2001</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774643] scsi_eh_done scmd: ffff883373616200 result: 0</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774649] scsi_send_eh_cmnd: scmd: ffff883373616200, timeleft: 2500</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774650] scsi_send_eh_cmnd: scsi_eh_completed_normally 2002</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774653] scsi_eh_tur: scmd ffff883373616200 rtn 2002</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774658] scsi_eh_7: flush retry cmd: ffff883373616200</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774665] scsi_eh_7 waking up host to restart</span><br><span class="line">Jan 17 10:49:12 10-180-0-46 kernel: [5368517.774673] scsi_eh_7: sleeping</span><br><span class="line">Jan 17 10:49:24 10-180-0-46 kernel: [5368529.746792] sd 7:0:0:0: [sdu] scmd ffff883373616200 abort scheduled</span><br><span class="line">Jan 17 10:49:24 10-180-0-46 kernel: [5368529.754787] sd 7:0:0:0: [sdu] aborting command ffff883373616200</span><br><span class="line">Jan 17 10:49:24 10-180-0-46 kernel: [5368529.754891] sd 7:0:0:0: [sdu] scmd ffff883373616200 retry aborted command</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.790899] sd 7:0:0:0: [sdu] scmd ffff883373616200 previous abort failed</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.790906] Waking error handler thread</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.790910] scsi_eh_7: waking up 0/1/1</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.790918] sd 7:0:0:0: scsi_eh_prt_fail_stats: cmds failed: 1, cancel: 0</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.790925] Total of 1 commands on 1 devices require eh work</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.790929] scsi_eh_7: Sending BDR sdev: 0xffff881fb23ff800</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791141] scsi_eh_done scmd: ffff883373616200 result: 2</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791150] scsi_send_eh_cmnd: scmd: ffff883373616200, timeleft: 2500</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791155] scsi_send_eh_cmnd: scsi_eh_completed_normally 2001</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791157] scsi_eh_tur: scmd ffff883373616200 rtn 2001</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791224] scsi_eh_done scmd: ffff883373616200 result: 0</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791230] scsi_send_eh_cmnd: scmd: ffff883373616200, timeleft: 2500</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791233] scsi_send_eh_cmnd: scsi_eh_completed_normally 2002</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791234] scsi_eh_tur: scmd ffff883373616200 rtn 2002</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791243] scsi_eh_7: flush retry cmd: ffff883373616200</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791249] scsi_eh_7 waking up host to restart</span><br><span class="line">Jan 17 10:49:35 10-180-0-46 kernel: [5368540.791257] scsi_eh_7: sleeping</span><br><span class="line">Jan 17 10:49:47 10-180-0-46 kernel: [5368552.763354] sd 7:0:0:0: [sdu] scmd ffff883373616200 abort scheduled</span><br><span class="line">Jan 17 10:49:47 10-180-0-46 kernel: [5368552.771352] sd 7:0:0:0: [sdu] aborting command ffff883373616200</span><br><span class="line">Jan 17 10:49:47 10-180-0-46 kernel: [5368552.771471] sd 7:0:0:0: [sdu] scmd ffff883373616200 retry aborted command</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807464] sd 7:0:0:0: [sdu] scmd ffff883373616200 previous abort failed</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807470] Waking error handler thread</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807480] scsi_eh_7: waking up 0/1/1</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807488] sd 7:0:0:0: scsi_eh_prt_fail_stats: cmds failed: 1, cancel: 0</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807494] Total of 1 commands on 1 devices require eh work</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807497] scsi_eh_7: Sending BDR sdev: 0xffff881fb23ff800</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807697] scsi_eh_done scmd: ffff883373616200 result: 2</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807705] scsi_send_eh_cmnd: scmd: ffff883373616200, timeleft: 2500</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807710] scsi_send_eh_cmnd: scsi_eh_completed_normally 2001</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807712] scsi_eh_tur: scmd ffff883373616200 rtn 2001</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807783] scsi_eh_done scmd: ffff883373616200 result: 0</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807790] scsi_send_eh_cmnd: scmd: ffff883373616200, timeleft: 2500</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807791] scsi_send_eh_cmnd: scsi_eh_completed_normally 2002</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807793] scsi_eh_tur: scmd ffff883373616200 rtn 2002</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807798] scsi_eh_7: flush finish cmd: ffff883373616200</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807804] sd 7:0:0:0: [sdu] Unhandled error code</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807806] sd 7:0:0:0: [sdu]  </span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807808] Result: hostbyte=DID_ERROR driverbyte=DRIVER_OK</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807809] sd 7:0:0:0: [sdu] CDB: </span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807811] Write(10): 2a 00 00 eb b5 80 00 00 08 00</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.807823] end_request: I/O error, dev sdu, sector 15447424</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.808900] md/raid1:md127: Disk failure on sdu, disabling device.</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.808900] md/raid1:md127: Operation continuing on 1 devices.</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.808906] scsi_eh_7 waking up host to restart</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.808912] scsi_eh_7: sleeping</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.811521] RAID1 conf printout:</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.811523]  --- wd:1 rd:2</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.811525]  disk 0, wo:1, o:0, dev:sdu</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.811527]  disk 1, wo:0, o:1, dev:sdv</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.823554] RAID1 conf printout:</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.823556]  --- wd:1 rd:2</span><br><span class="line">Jan 17 10:49:58 10-180-0-46 kernel: [5368563.823558]  disk 1, wo:0, o:1, dev:sdv</span><br></pre></td></tr></table></figure></p>
+<p>target&#x7AEF;&#x7684;&#x65E5;&#x5FD7;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Jan 17 10:49:00 10-180-0-30 kernel: [2863985.237066] iscsi_trgt: Abort Task (01) issued on tid:1000 lun:0 by sid:12384899046375936 (Function Complete)</span><br><span class="line">Jan 17 10:49:12 10-180-0-30 kernel: [2863997.233531] iscsi_trgt: Logical Unit Reset (05) issued on tid:1000 lun:0 by sid:12384899046375936 (Function Complete)</span><br><span class="line">Jan 17 10:49:24 10-180-0-30 kernel: [2864009.213910] iscsi_trgt: Abort Task (01) issued on tid:1000 lun:0 by sid:12384899046375936 (Function Complete)</span><br><span class="line">Jan 17 10:49:35 10-180-0-30 kernel: [2864020.250035] iscsi_trgt: Logical Unit Reset (05) issued on tid:1000 lun:0 by sid:12384899046375936 (Function Complete)</span><br><span class="line">Jan 17 10:49:47 10-180-0-30 kernel: [2864032.230419] iscsi_trgt: Abort Task (01) issued on tid:1000 lun:0 by sid:12384899046375936 (Function Complete)</span><br><span class="line">Jan 17 10:49:58 10-180-0-30 kernel: [2864043.266527] iscsi_trgt: Logical Unit Reset (05) issued on tid:1000 lun:0 by sid:12384899046375936 (Function Complete)</span><br></pre></td></tr></table></figure></p>
+<p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x65E5;&#x5FD7;&#x6765;&#x770B;&#xFF0C;&#x662F;&#x7ECF;&#x8FC7;&#x4E86;&#x591A;&#x6B21;abort task&#xFF0C;&#x7136;&#x540E;error handle&#x7684;&#x5904;&#x7406;&#xFF0C;&#x4F46;&#x662F;&#x5177;&#x4F53;&#x6709;&#x4EC0;&#x4E48;&#x6837;&#x7684;&#x5173;&#x7CFB;&#xFF0C;&#x8FD8;&#x662F;&#x5F97;&#x4ECE;linux&#x5185;&#x6838;&#x91CC;&#x8FD9;&#x90E8;&#x5206;&#x4EE3;&#x7801;&#x91CC;&#x627E;&#x7EBF;&#x7D22;&#x3002;</p>
+<h3 id="&#x4F7F;&#x7528;ftrace&#x6765;&#x8FFD;&#x8E2A;&#x5173;&#x952E;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#x4FE1;&#x606F;"><a href="#&#x4F7F;&#x7528;ftrace&#x6765;&#x8FFD;&#x8E2A;&#x5173;&#x952E;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#x4FE1;&#x606F;" class="headerlink" title="&#x4F7F;&#x7528;ftrace&#x6765;&#x8FFD;&#x8E2A;&#x5173;&#x952E;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#x4FE1;&#x606F;"></a>&#x4F7F;&#x7528;ftrace&#x6765;&#x8FFD;&#x8E2A;&#x5173;&#x952E;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#x4FE1;&#x606F;</h3><p>&#x5728;&#x67E5;&#x9605;linux&#x5185;&#x6838;&#x6E90;&#x7801;&#x7684;&#x540C;&#x65F6;&#xFF0C;&#x4F7F;&#x7528;ftrace&#x6765;&#x8FFD;&#x8E2A;&#x5173;&#x952E;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#x65E5;&#x5FD7;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo mount -t debugfs debugfs /sys/kernel/debug</span><br><span class="line"></span><br><span class="line">echo 1 &gt; /sys/kernel/debug/tracing/events/scsi/scsi_dispatch_cmd_start/enable</span><br><span class="line">echo 1 &gt; /sys/kernel/debug/tracing/events/scsi/scsi_dispatch_cmd_timeout/enable</span><br><span class="line"></span><br><span class="line">&#x7136;&#x540E;&#x53EF;&#x4EE5;&#x67E5;&#x770B;/sys/kernel/debug/tracing/trace&#x91CC;&#x7684;&#x5185;&#x5BB9;&#x6765;&#x770B;&#x65E5;&#x5FD7;&#x4FE1;&#x606F;&#xFF0C;&#x4E0D;&#x8FC7;&#x56E0;&#x4E3A;&#x4F1A;&#x8F93;&#x51FA;&#x6240;&#x6709;&#x8BBE;&#x5907;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x6240;&#x6709;&#x6839;&#x636E;scsi&#x53F7;&#x6765;&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#x3002;</span><br><span class="line"></span><br><span class="line">grep &quot;host_no=7 channel=0 id=0 lun=0&quot; /sys/kernel/debug/tracing/trace</span><br></pre></td></tr></table></figure></p>
+<p>&#x6D4B;&#x8BD5;&#x8FC7;&#x7A0B;&#x4E2D;io hang&#x90A3;&#x6BB5;&#x65F6;&#x95F4;&#x7684;&#x65E5;&#x5FD7;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">       &lt;...&gt;-15169 [005] .... 5387221.071608: scsi_dispatch_cmd_start: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387226.715800: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_OK message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">      &lt;idle&gt;-0     [003] d.s. 5387232.718032: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_TIME_OUT message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">kworker/3:1H-612   [003] .... 5387232.734040: scsi_dispatch_cmd_start: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387238.720266: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_OK message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387244.722500: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_TIME_OUT message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">kworker/5:1H-655   [005] .... 5387244.726522: scsi_dispatch_cmd_start: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00)</span><br><span class="line">      &lt;idle&gt;-0     [005] dNs. 5387250.692735: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_OK message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">      &lt;idle&gt;-0     [005] dNs. 5387256.710961: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_TIME_OUT message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">kworker/3:1H-612   [003] .... 5387256.726970: scsi_dispatch_cmd_start: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387262.729203: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_OK message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387268.731435: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_TIME_OUT message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">kworker/3:1H-612   [003] .... 5387268.735459: scsi_dispatch_cmd_start: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387274.733669: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_OK message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387280.735902: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_TIME_OUT message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">kworker/3:1H-612   [003] .... 5387280.751909: scsi_dispatch_cmd_start: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00)</span><br><span class="line">      &lt;idle&gt;-0     [003] d.s. 5387286.738133: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_OK message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br><span class="line">      &lt;idle&gt;-0     [003] dNs. 5387292.740369: scsi_dispatch_cmd_timeout: host_no=7 channel=0 id=0 lun=0 data_sgl=1 prot_sgl=0 prot_op=SCSI_PROT_NORMAL cmnd=(WRITE_10 lba=3300944 txlen=8 protect=0 raw=2a 00 00 32 5e 50 00 00 08 00) result=(driver=DRIVER_OK host=DID_TIME_OUT message=COMMAND_COMPLETE status=SAM_STAT_GOOD)</span><br></pre></td></tr></table></figure></p>
+<p>&#x4EE5;&#x53CA;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x4E2D;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x7684;scsi&#x65E5;&#x5FD7;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">Jan 17 16:00:29 10-180-0-46 bash: HISTORY: PID=3642 UID=0 echo &quot;&quot; &gt; trace</span><br><span class="line">Jan 17 16:00:39 10-180-0-46 -su: HISTORY: PID=4475 UID=2010 sudo fio fio.cfg </span><br><span class="line">Jan 17 16:00:41 10-180-0-46 -su: HISTORY: PID=46333 UID=2010 iostat -mxt 1 dm-0 |tee dm-0.stats</span><br><span class="line">Jan 17 16:01:00 10-180-0-46 kernel: [5387232.718042] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 abort scheduled</span><br><span class="line">Jan 17 16:01:00 10-180-0-46 kernel: [5387232.726038] sd 7:0:0:0: [sdu] aborting command ffff88377bcb56c0</span><br><span class="line">Jan 17 16:01:00 10-180-0-46 kernel: [5387232.726148] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 retry aborted command</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722511] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 previous abort failed</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722518] Waking error handler thread</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722521] scsi_eh_7: waking up 0/1/1</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722531] sd 7:0:0:0: scsi_eh_prt_fail_stats: cmds failed: 1, cancel: 0</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722537] Total of 1 commands on 1 devices require eh work</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722541] scsi_eh_7: Sending BDR sdev: 0xffff881fb23ff800</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722735] scsi_eh_done scmd: ffff88377bcb56c0 result: 2</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722743] scsi_send_eh_cmnd: scmd: ffff88377bcb56c0, timeleft: 1250</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722746] scsi_send_eh_cmnd: scsi_eh_completed_normally 2001</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722749] scsi_eh_tur: scmd ffff88377bcb56c0 rtn 2001</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722816] scsi_eh_done scmd: ffff88377bcb56c0 result: 0</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722822] scsi_send_eh_cmnd: scmd: ffff88377bcb56c0, timeleft: 1250</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722824] scsi_send_eh_cmnd: scsi_eh_completed_normally 2002</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722828] scsi_eh_tur: scmd ffff88377bcb56c0 rtn 2002</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722832] scsi_eh_7: flush retry cmd: ffff88377bcb56c0</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722840] scsi_eh_7 waking up host to restart</span><br><span class="line">Jan 17 16:01:12 10-180-0-46 kernel: [5387244.722851] scsi_eh_7: sleeping</span><br><span class="line">Jan 17 16:01:24 10-180-0-46 kernel: [5387256.710972] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 abort scheduled</span><br><span class="line">Jan 17 16:01:24 10-180-0-46 kernel: [5387256.718969] sd 7:0:0:0: [sdu] aborting command ffff88377bcb56c0</span><br><span class="line">Jan 17 16:01:24 10-180-0-46 kernel: [5387256.719133] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 retry aborted command</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731446] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 previous abort failed</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731452] Waking error handler thread</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731455] scsi_eh_7: waking up 0/1/1</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731464] sd 7:0:0:0: scsi_eh_prt_fail_stats: cmds failed: 1, cancel: 0</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731470] Total of 1 commands on 1 devices require eh work</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731473] scsi_eh_7: Sending BDR sdev: 0xffff881fb23ff800</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731668] scsi_eh_done scmd: ffff88377bcb56c0 result: 2</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731674] scsi_send_eh_cmnd: scmd: ffff88377bcb56c0, timeleft: 1250</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731676] scsi_send_eh_cmnd: scsi_eh_completed_normally 2001</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731678] scsi_eh_tur: scmd ffff88377bcb56c0 rtn 2001</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731742] scsi_eh_done scmd: ffff88377bcb56c0 result: 0</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731747] scsi_send_eh_cmnd: scmd: ffff88377bcb56c0, timeleft: 1250</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731748] scsi_send_eh_cmnd: scsi_eh_completed_normally 2002</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731750] scsi_eh_tur: scmd ffff88377bcb56c0 rtn 2002</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731754] scsi_eh_7: flush retry cmd: ffff88377bcb56c0</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731761] scsi_eh_7 waking up host to restart</span><br><span class="line">Jan 17 16:01:36 10-180-0-46 kernel: [5387268.731770] scsi_eh_7: sleeping</span><br><span class="line">Jan 17 16:01:48 10-180-0-46 kernel: [5387280.735913] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 abort scheduled</span><br><span class="line">Jan 17 16:01:48 10-180-0-46 kernel: [5387280.743906] sd 7:0:0:0: [sdu] aborting command ffff88377bcb56c0</span><br><span class="line">Jan 17 16:01:48 10-180-0-46 kernel: [5387280.744017] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 retry aborted command</span><br><span class="line">Jan 17 16:01:55 10-180-0-46 bash: HISTORY: PID=3642 UID=0 grep &quot;host_no=7 channel=0 id=0 lun=0&quot; trace</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740380] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 previous abort failed</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740387] Waking error handler thread</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740391] scsi_eh_7: waking up 0/1/1</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740400] sd 7:0:0:0: scsi_eh_prt_fail_stats: cmds failed: 1, cancel: 0</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740405] Total of 1 commands on 1 devices require eh work</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740408] scsi_eh_7: Sending BDR sdev: 0xffff881fb23ff800</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740630] scsi_eh_done scmd: ffff88377bcb56c0 result: 2</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740638] scsi_send_eh_cmnd: scmd: ffff88377bcb56c0, timeleft: 1250</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740642] scsi_send_eh_cmnd: scsi_eh_completed_normally 2001</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740644] scsi_eh_tur: scmd ffff88377bcb56c0 rtn 2001</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740716] scsi_eh_done scmd: ffff88377bcb56c0 result: 0</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740722] scsi_send_eh_cmnd: scmd: ffff88377bcb56c0, timeleft: 1250</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740723] scsi_send_eh_cmnd: scsi_eh_completed_normally 2002</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740727] scsi_eh_tur: scmd ffff88377bcb56c0 rtn 2002</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740733] scsi_eh_7: flush finish cmd: ffff88377bcb56c0</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740737] sd 7:0:0:0: [sdu] Unhandled error code</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740739] sd 7:0:0:0: [sdu]  </span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740740] Result: hostbyte=DID_ERROR driverbyte=DRIVER_OK</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740742] sd 7:0:0:0: [sdu] CDB: </span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740747] Write(10): 2a 00 00 32 5e 50 00 00 08 00</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740755] end_request: I/O error, dev sdu, sector 3300944</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.742331] md/raid1:md127: Disk failure on sdu, disabling device.</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.742331] md/raid1:md127: Operation continuing on 1 devices.</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.742335] scsi_eh_7 waking up host to restart</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.742343] scsi_eh_7: sleeping</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.745838] RAID1 conf printout:</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.745840]  --- wd:1 rd:2</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.745842]  disk 0, wo:1, o:0, dev:sdu</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.745843]  disk 1, wo:0, o:1, dev:sdv</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.756382] RAID1 conf printout:</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.756384]  --- wd:1 rd:2</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.756386]  disk 1, wo:0, o:1, dev:sdv</span><br></pre></td></tr></table></figure></p>
+<p>&#x4ECE;trace&#x91CC;&#x770B;&#x5230;scsi&#x547D;&#x4EE4;&#x5728;5387221.071608&#x65F6;&#x95F4;&#x70B9;start&#x4E86;&#xFF0C;&#x7136;&#x540E;5387226.715800&#x8D85;&#x65F6;&#x4E86;&#xFF0C;&#x521A;&#x597D;5s&#x3002;<br>&#x4F46;&#x662F;&#x4ECE;kern&#x7684;log&#x6765;&#x770B;&#xFF0C;&#x662F;5387232.718042&#x624D;&#x6253;&#x51FA;&#x65E5;&#x5FD7;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;trace&#x91CC;&#x7684;&#x7B2C;&#x4E8C;&#x6B21;timeout&#x7684;&#x65F6;&#x95F4;&#x70B9;&#xFF0C;&#x6BD4;&#x8F83;&#x5947;&#x602A;&#x3002;&#x3002;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jan 17 16:01:00 10-180-0-46 kernel: [5387232.718042] sd 7:0:0:0: [sdu] scmd ffff88377bcb56c0 abort scheduled</span><br></pre></td></tr></table></figure></p>
+<p>&#x80FD;&#x591F;&#x786E;&#x8BA4;&#x7684;&#x4E00;&#x70B9;&#x662F;&#xFF0C;&#x4ECE;trace&#x4FE1;&#x606F;&#x91CC;&#x770B;&#x5230;scsi cmnd&#x91CD;&#x8BD5;&#x4E86;5&#x6B21;&#xFF0C;&#x67E5;&#x9605;&#x5185;&#x6838;&#x4EE3;&#x7801;&#x786E;&#x8BA4;&#x5C31;&#x662F;SD_MAX_RETRIES&#x7684;&#x6B21;&#x6570;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x65F6;&#x95F4;&#x70B9;5387292.740369&#x6700;&#x540E;&#x4E00;&#x6B21;timeout&#x3002;&#x521A;&#x597D;&#x8DDF;kern&#x65E5;&#x5FD7;&#x91CC;&#x62A5;io error&#x7684;&#x65F6;&#x95F4;&#x70B9;&#x543B;&#x5408;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740737] sd 7:0:0:0: [sdu] Unhandled error code</span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740739] sd 7:0:0:0: [sdu]  </span><br><span class="line">Jan 17 16:02:00 10-180-0-46 kernel: [5387292.740740] Result: hostbyte=DID_ERROR driverbyte=DRIVER_OK</span><br></pre></td></tr></table></figure></p>
+<p>&#x4ECE;scsi&#x7684;&#x65E5;&#x5FD7;&#x6765;&#x770B;&#xFF0C;&#x4ECE;5387221.071608&#x8FD9;&#x4E2A;&#x65F6;&#x95F4;&#x70B9;scsi_dispatch_cmd_start&#x5230;&#x6700;&#x540E;&#x4E00;&#x6B21;5387292.740369 scsi_dispatch_cmd_timeout<br>&#x65F6;&#x95F4;&#x5DEE;&#x662F;5387292-5387221=71s&#x3002;&#x8DDF;fio&#x548C;iostat&#x89C2;&#x5BDF;&#x5230;&#x7684;io hang&#x7684;&#x65F6;&#x95F4;&#x4E00;&#x81F4;&#x3002;<br>&#x6240;&#x4EE5;io hang&#x7684;&#x65F6;&#x95F4;&#x53EF;&#x4EE5;&#x7B97;&#x51FA;&#x6765;&#x662F;: 2<em>timeout + SD_MAX_RETRIES</em>(2<em>timeout)&#xFF0C;&#x518D;&#x52A0;&#x4E0A;&#x8D85;&#x65F6;&#x65F6;&#x95F4;1s&#x5185;&#x7684;&#x8BEF;&#x5DEE;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x8FD8;&#x9700;&#x8981;&#x52A0;&#x4E0A;2</em>SD_MAX_RETRIES<em>1&#x7684;&#x8BEF;&#x5DEE;&#x65F6;&#x95F4;&#xFF0C;&#x603B;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x4E3A;&#xFF1A;<br>2</em>timeout + SD_MAX_RETRIES<em>(2</em>timeout) + 2<em>SD_MAX_RETRIES</em>1<br>&#x6240;&#x4EE5;&#x5F53;timeout&#x8BBE;&#x7F6E;&#x4E3A;5s&#x65F6;&#xFF0C;&#x603B;&#x5171;io hang&#x7684;&#x65F6;&#x95F4;&#x53EF;&#x4EE5;&#x7B97;&#x51FA;&#x6765;&#x662F;&#xFF1A; 2<em>5 + 5</em>(2<em>5) + 2</em>5*1 = 70s&#x3002;</p>
+<p>&#x671F;&#x95F4;&#x4E3A;&#x4E86;&#x8FDB;&#x4E00;&#x6B65;&#x83B7;&#x53D6;iscsi&#x5185;&#x6838;&#x7684;&#x76F8;&#x5173;&#x65E5;&#x5FD7;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x76F8;&#x5173;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo 1 &gt; /sys/module/libiscsi/parameters/debug_libiscsi_conn</span><br><span class="line">echo 1 &gt; /sys/module/libiscsi/parameters/debug_libiscsi_eh</span><br><span class="line">echo 1 &gt; /sys/module/libiscsi/parameters/debug_libiscsi_session</span><br><span class="line">echo 1 &gt; /sys/module/libiscsi_tcp/parameters/debug_libiscsi_tcp</span><br></pre></td></tr></table></figure></p>
+<p>&#x4E0D;&#x8FC7;&#x6211;&#x4EEC;&#x76EE;&#x524D;&#x53EA;&#x5173;&#x6CE8;&#x9519;&#x8BEF;&#x5904;&#x7406;&#x7684;&#x90E8;&#x5206;&#xFF0C;&#x6240;&#x4EE5;&#x53EA;&#x7528;&#x5F00;&#x542F;&#x4E00;&#x4E2A;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 1 &gt; /sys/module/libiscsi/parameters/debug_libiscsi_eh</span><br></pre></td></tr></table></figure></p>
+<p>&#x90A3;&#x4E48;&#x4E0A;&#x9762;&#x4F30;&#x7B97;&#x7684;&#x65F6;&#x95F4;&#x662F;&#x5426;&#x6B63;&#x786E;&#x5462;&#xFF1F;&#x4E0B;&#x9762;&#x5C31;&#x7ED3;&#x5408;&#x5185;&#x6838;&#x6E90;&#x7801;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
+<h3 id="&#x5206;&#x6790;linux&#x5185;&#x6838;scsi&#x547D;&#x4EE4;&#x5904;&#x7406;&#x7684;&#x4EE3;&#x7801;"><a href="#&#x5206;&#x6790;linux&#x5185;&#x6838;scsi&#x547D;&#x4EE4;&#x5904;&#x7406;&#x7684;&#x4EE3;&#x7801;" class="headerlink" title="&#x5206;&#x6790;linux&#x5185;&#x6838;scsi&#x547D;&#x4EE4;&#x5904;&#x7406;&#x7684;&#x4EE3;&#x7801;"></a>&#x5206;&#x6790;linux&#x5185;&#x6838;scsi&#x547D;&#x4EE4;&#x5904;&#x7406;&#x7684;&#x4EE3;&#x7801;</h3><h4 id="scsi&#x8BBE;&#x5907;&#x521D;&#x59CB;&#x5316;"><a href="#scsi&#x8BBE;&#x5907;&#x521D;&#x59CB;&#x5316;" class="headerlink" title="scsi&#x8BBE;&#x5907;&#x521D;&#x59CB;&#x5316;"></a>scsi&#x8BBE;&#x5907;&#x521D;&#x59CB;&#x5316;</h4><p>&#x5F53;&#x7CFB;&#x7EDF;&#x53D1;&#x73B0;&#x65B0;&#x7684;scsi&#x8BBE;&#x5907;&#xFF0C;&#x4F1A;&#x8FDB;&#x884C;&#x65B0;&#x8BBE;&#x5907;&#x7684;&#x6CE8;&#x518C;&#xFF0C;&#x5176;&#x4E2D;&#x5C31;&#x6D89;&#x53CA;&#x5230;scsi&#x8BBE;&#x5907;&#x7684;&#x521D;&#x59CB;&#x5316;&#x3002;&#x5728;&#x8FD9;&#x91CC;&#x5C31;&#x6CE8;&#x518C;&#x4E86;&#x8BE5;&#x8BBE;&#x5907;&#x7684;&#x8BF7;&#x6C42;&#x5904;&#x7406;&#x51FD;&#x6570;scsi_request_fn()&#xFF0C;&#x8BF7;&#x6C42;&#x5B8C;&#x6210;&#x51FD;&#x6570;scsi_softirq_done()&#xFF0C;&#x8D85;&#x65F6;&#x5904;&#x7406;&#x51FD;&#x6570;scsi_times_out()&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scsi_alloc_sdev</span><br><span class="line"> -&gt;scsi_alloc_queue&#xFF0C;&#x8D4B;&#x503C;&#x7ED9;sdev-&gt;request_queue</span><br><span class="line">    -&gt;__scsi_alloc_queue(sdev-&gt;host, scsi_request_fn)</span><br><span class="line">       -&gt;blk_init_queue()</span><br><span class="line">         -&gt;blk_init_queue_node()</span><br><span class="line">           -&gt;blk_alloc_queue_node()</span><br><span class="line">             -&gt;setup_timer(&amp;q-&gt;timeout, blk_rq_timed_out_timer, (unsigned long) q)&#x8BBE;&#x7F6E;&#x5B9A;&#x65F6;&#x5668;</span><br><span class="line">    -&gt;blk_queue_prep_rq(q, scsi_prep_fn);</span><br><span class="line">	-&gt;blk_queue_softirq_done(q, scsi_softirq_done);</span><br><span class="line">	-&gt;blk_queue_rq_timed_out(q, scsi_times_out);</span><br><span class="line">	-&gt;blk_queue_lld_busy(q, scsi_lld_busy);</span><br></pre></td></tr></table></figure></p>
+<h4 id="scsi-cmnd&#x8BF7;&#x6C42;&#x4E0B;&#x53D1;"><a href="#scsi-cmnd&#x8BF7;&#x6C42;&#x4E0B;&#x53D1;" class="headerlink" title="scsi cmnd&#x8BF7;&#x6C42;&#x4E0B;&#x53D1;"></a>scsi cmnd&#x8BF7;&#x6C42;&#x4E0B;&#x53D1;</h4><p>io&#x5728;&#x5757;&#x5C42;&#x5904;&#x7406;&#x5B8C;&#x6210;&#x540E;&#x4F1A;&#x8C03;&#x7528;q-&gt;request_fn&#x8FDB;&#x884C;&#x5177;&#x4F53;&#x7684;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x5C42;&#x7684;&#x5904;&#x7406;&#xFF0C;&#x5BF9;&#x4E8E;scsi&#x8BBE;&#x5907;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F;scsi_request_fn&#x5904;&#x7406;&#x51FD;&#x6570;&#x3002;scsi_request_fn&#x8C03;&#x7528;scsi_dipatch_cmd&#xFF0C;&#x7136;&#x540E;hostt-&gt;queuecommand&#x653E;&#x5230;&#x5E95;&#x5C42;&#x9A71;&#x52A8;&#x7684;&#x961F;&#x5217;&#x91CC;&#xFF0C;&#x7531;&#x5E95;&#x5C42;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">scsi_request_fn</span><br><span class="line"> -&gt;blk_peek_request</span><br><span class="line"> -&gt;blk_start_request</span><br><span class="line">    -&gt;blk_add_timer&#x8BBE;&#x7F6E;&#x8D85;&#x65F6;</span><br><span class="line"> -&gt;scsi_dispatch_cmd</span><br><span class="line">    -&gt;cmd-&gt;scsi_done = scsi_done</span><br><span class="line">    -&gt;rtn = host-&gt;hostt-&gt;queuecommand(host, cmd)</span><br></pre></td></tr></table></figure></p>
+<h4 id="scsi-cmnd&#x8BF7;&#x6C42;&#x5B8C;&#x6210;&#x5904;&#x7406;"><a href="#scsi-cmnd&#x8BF7;&#x6C42;&#x5B8C;&#x6210;&#x5904;&#x7406;" class="headerlink" title="scsi cmnd&#x8BF7;&#x6C42;&#x5B8C;&#x6210;&#x5904;&#x7406;"></a>scsi cmnd&#x8BF7;&#x6C42;&#x5B8C;&#x6210;&#x5904;&#x7406;</h4><p>&#x5F53;scsi&#x547D;&#x4EE4;&#x7531;&#x5E95;&#x5C42;&#x9A71;&#x52A8;&#x5904;&#x7406;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x4F1A;&#x89E6;&#x53D1;&#x8F6F;&#x4E2D;&#x65AD;&#xFF0C;&#x8C03;&#x7528;&#x5BF9;&#x4E8E;&#x7684;&#x8F6F;&#x4E2D;&#x65AD;&#x5904;&#x7406;&#x51FD;&#x6570;&#xFF0C;&#x4ECE;&#x800C;&#x8C03;&#x7528;&#x5230;scsi&#x547D;&#x4EE4;&#x4E00;&#x5F00;&#x59CB;&#x6CE8;&#x518C;&#x7684;&#x5B8C;&#x6210;&#x51FD;&#x6570;scsi_done()&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">scsi_softirq_done()</span><br><span class="line">  is the handler that gets called once the LLD indicates command completed.</span><br><span class="line">  scsi_done()</span><br><span class="line">    -&gt;blk_complete_request()</span><br><span class="line">        -&gt;causes softirq</span><br><span class="line">            -&gt;blk_done_softirq()</span><br><span class="line">                -&gt;scsi_softirq_done()</span><br></pre></td></tr></table></figure></p>
+<h4 id="scsi-cmnd&#x8D85;&#x65F6;&#x7684;&#x8BBE;&#x7F6E;&#x4E0E;&#x5904;&#x7406;"><a href="#scsi-cmnd&#x8D85;&#x65F6;&#x7684;&#x8BBE;&#x7F6E;&#x4E0E;&#x5904;&#x7406;" class="headerlink" title="scsi cmnd&#x8D85;&#x65F6;&#x7684;&#x8BBE;&#x7F6E;&#x4E0E;&#x5904;&#x7406;"></a>scsi cmnd&#x8D85;&#x65F6;&#x7684;&#x8BBE;&#x7F6E;&#x4E0E;&#x5904;&#x7406;</h4><p>&#x5728;blk_add_timer&#x91CC;&#x4F1A;&#x8BBE;&#x7F6E;req-&gt;timeout&#xFF08;&#x8D4B;&#x503C;&#x4E3A;q-&gt;rq_timeout&#xFF0C;&#x8FD9;&#x4E2A;&#x503C;&#x662F;&#x5728;sd_probe()&#x91CC;&#x8BBE;&#x7F6E;&#x7684;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;/sys/block/<sdxx>/device/timeout&#x8FD9;&#x4E2A;&#x503C;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x6DFB;&#x52A0;&#x5230;q-&gt;timeout_list&#xFF0C;&#x7531;&#x5B9A;&#x65F6;&#x5668;&#x5904;&#x7406;&#x51FD;&#x6570;&#x6765;&#x5904;&#x7406;&#x3002;&#x6CE8;&#x610F;&#x8FD9;&#x91CC;&#x91C7;&#x7528;round up to nearest second&#xFF0C;&#x6240;&#x4EE5;&#x5B9E;&#x9645;&#x4F1A;&#x53D1;&#x73B0;timeout&#x4F1A;&#x6709;1s&#x5DE6;&#x53F3;&#x7684;&#x8BEF;&#x5DEE;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">void blk_add_timer(struct request *req)</span><br><span class="line">{</span><br><span class="line">	struct request_queue *q = req-&gt;q;</span><br><span class="line">	unsigned long expiry;</span><br><span class="line"></span><br><span class="line">	if (!q-&gt;rq_timed_out_fn)</span><br><span class="line">		return;</span><br><span class="line"></span><br><span class="line">	BUG_ON(!list_empty(&amp;req-&gt;timeout_list));</span><br><span class="line"></span><br><span class="line">	/*</span><br><span class="line">	 * Some LLDs, like scsi, peek at the timeout to prevent a</span><br><span class="line">	 * command from being retried forever.</span><br><span class="line">	 */</span><br><span class="line">	if (!req-&gt;timeout)</span><br><span class="line">		req-&gt;timeout = q-&gt;rq_timeout;</span><br><span class="line"></span><br><span class="line">	req-&gt;deadline = jiffies + req-&gt;timeout;</span><br><span class="line">	list_add_tail(&amp;req-&gt;timeout_list, &amp;q-&gt;timeout_list);</span><br><span class="line"></span><br><span class="line">	/*</span><br><span class="line">	 * If the timer isn&apos;t already pending or this timeout is earlier</span><br><span class="line">	 * than an existing one, modify the timer. Round up to next nearest</span><br><span class="line">	 * second.</span><br><span class="line">	 */</span><br><span class="line">	/* &#x6CE8;&#x610F;&#x8FD9;&#x91CC;&#x91C7;&#x7528;round up to nearest second&#xFF0C;&#x6240;&#x4EE5;&#x5B9E;&#x9645;&#x4F1A;&#x53D1;&#x73B0;timeout&#x4F1A;&#x6709;1s&#x5DE6;&#x53F3;&#x7684;&#x8BEF;&#x5DEE; */</span><br><span class="line">	expiry = round_jiffies_up(req-&gt;deadline);</span><br><span class="line"></span><br><span class="line">	if (!timer_pending(&amp;q-&gt;timeout) ||</span><br><span class="line">	    time_before(expiry, q-&gt;timeout.expires))</span><br><span class="line">		mod_timer(&amp;q-&gt;timeout, expiry);</span><br><span class="line">}</span><br></pre></td></tr></table></figure></sdxx></p>
+<p>&#x5728;blk_alloc_queue_node&#x521D;&#x59CB;&#x5316;&#x65F6;&#x5C31;&#x8C03;&#x7528;setup_timer&#x521D;&#x59CB;&#x5316;&#x4E86;&#x4E00;&#x4E2A;&#x5B9A;&#x65F6;&#x5668;&#xFF08;&#x5BF9;&#x5E94;&#x8D85;&#x65F6;&#x5904;&#x7406;&#x51FD;&#x6570;&#x4E3A;blk_rq_timed_out_timer&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x521D;&#x59CB;&#x5316;&#x4E86;q-&gt;timeout_list&#x961F;&#x5217;&#xFF0C;&#x5F53;&#x8D85;&#x65F6;&#x540E;&#x5C31;&#x4F1A;&#x904D;&#x5386;q-&gt;timeout_list&#xFF0C;&#x4ECE;&#x4E2D;&#x53D6;&#x51FA;req&#x8FDB;&#x884C;&#x8D85;&#x65F6;&#x7684;&#x5904;&#x7406;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">void blk_rq_timed_out_timer(unsigned long data)</span><br><span class="line">{</span><br><span class="line">	struct request_queue *q = (struct request_queue *) data;</span><br><span class="line">	unsigned long flags, next = 0;</span><br><span class="line">	struct request *rq, *tmp;</span><br><span class="line">	int next_set = 0;</span><br><span class="line"></span><br><span class="line">	spin_lock_irqsave(q-&gt;queue_lock, flags);</span><br><span class="line"></span><br><span class="line">	list_for_each_entry_safe(rq, tmp, &amp;q-&gt;timeout_list, timeout_list) {</span><br><span class="line">		if (time_after_eq(jiffies, rq-&gt;deadline)) {</span><br><span class="line">			list_del_init(&amp;rq-&gt;timeout_list);</span><br><span class="line"></span><br><span class="line">			/*</span><br><span class="line">			 * Check if we raced with end io completion</span><br><span class="line">			 */</span><br><span class="line">			if (blk_mark_rq_complete(rq))</span><br><span class="line">				continue;</span><br><span class="line">			blk_rq_timed_out(rq);</span><br><span class="line">		} else if (!next_set || time_after(next, rq-&gt;deadline)) {</span><br><span class="line">			next = rq-&gt;deadline;</span><br><span class="line">			next_set = 1;</span><br><span class="line">		}</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	if (next_set)</span><br><span class="line">		mod_timer(&amp;q-&gt;timeout, round_jiffies_up(next));</span><br><span class="line"></span><br><span class="line">	spin_unlock_irqrestore(q-&gt;queue_lock, flags);</span><br><span class="line">}</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">blk_rq_timed_out_timer</span><br><span class="line"> -&gt;blk_rq_timed_out</span><br><span class="line">    -&gt;q-&gt;rq_timed_out_fn&#xFF0C;&#x5373;scsi_times_out</span><br><span class="line">       -&gt;scsi_times_out</span><br><span class="line">          -&gt;scsi_eh_scmd_add</span><br><span class="line">             -&gt;scsi_eh_wakeup</span><br><span class="line">                -&gt;wake_up_process(shost-&gt;ehandler)</span><br></pre></td></tr></table></figure>
+<p>&#x56E0;&#x4E3A;&#x4ECE;&#x5B9E;&#x9645;&#x6D4B;&#x8BD5;&#x65F6;&#x89C2;&#x5BDF;&#x5230;&#x662F;&#x8FC7;&#x4E86;&#x4E24;&#x6B21;&#x8D85;&#x65F6;&#x7684;&#x65F6;&#x95F4;&#x624D;&#x5F00;&#x59CB;&#x91CD;&#x8BD5;&#xFF0C;&#x5230;&#x4E0B;&#x4E00;&#x6B21;&#x91CD;&#x8BD5;&#x4E5F;&#x662F;&#x9694;&#x4E86;&#x4E24;&#x500D;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#xFF0C;&#x56E0;&#x6B64;&#x91CD;&#x70B9;&#x67E5;&#x770B;scsi_times_out&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x53D1;&#x73B0;&#x5728;&#x8C03;&#x7528;scsi_eh_scmd_add&#x4E4B;&#x524D;&#x662F;&#x5224;&#x65AD;&#x4E86;host-&gt;transportt-&gt;eh_timed_out(scmd)&#x7684;&#x8FD4;&#x56DE;&#x503C;&#x662F;&#x5426;&#x4E3A;BLK_EH_NOT_HANDLED&#x3002;<br>&#x5BF9;&#x4E8E;iscsi&#x6765;&#x8BF4;&#xFF0C;eh_timed_out&#x5BF9;&#x5E94;&#x7684;&#x51FD;&#x6570;&#x662F;iscsi_eh_cmd_timed_out&#xFF0C;&#x5F53;iscsi_eh_cmd_timed_out&#x8FD4;&#x56DE;BLK_EH_RESET_TIMER&#x65F6;&#xFF0C;&#x5BF9;&#x5E94;blk_rq_timed_out&#x91CC;&#x7684;&#x5904;&#x7406;&#x662F;&#x7EE7;&#x7EED;&#x52A0;&#x5165;&#x5B9A;&#x65F6;&#x5668;&#x4E2D;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">enum blk_eh_timer_return scsi_times_out(struct request *req)</span><br><span class="line">{</span><br><span class="line">	struct scsi_cmnd *scmd = req-&gt;special;</span><br><span class="line">	enum blk_eh_timer_return rtn = BLK_EH_NOT_HANDLED;</span><br><span class="line">	struct Scsi_Host *host = scmd-&gt;device-&gt;host;</span><br><span class="line"></span><br><span class="line">	trace_scsi_dispatch_cmd_timeout(scmd);</span><br><span class="line">	scsi_log_completion(scmd, TIMEOUT_ERROR);</span><br><span class="line"></span><br><span class="line">	if (host-&gt;transportt-&gt;eh_timed_out)</span><br><span class="line">		rtn = host-&gt;transportt-&gt;eh_timed_out(scmd);</span><br><span class="line">	else if (host-&gt;hostt-&gt;eh_timed_out)</span><br><span class="line">		rtn = host-&gt;hostt-&gt;eh_timed_out(scmd);</span><br><span class="line"></span><br><span class="line">	scmd-&gt;result |= DID_TIME_OUT &lt;&lt; 16;</span><br><span class="line"></span><br><span class="line">    // &#x8FD9;&#x91CC;&#x662F;&#x5F53;rtn== BLK_EH_NOT_HANDLED&#x624D;&#x4F1A;&#x7EE7;&#x7EED;&#x8C03;&#x7528;scsi_eh_scmd_add&#x53BB;&#x5524;&#x9192;error handle&#x5904;&#x7406;&#x7EBF;&#x7A0B;</span><br><span class="line">	if (unlikely(rtn == BLK_EH_NOT_HANDLED &amp;&amp;</span><br><span class="line">		     !scsi_eh_scmd_add(scmd, SCSI_EH_CANCEL_CMD)))</span><br><span class="line">		rtn = BLK_EH_HANDLED;</span><br><span class="line"></span><br><span class="line">	return rtn;</span><br><span class="line">}</span><br></pre></td></tr></table></figure></p>
+<p>&#x4E3A;&#x4EC0;&#x4E48;&#x662F;&#x6BCF;&#x6B21;&#x7ECF;&#x8FC7;2&#x4E2A;timeout&#x624D;&#x5F00;&#x59CB;&#x91CD;&#x8BD5;&#xFF0C;&#x67E5;&#x770B;&#x5185;&#x6838;&#x4EE3;&#x7801;&#x540E;&#x786E;&#x8BA4;&#x662F;&#x7531;&#x4E8E;iscsi&#x8BBE;&#x5907;&#xFF0C;&#x5728;scsi&#x7684;&#x8D85;&#x65F6;&#x5904;&#x7406;&#x51FD;&#x6570;scsi_times_out&#x4E2D;&#xFF0C;&#x8C03;&#x7528;iscsi&#x7684;iscsi_eh_cmd_timed_out&#x65F6;&#x7B2C;&#x4E00;&#x6B21;&#x68C0;&#x6D4B;&#x5230;&#x4E0D;&#x6EE1;&#x8DB3;&#x5524;&#x9192;scsi&#x7684;error handler&#x7EBF;&#x7A0B;&#x7684;&#x6761;&#x4EF6;&#xFF0C;&#x6240;&#x4EE5;&#x53C8;&#x52A0;&#x5165;&#x4E86;&#x4E00;&#x6B21;&#x5B9A;&#x65F6;&#x5668;&#x8FDB;&#x884C;&#x7B49;&#x5F85;&#xFF0C;&#x5230;&#x7B2C;&#x4E8C;&#x6B21;&#x8D85;&#x65F6;&#x540E;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x624D;&#x6EE1;&#x8DB3;&#x5524;&#x9192;scsi_eh&#x7684;&#x6761;&#x4EF6;&#x3002;&#x56E0;&#x6B64;&#x6BCF;&#x6B21;&#x90FD;&#x662F;&#x7ECF;&#x8FC7;&#x4E86;2&#x6B21;timeout&#x7684;&#x65F6;&#x95F4;&#x624D;&#x8FDB;&#x884C;&#x7684;&#x91CD;&#x8BD5;&#x3002;</p>
+<h4 id="&#x91CD;&#x8BD5;&#x6B21;&#x6570;&#x7684;&#x786E;&#x5B9A;"><a href="#&#x91CD;&#x8BD5;&#x6B21;&#x6570;&#x7684;&#x786E;&#x5B9A;" class="headerlink" title="&#x91CD;&#x8BD5;&#x6B21;&#x6570;&#x7684;&#x786E;&#x5B9A;"></a>&#x91CD;&#x8BD5;&#x6B21;&#x6570;&#x7684;&#x786E;&#x5B9A;</h4><p>&#x4E0B;&#x9762;&#x5148;&#x5217;&#x4E00;&#x4E0B;scsi error handler&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">scsi_error_handler</span><br><span class="line"> -&gt;scsi_unjam_host</span><br><span class="line">    -&gt;scsi_eh_prt_fail_stats</span><br><span class="line">    -&gt;scsi_eh_get_sense</span><br><span class="line">       -&gt;scsi_request_sense</span><br><span class="line">          -&gt;scsi_send_eh_cmnd</span><br><span class="line">             -&gt;scmd-&gt;scsi_done = scsi_eh_done</span><br><span class="line">    -&gt;scsi_eh_abort_cmds</span><br><span class="line">       -&gt;scsi_try_to_abort_cmd</span><br><span class="line">          -&gt;hostt-&gt;eh_abort_handler</span><br><span class="line">          &#x5BF9;iscsi&#x6765;&#x8BF4;&#x5C31;&#x662F;iscsi_eh_abort</span><br><span class="line">            -&gt;iscsi_exec_task_mgmt_fn</span><br><span class="line">    -&gt;scsi_eh_flush_done_q</span><br></pre></td></tr></table></figure></p>
+<p>&#x5728;scsi_eh_flush_done_q&#x91CC;&#x8FDB;&#x884C;&#x7684;&#x91CD;&#x8BD5;&#x6B21;&#x6570;&#x7684;&#x5224;&#x65AD;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x91CD;&#x8BD5;&#x6B21;&#x6570;&#x5C31;&#x662F;SD_MAX_RETRIES&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">void scsi_eh_flush_done_q(struct list_head *done_q)</span><br><span class="line">{</span><br><span class="line">	struct scsi_cmnd *scmd, *next;</span><br><span class="line"></span><br><span class="line">	list_for_each_entry_safe(scmd, next, done_q, eh_entry) {</span><br><span class="line">		list_del_init(&amp;scmd-&gt;eh_entry);</span><br><span class="line">		if (scsi_device_online(scmd-&gt;device) &amp;&amp;</span><br><span class="line">		    !scsi_noretry_cmd(scmd) &amp;&amp;</span><br><span class="line">		    (++scmd-&gt;retries &lt;= scmd-&gt;allowed)) {  //&#x8FD9;&#x91CC;&#x5224;&#x65AD;&#x4E86;&#x91CD;&#x8BD5;&#x6B21;&#x6570;</span><br><span class="line">			SCSI_LOG_ERROR_RECOVERY(3, printk(&quot;%s: flush&quot;</span><br><span class="line">							  &quot; retry cmd: %p\n&quot;,</span><br><span class="line">							  current-&gt;comm,</span><br><span class="line">							  scmd));</span><br><span class="line">				scsi_queue_insert(scmd, SCSI_MLQUEUE_EH_RETRY);</span><br><span class="line">		} else {</span><br><span class="line">			/*</span><br><span class="line">			 * If just we got sense for the device (called</span><br><span class="line">			 * scsi_eh_get_sense), scmd-&gt;result is already</span><br><span class="line">			 * set, do not set DRIVER_TIMEOUT.</span><br><span class="line">			 */</span><br><span class="line">			if (!scmd-&gt;result)</span><br><span class="line">				scmd-&gt;result |= (DRIVER_TIMEOUT &lt;&lt; 24);</span><br><span class="line">			SCSI_LOG_ERROR_RECOVERY(3, printk(&quot;%s: flush finish&quot;</span><br><span class="line">							&quot; cmd: %p\n&quot;,</span><br><span class="line">							current-&gt;comm, scmd));</span><br><span class="line">			scsi_finish_command(scmd);</span><br><span class="line">		}</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure></p>
+<h2 id="&#x5C0F;&#x7ED3;"><a href="#&#x5C0F;&#x7ED3;" class="headerlink" title="&#x5C0F;&#x7ED3;"></a>&#x5C0F;&#x7ED3;</h2><p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x5206;&#x6790;&#x53EF;&#x4EE5;&#x5F97;&#x51FA;&#xFF0C;io hang&#x7684;&#x6839;&#x672C;&#x539F;&#x56E0;&#x662F;scsi&#x5C42;&#x7684;&#x547D;&#x4EE4;&#x5904;&#x7406;&#x7684;&#x8D85;&#x65F6;&#x548C;&#x91CD;&#x8BD5;&#x5BFC;&#x81F4;&#x7684;&#x3002;<br>&#x5E76;&#x4E14;io hang&#x7684;&#x65F6;&#x95F4;&#x53EF;&#x4EE5;&#x7B97;&#x51FA;&#x6765;&#x662F;: 2<em>timeout + SD_MAX_RETRIES</em>(2<em>timeout)&#xFF0C;&#x518D;&#x52A0;&#x4E0A;&#x8D85;&#x65F6;&#x8BA1;&#x65F6;&#x5668;&#x65F6;&#x95F4;1s&#x5DE6;&#x53F3;&#x7684;&#x8BEF;&#x5DEE;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x8FD8;&#x9700;&#x8981;&#x52A0;&#x4E0A;2</em>SD_MAX_RETRIES*1&#x7684;&#x8BEF;&#x5DEE;&#x65F6;&#x95F4;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">io hang&#x7684;&#x65F6;&#x95F4;=2*timeout + SD_MAX_RETRIES*(2*timeout) + 2*SD_MAX_RETRIES*1</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kernel/" rel="tag">#kernel</a>
+          
+            <a href="/tags/scsi/" rel="tag">#scsi</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/29/ceph-io-sequence/" rel="next" title="ceph中对象读写的顺序性及并发性保证">
+                <i class="fa fa-chevron-left"></i> ceph中对象读写的顺序性及并发性保证
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/15/error-disk-cause-iohang2/" rel="prev" title="坏盘导致IO hang问题分析（续）">
+                坏盘导致IO hang问题分析（续） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  <p>热评文章</p>
+  <div class="ds-top-threads" data-range="weekly" data-num-items="4"></div>
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/03/15/error-disk-cause-iohang/"
+           data-title="坏盘导致IO hang问题分析" data-url="http://yoursite.com/2017/03/15/error-disk-cause-iohang/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Wu Dong" />
+          <p class="site-author-name" itemprop="name">Wu Dong</p>
+          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">31</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#模拟复现坏盘导致的io-hang"><span class="nav-number">1.</span> <span class="nav-text">模拟复现坏盘导致的io hang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-在两台存储机器分别创建出两个device-mapper设备"><span class="nav-number">1.1.</span> <span class="nav-text">1.在两台存储机器分别创建出两个device mapper设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-然后分别使用iet导出chunk设备"><span class="nav-number">1.2.</span> <span class="nav-text">2.然后分别使用iet导出chunk设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-在宿主机端使用open-iscsi连接这两个target"><span class="nav-number">1.3.</span> <span class="nav-text">3.在宿主机端使用open-iscsi连接这两个target</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-在宿主机端使用mdadm创建软raid设备"><span class="nav-number">1.4.</span> <span class="nav-text">4.在宿主机端使用mdadm创建软raid设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-使用devicemapper再将软raid设备映射一次，做成跟云硬盘的使用方式一样"><span class="nav-number">1.5.</span> <span class="nav-text">5.使用devicemapper再将软raid设备映射一次，做成跟云硬盘的使用方式一样</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-使用fio来测试这块逻辑卷，为了不产生过多的io影响分析，采用fio的rate-iops来限制io数"><span class="nav-number">1.6.</span> <span class="nav-text">6.使用fio来测试这块逻辑卷，为了不产生过多的io影响分析，采用fio的rate_iops来限制io数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-将fio跑起来，并且在宿主机上使用iostat监控dm-0的io状况"><span class="nav-number">1.7.</span> <span class="nav-text">7.将fio跑起来，并且在宿主机上使用iostat监控dm-0的io状况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-将其中一台存储机上的chunk设备suspend住"><span class="nav-number">1.8.</span> <span class="nav-text">8.将其中一台存储机上的chunk设备suspend住</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-io-hang住的时间统计"><span class="nav-number">1.9.</span> <span class="nav-text">9.io hang住的时间统计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-资源使用情况监控"><span class="nav-number">1.10.</span> <span class="nav-text">10.资源使用情况监控</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排查分析过程"><span class="nav-number">2.</span> <span class="nav-text">排查分析过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iscsi相关超时排查"><span class="nav-number">2.1.</span> <span class="nav-text">iscsi相关超时排查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#open-iscsi和iscsitarget的日志"><span class="nav-number">2.2.</span> <span class="nav-text">open-iscsi和iscsitarget的日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备的timeout"><span class="nav-number">2.3.</span> <span class="nav-text">设备的timeout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开启scsi调试日志"><span class="nav-number">2.4.</span> <span class="nav-text">开启scsi调试日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用ftrace来追踪关键函数的调用信息"><span class="nav-number">2.5.</span> <span class="nav-text">使用ftrace来追踪关键函数的调用信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析linux内核scsi命令处理的代码"><span class="nav-number">2.6.</span> <span class="nav-text">分析linux内核scsi命令处理的代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#scsi设备初始化"><span class="nav-number">2.6.1.</span> <span class="nav-text">scsi设备初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scsi-cmnd请求下发"><span class="nav-number">2.6.2.</span> <span class="nav-text">scsi cmnd请求下发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scsi-cmnd请求完成处理"><span class="nav-number">2.6.3.</span> <span class="nav-text">scsi cmnd请求完成处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scsi-cmnd超时的设置与处理"><span class="nav-number">2.6.4.</span> <span class="nav-text">scsi cmnd超时的设置与处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重试次数的确定"><span class="nav-number">2.6.5.</span> <span class="nav-text">重试次数的确定</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wu Dong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"sysnote"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
