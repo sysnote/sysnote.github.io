@@ -5,11 +5,14 @@
   
 
 
-<html class="theme-next mist use-motion">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
 
 
 
@@ -27,7 +30,12 @@
 
 
 
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -59,9 +67,11 @@
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -75,7 +85,7 @@
 
 
 
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
 
 
 
@@ -94,21 +104,37 @@
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
+    root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"left","display":"post"},
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
     duoshuo: {
-      userId: 0,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     }
   };
 </script>
 
-  <title> System Notes </title>
+
+
+  <link rel="canonical" href="http://yoursite.com/page/3/"/>
+
+
+
+
+
+  <title>System Notes</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -117,15 +143,20 @@
 
 
 
+
+
   <script type="text/javascript">
     var _hmt = _hmt || [];
     (function() {
       var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      hm.src = "https://hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
       var s = document.getElementsByTagName("script")[0];
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+
+
+
 
 
 
@@ -139,31 +170,35 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
+  <div class="container sidebar-position-left 
    page-home 
  ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">System Notes</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">System Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
-  <p class="site-subtitle"></p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
@@ -176,7 +211,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
           </a>
@@ -186,7 +221,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
             
-              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
             
             分类
           </a>
@@ -196,7 +231,7 @@
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
             
-              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
             关于
           </a>
@@ -206,7 +241,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
-              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
           </a>
@@ -216,7 +251,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
             
-              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
             
             标签
           </a>
@@ -229,6 +264,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -243,13 +280,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/08/06/linux-io-stack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -257,38 +304,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2015/08/06/linux-io-stack/" itemprop="url">
-                  linux块设备IO栈浅析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/08/06/linux-io-stack/" itemprop="url">linux块设备IO栈浅析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-08-06T21:54:13+08:00" content="2015-08-06">
-              2015-08-06
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-06T21:54:13+08:00">
+                2015-08-06
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -296,7 +347,6 @@
 
                 
                 
-
               
             </span>
           
@@ -306,15 +356,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -325,15 +377,21 @@
         
           <p>&#x5757;&#x5B58;&#x50A8;&#xFF0C;&#x7B80;&#x5355;&#x6765;&#x8BF4;&#x5C31;&#x662F;&#x4F7F;&#x7528;&#x5757;&#x8BBE;&#x5907;&#x4E3A;&#x7CFB;&#x7EDF;&#x63D0;&#x4F9B;&#x5B58;&#x50A8;&#x670D;&#x52A1;&#x3002;&#x5757;&#x5B58;&#x50A8;&#x5206;&#x591A;&#x79CD;&#x7C7B;&#x578B;&#xFF0C;&#x6709;&#x5355;&#x673A;&#x5757;&#x5B58;&#x50A8;&#xFF0C;&#x7F51;&#x7EDC;&#x5B58;&#x50A8;&#xFF08;&#x5982;NAS&#xFF0C;SAN&#x7B49;&#xFF09;&#xFF0C;&#x5206;&#x5E03;&#x5F0F;&#x5757;&#x5B58;&#x50A8;&#xFF08;&#x76EE;&#x524D;&#x4E3B;&#x6D41;&#x7684;&#x5982;AWS&#x7684;EBS&#xFF0C;&#x9752;&#x4E91;&#x7684;&#x4E91;&#x786C;&#x76D8;&#xFF0C;&#x963F;&#x91CC;&#x4E91;&#x7684;&#x4E91;&#x78C1;&#x76D8;&#xFF0C;&#x7F51;&#x6613;&#x4E91;&#x786C;&#x76D8;&#x7B49;&#xFF09;&#x3002;&#x901A;&#x5E38;&#x5757;&#x5B58;&#x50A8;&#x7684;&#x8868;&#x73B0;&#x5F62;&#x5F0F;&#x5C31;&#x662F;&#x4E00;&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x7528;&#x6237;&#x770B;&#x5230;&#x7684;&#x5C31;&#x662F;&#x7C7B;&#x4F3C;&#x4E8E;sda&#xFF0C;sdb&#x8FD9;&#x6837;&#x7684;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x4ECB;&#x7ECD;Linux&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x5BF9;Linux&#x7684;&#x5757;&#x8BBE;&#x5907;I/O&#x6808;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
 <h1 id="1-&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x5757;&#x8BBE;&#x5907;&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><p>&#x5757;&#x8BBE;&#x5907;&#x5C06;&#x4FE1;&#x606F;&#x5B58;&#x50A8;&#x5728;&#x56FA;&#x5B9A;&#x5927;&#x5C0F;&#x7684;&#x5757;&#x4E2D;&#xFF0C;&#x6BCF;&#x4E2A;&#x5757;&#x90FD;&#x6709;&#x81EA;&#x5DF1;&#x7684;&#x5730;&#x5740;&#x3002;&#x5BF9;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x800C;&#x8A00;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x662F;&#x4EE5;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#x7684;&#x5916;&#x89C2;&#x5C55;&#x73B0;&#x7684;&#xFF0C;&#x4F8B;&#x5982;/dev/sda&#xFF0C;&#x867D;&#x7136;&#x5BF9;&#x8FD9;&#x79CD;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#x53EF;&#x4EE5;&#x6309;&#x7167;&#x5B57;&#x8282;&#x4E3A;&#x5355;&#x4F4D;&#x8BBF;&#x95EE;&#xFF0C;&#x4F46;&#x662F;&#x5B9E;&#x9645;&#x4E0A;&#x5230;&#x5757;&#x8BBE;&#x5907;&#x4E0A;&#x5374;&#x662F;&#x4EE5;&#x5757;&#x4E3A;&#x5355;&#x4F4D;&#xFF08;&#x6700;&#x5C0F;512byte&#xFF0C;&#x5373;&#x4E00;&#x4E2A;&#x6247;&#x533A;&#xFF09;&#xFF0C;&#x8FD9;&#x4E4B;&#x95F4;&#x7684;&#x8F6C;&#x6362;&#x662F;&#x7531;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x6765;&#x5B9E;&#x73B0;&#x7684;&#x3002;<br>        &#x4E0B;&#x9762;&#x4ECB;&#x7ECD;&#x51E0;&#x4E2A;&#x5757;&#x8BBE;&#x5907;&#x7684;&#x57FA;&#x672C;&#x6982;&#x5FF5;&#xFF1A;<br>        1&#xFF09;&#x6247;&#x533A;&#xFF1A;&#x78C1;&#x76D8;&#x76D8;&#x7247;&#x4E0A;&#x7684;&#x6247;&#x5F62;&#x533A;&#x57DF;&#xFF0C;&#x903B;&#x8F91;&#x5316;&#x6570;&#x636E;&#xFF0C;&#x65B9;&#x4FBF;&#x7BA1;&#x7406;&#x78C1;&#x76D8;&#x7A7A;&#x95F4;&#xFF0C;&#x662F;&#x786C;&#x4EF6;&#x8BBE;&#x5907;&#x6570;&#x636E;&#x4F20;&#x9001;&#x7684;&#x57FA;&#x672C;&#x5355;&#x4F4D;&#xFF0C;&#x4E00;&#x822C;512Byte&#xFF1B;<br>    2&#xFF09;&#x5757;&#xFF1A;&#x5757;&#x662F;VFS&#x548C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6570;&#x636E;&#x4F20;&#x9001;&#x7684;&#x57FA;&#x672C;&#x5355;&#x4F4D;&#xFF0C;&#x5FC5;&#x987B;&#x662F;&#x6247;&#x533A;&#x7684;&#x6574;&#x6570;&#x500D;&#xFF0C;&#x683C;&#x5F0F;&#x5316;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x5757;&#x5927;&#x5C0F;&#xFF08;&#x4E00;&#x822C;512,1024,2048,4096&#x5B57;&#x8282;&#xFF09;&#xFF1B;<br>       3&#xFF09;&#x6BB5;&#xFF1A;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x4E2D;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5305;&#x542B;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x78C1;&#x76D8;&#x6247;&#x533A;&#x4E2D;&#x7684;&#x6570;&#x636E;&#xFF1B;&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;I/O&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x5728;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x4F20;&#x9001;&#x3002;&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x5757;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x5728;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5408;&#x5E76;&#x5B83;&#x4EEC;&#xFF0C;&#x4EA7;&#x751F;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#xFF0C;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x662F;&#x901A;&#x8FC7;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6765;&#x8BBF;&#x95EE;&#x5757;&#x8BBE;&#x5907;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x901A;&#x8FC7;&#x6307;&#x5B9A;&#x504F;&#x79FB;&#x548C;&#x5927;&#x5C0F;&#x6765;&#x8BFB;&#x5199;&#x88F8;&#x8BBE;&#x5907;&#x3002;<br>&#x5E38;&#x89C1;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x5C31;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF0C;&#x5728;Linux&#x7CFB;&#x7EDF;&#x4E0B;&#xFF0C;&#x8FD8;&#x63D0;&#x4F9B;&#x57FA;&#x4E8E;&#x5176;&#x4ED6;&#x5757;&#x8BBE;&#x5907;&#x4E4B;&#x4E0A;&#x7684;&#x903B;&#x8F91;&#x8BBE;&#x5907;&#xFF0C;&#x5982;Device Mapper&#xFF0C;&#x8F6F;RAID&#x7B49;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2015/08/06/linux-io-stack/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -343,6 +401,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -359,13 +419,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/08/06/blizzard/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -373,38 +443,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2015/08/06/blizzard/" itemprop="url">
-                  Blizzard Fast, Cloud-scale Block Storage for Cloud-oblivious Applications
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/08/06/blizzard/" itemprop="url">Blizzard Fast, Cloud-scale Block Storage for Cloud-oblivious Applications</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-08-06T15:00:43+08:00" content="2015-08-06">
-              2015-08-06
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-06T15:00:43+08:00">
+                2015-08-06
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/paper/" itemprop="url" rel="index">
                     <span itemprop="name">paper</span>
                   </a>
@@ -412,7 +486,6 @@
 
                 
                 
-
               
             </span>
           
@@ -422,15 +495,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -440,15 +515,21 @@
       
         
           <p>&#x6709;&#x4E9B;&#x5E94;&#x7528;&#x5BB9;&#x8BB8;&#x5C11;&#x91CF;&#x7684;&#x6570;&#x636E;&#x4E22;&#x5931;&#x6765;&#x6362;&#x53D6;&#x9AD8;&#x541E;&#x5410;&#x91CF;&#xFF0C;&#x6709;&#x4E9B;&#x5E94;&#x7528;&#x5982;&#x6570;&#x636E;&#x5E93;&#xFF0C;&#x90AE;&#x4EF6;&#x670D;&#x52A1;&#x5668;&#x662F;&#x4E0D;&#x5BB9;&#x8BB8;&#x4E00;&#x70B9;&#x6570;&#x636E;&#x4E22;&#x5931;&#x7684;&#x3002;<br>posix&#x5E94;&#x7528;&#x4F7F;&#x7528;&#x5237;&#x76D8;&#xFF08;disk flush&#xFF09;&#x6765;&#x4FDD;&#x8BC1;&#x5199;&#x7684;&#x987A;&#x5E8F;&#xFF0C;&#x4ECE;&#x800C;&#x786E;&#x4FDD;&#x5373;&#x4F7F;&#x5D29;&#x6E83;&#x4E86;&#x4ECD;&#x7136;&#x80FD;&#x591F;&#x4FDD;&#x8BC1;&#x4E00;&#x81F4;&#x6027;&#xFF0C;&#x4F46;&#x662F;flush&#x4F1A;&#x6709;write barrier&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x964D;&#x4F4E;&#x4E86;&#x5E76;&#x53D1;&#x6027;&#x3002;<br>Blizzard&#x5E76;&#x884C;&#x5730;&#x628A;&#x5BF9;&#x865A;&#x62DF;&#x76D8;&#x7684;&#x8BFB;&#x5199;&#x53D1;&#x5230;&#x8FDC;&#x7A0B;disk&#x4E0A;&#xFF0C;&#x6709;&#x51E0;&#x4E2A;&#x7279;&#x6027;&#xFF1A;<br>1&#xFF09;&#x67B6;&#x6784;&#x5728;CLOS&#x7F51;&#x7EDC;&#x4E0A;&#xFF0C;&#x5168;&#x5BF9;&#x5206;&#x7F51;&#x7EDC;&#xFF0C;&#x8BFB;&#x5199;&#x6BCF;&#x5757;disk&#x90FD;&#x80FD;&#x8FBE;&#x5230;&#x5168;&#x901F;&#xFF0C;&#x6BCF;&#x4E2A;server<br>2&#xFF09;Nested striping&#xFF0C;&#x4F20;&#x7EDF;&#x7684;&#x4F1A;&#x5B58;&#x5728;IOp convoy dilation&#x95EE;&#x9898;&#xFF0C;&#x5927;&#x7684;io&#x4F1A;&#x88AB;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x62C6;&#x5206;&#x6210;&#x5C0F;io&#xFF0C;&#x8FD9;&#x4E9B;&#x5C0F;io&#x4F1A;&#x4ECE;&#x5BA2;&#x6237;&#x7AEF;&#x53D1;&#x5230;&#x4E00;&#x4E2A;&#x8FDC;&#x7A0B;disk&#xFF0C;&#x8FD9;&#x4E9B;io&#x90FD;&#x5C5E;&#x4E8E;&#x4E00;&#x4E2A;&#x5927;&#x7684;io&#x64CD;&#x4F5C;&#xFF0C;&#x7F51;&#x7EDC;&#x6296;&#x52A8;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x670D;&#x52A1;&#x5668;&#x7684;&#x8C03;&#x5EA6;&#x5F02;&#x5E38;&#x90FD;&#x4F1A;&#x4F7F;&#x5F97;&#x8BF7;&#x6C42;&#x95F4;&#x7684;&#x95F4;&#x9694;&#x589E;&#x52A0;&#xFF0C;&#x800C;Bllizard&#x4F7F;&#x7528;Nested striping&#x6765;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x63D0;&#x9AD8;&#x5E76;&#x53D1;&#x6027;&#xFF0C;&#x51CF;&#x5C11;&#x78C1;&#x76D8;&#x7684;&#x70ED;&#x70B9;&#x3002;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x8BF4;&#x4E00;&#x4E2A;&#x5927;&#x7684;&#x7528;&#x6237;io&#x4F1A;&#x62C6;&#x5206;&#x6210;&#x591A;&#x4E2A;&#x5C0F;&#x7684;io&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E9B;io&#x5206;&#x522B;&#x5230;&#x8FBE;&#x8FDC;&#x7A0B;disk&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x4E9B;&#x8BF7;&#x6C42;&#x5230;&#x8FBE;&#x8FDC;&#x7A0B;disk&#x65F6;&#x95F4;&#x95F4;&#x9694;&#x5F88;&#x77ED;&#xFF0C;&#x8FDC;&#x7A0B;disk&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#xFF0C;&#x7136;&#x540E;&#x4E00;&#x6B21;&#x5BFB;&#x9053;&#x5C31;&#x53EF;&#x4EE5;&#x8BFB;&#x5199;&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x679C;&#x7F51;&#x7EDC;&#x6296;&#x52A8;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x670D;&#x52A1;&#x5668;&#x7684;&#x8C03;&#x5EA6;&#x5F02;&#x5E38;&#x90FD;&#x4F1A;&#x4F7F;&#x5F97;&#x8BF7;&#x6C42;&#x95F4;&#x7684;&#x95F4;&#x9694;&#x589E;&#x52A0;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x4F1A;&#x9020;&#x6210;&#x8FDC;&#x7A0B;disk&#x8981;&#x591A;&#x6B21;io&#xFF0C;&#x964D;&#x4F4E;&#x4E86;&#x6027;&#x80FD;&#x3002;<br>3&#xFF09;Fast flushes with prefix write commits&#xFF08;&#x5F02;&#x6B65;&#x5237;&#x6570;&#x636E;&#xFF09;&#xFF0C;&#x5F53;&#x6536;&#x5230;flush&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x540E;&#x53F0;&#x5F02;&#x6B65;&#x5730;&#x6267;&#x884C;flush&#x3002;&#x5373;&#x4F7F;&#x5BA2;&#x6237;&#x7AEF;&#x6216;&#x8005;&#x865A;&#x62DF;&#x5377;&#x5D29;&#x6E83;&#xFF0C;&#x8BE5;&#x76D8;&#x4ECD;&#x7136;&#x80FD;&#x591F;&#x6062;&#x590D;&#x5230;&#x4E00;&#x81F4;&#x7684;&#x72B6;&#x6001;&#xFF0C;&#x4E0D;&#x540C;flush epoch&#x7684;&#x5199;&#x64CD;&#x4F5C;&#x4E0D;&#x4F1A;&#x76F8;&#x4E92;&#x6DF7;&#x4E71;&#xFF0C;&#x4E0D;&#x8FC7;&#x67D0;&#x4E2A;epoch&#x4E4B;&#x540E;&#x7684;&#x6570;&#x636E;&#x4F1A;&#x4E22;&#x5931;&#x3002;&#x4F7F;&#x7528;&#x5F02;&#x6B65;&#x5199;&#x6765;&#x63D0;&#x4F9B;&#x6027;&#x80FD;&#xFF0C;&#x4E0D;&#x8FC7;&#x4F1A;&#x6709;&#x6570;&#x636E;&#x4E22;&#x5931;&#x7684;&#x53EF;&#x80FD;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2015/08/06/blizzard/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -458,6 +539,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -474,13 +557,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/08/06/petal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -488,38 +581,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2015/08/06/petal/" itemprop="url">
-                  petal:Distributed Virtual Disks
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2015/08/06/petal/" itemprop="url">petal:Distributed Virtual Disks</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2015-08-06T14:47:44+08:00" content="2015-08-06">
-              2015-08-06
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-06T14:47:44+08:00">
+                2015-08-06
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/paper/" itemprop="url" rel="index">
                     <span itemprop="name">paper</span>
                   </a>
@@ -527,7 +624,6 @@
 
                 
                 
-
               
             </span>
           
@@ -537,15 +633,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -562,15 +660,21 @@
 <li>&#x6309;&#x9700;&#x5206;&#x914D;&#x7A7A;&#x95F4;</li>
 <li>load balance</li>
 <li>&#x652F;&#x6301;&#x5907;&#x4EFD;&#x548C;&#x6062;&#x590D;&#xFF0C;&#x5FEB;&#x7167;&#x3002;<h1 id="&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;"><a href="#&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;" class="headerlink" title="&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;"></a>&#x7CFB;&#x7EDF;&#x6982;&#x8C8C;</h1><img src="/2015/08/06/petal/petal-arch.png" alt="petal-arch"><br>petal&#x4F7F;&#x7528;rpc&#x8C03;&#x7528;&#x8BBF;&#x95EE;&#x865A;&#x62DF;&#x76D8;&#xFF0C;&#x5168;&#x5C40;&#x7684;&#x72B6;&#x6001;&#x5728;&#x6BCF;&#x53F0;server&#x91CC;&#x90FD;&#x6709;&#x8BB0;&#x5F55;&#xFF0C;&#x901A;&#x8FC7;paxos&#x534F;&#x8BAE;&#x786E;&#x4FDD;&#x4E00;&#x81F4;&#xFF0C;clients&#x4FDD;&#x5B58;&#x5C11;&#x91CF;&#x7684;&#x6620;&#x5C04;&#x4FE1;&#x606F;&#x6765;&#x51B3;&#x5B9A;&#x8BF7;&#x6C42;&#x5206;&#x53D1;&#x5230;&#x54EA;&#x53F0;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x6837;&#x8BF7;&#x6C42;&#x5931;&#x8D25;&#xFF0C;&#x670D;&#x52A1;&#x5668;&#x4F1A;&#x8FD4;&#x56DE;error&#xFF0C;&#x7136;&#x540E;client&#x66F4;&#x65B0;&#x6620;&#x5C04;&#xFF0C;&#x5E76;&#x4E14;&#x91CD;&#x8BD5;&#x8BF7;&#x6C42;&#x3002;</li></ul>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2015/08/06/petal/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -580,6 +684,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -596,13 +702,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/08/23/tgt-arch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -610,38 +726,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/08/23/tgt-arch/" itemprop="url">
-                  tgt程序框架
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/08/23/tgt-arch/" itemprop="url">tgt程序框架</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-08-23T21:39:11+08:00" content="2014-08-23">
-              2014-08-23
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-08-23T21:39:11+08:00">
+                2014-08-23
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -651,9 +771,8 @@
                 
                   ， 
                 
-
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/iscsi/" itemprop="url" rel="index">
                     <span itemprop="name">iscsi</span>
                   </a>
@@ -661,7 +780,6 @@
 
                 
                 
-
               
             </span>
           
@@ -671,15 +789,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -690,15 +810,21 @@
         
           <p>tgt&#x662F;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;iscsi target&#xFF0C;&#x800C;iet&#xFF08;iscsi enterprise target&#xFF09;&#x662F;&#x5728;&#x5185;&#x6838;&#x6001;&#x5B9E;&#x73B0;&#x7684;target&#xFF0C;tgt&#x76F8;&#x6BD4;&#x4E8E;iet&#x6765;&#x8BF4;&#xFF0C;&#x56E0;&#x4E3A;&#x5176;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#xFF0C;&#x65B9;&#x4FBF;&#x8C03;&#x8BD5;&#xFF0C;&#x65B0;&#x52A0;&#x5165;&#x4E00;&#x4E9B;&#x529F;&#x80FD;&#x7B49;&#xFF0C;&#x4E0D;&#x8FC7;&#x6027;&#x80FD;&#x76F8;&#x6BD4;iet&#x6765;&#x8BF4;&#x8981;&#x7A0D;&#x5DEE;&#x4E00;&#x70B9;&#x3002;&#x4E0B;&#x9762;&#x5C31;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;tgt&#x7684;&#x7A0B;&#x5E8F;&#x6846;&#x67B6;&#xFF08;&#x7565;&#x8FC7;iscsi&#x534F;&#x8BAE;&#x89E3;&#x6790;&#x5904;&#x7406;&#x90E8;&#x5206;&#xFF09;&#xFF0C;&#x4EE5;&#x4FBF;&#x4E8E;&#x6574;&#x4F53;&#x628A;&#x63E1;tgt&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x65B9;&#x4FBF;&#x540E;&#x7EED;&#x7684;&#x4E00;&#x4E9B;&#x4FEE;&#x6539;&#x3002;</p>
 <h1 id="1-&#x6574;&#x4F53;&#x6846;&#x67B6;"><a href="#1-&#x6574;&#x4F53;&#x6846;&#x67B6;" class="headerlink" title="1.&#x6574;&#x4F53;&#x6846;&#x67B6;"></a>1.&#x6574;&#x4F53;&#x6846;&#x67B6;</h1><p>&#x8FD9;&#x91CC;&#x501F;&#x7528;tgt&#x5B98;&#x7F51;&#x7ED9;&#x51FA;&#x7684;&#x4E00;&#x5F20;&#x56FE;&#x3002;<br><img src="/2014/08/23/tgt-arch/tgt-arch.png" alt="tgt-arch"><br>tgt&#x4E2D;&#x547D;&#x4EE4;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x4E0E;initiator&#x7AEF;&#x7684;&#x901A;&#x4FE1;&#x90FD;&#x662F;&#x901A;&#x8FC7;epoll&#x6765;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x4E0B;&#x9762;&#x5206;&#x522B;&#x5BF9;&#x8FD9;&#x4E24;&#x90E8;&#x5206;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/08/23/tgt-arch/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -708,6 +834,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -724,13 +852,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/06/20/bcache-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -738,38 +876,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/06/20/bcache-analysis/" itemprop="url">
-                  bcache浅析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/06/20/bcache-analysis/" itemprop="url">bcache浅析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-06-20T17:43:08+08:00" content="2014-06-20">
-              2014-06-20
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-06-20T17:43:08+08:00">
+                2014-06-20
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -777,7 +919,6 @@
 
                 
                 
-
               
             </span>
           
@@ -787,15 +928,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -806,15 +949,21 @@
         
           <h1 id="1-&#x7B80;&#x4ECB;"><a href="#1-&#x7B80;&#x4ECB;" class="headerlink" title="1.&#x7B80;&#x4ECB;"></a>1.&#x7B80;&#x4ECB;</h1><p>bcache&#x662F;linux&#x5185;&#x6838;&#x5757;&#x8BBE;&#x5907;&#x5C42;cache&#xFF0C;&#x7C7B;&#x4F3C;&#x4E8E;flashcache&#x4F7F;&#x7528;ssd&#x4F5C;&#x4E3A;hdd&#x7684;&#x7F13;&#x5B58;&#x65B9;&#x6848;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;flashcache&#xFF0C;bcache&#x66F4;&#x52A0;&#x7075;&#x6D3B;&#xFF0C;&#x652F;&#x6301;ssd&#x4F5C;&#x4E3A;&#x591A;&#x5757;hdd&#x7684;&#x5171;&#x4EAB;&#x7F13;&#x5B58;&#xFF0C;&#x5E76;&#x4E14;&#x8FD8;&#x652F;&#x6301;&#x591A;&#x5757;ssd&#xFF08;&#x8FD8;&#x672A;&#x5B8C;&#x5584;&#xFF09;&#xFF0C;&#x80FD;&#x591F;&#x5728;&#x8FD0;&#x884C;&#x4E2D;&#x52A8;&#x6001;&#x589E;&#x52A0;&#xFF0C;&#x5220;&#x9664;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#x548C;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x3002;&#x4ECE;3.10&#x5F00;&#x59CB;&#xFF0C;bcache&#x8FDB;&#x5165;&#x5185;&#x6838;&#x4E3B;&#x7EBF;&#x3002;bcache&#x652F;&#x6301;writeback&#x3001;writethrough&#x3001;writearoud&#x4E09;&#x79CD;&#x7B56;&#x7565;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F;wriththrough&#xFF0C;&#x53EF;&#x4EE5;&#x52A8;&#x6001;&#x4FEE;&#x6539;&#xFF0C;&#x7F13;&#x5B58;&#x66FF;&#x6362;&#x65B9;&#x5F0F;&#x652F;&#x6301;lru&#x3001;fifo&#x548C;random&#x4E09;&#x79CD;&#x3002;&#x4E0B;&#x9762;&#x4ECE;&#x51E0;&#x4E2A;&#x65B9;&#x9762;&#x4ECB;&#x7ECD;bcache&#x7684;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x3002;</p>
 <h1 id="2-&#x603B;&#x4F53;&#x7ED3;&#x6784;"><a href="#2-&#x603B;&#x4F53;&#x7ED3;&#x6784;" class="headerlink" title="2.&#x603B;&#x4F53;&#x7ED3;&#x6784;"></a>2.&#x603B;&#x4F53;&#x7ED3;&#x6784;</h1><p>bcache&#x7684;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;<br><img src="/2014/06/20/bcache-analysis/arch.png" alt="arch"><br>bcache&#x4E2D;&#x662F;&#x4EE5;cache set&#x6765;&#x5212;&#x5206;&#x4E0D;&#x540C;&#x5B58;&#x50A8;&#x96C6;&#x5408;&#xFF0C;&#x4E00;&#x4E2A;cache set&#x4E2D;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x7F13;&#x5B58;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;ssd&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#xFF08;&#x4E00;&#x822C;&#x662F;hdd&#xFF09;&#x3002;bcache&#x5BF9;&#x5916;&#x8F93;&#x51FA;&#x7ED9;&#x7528;&#x6237;&#x4F7F;&#x7528;&#x7684;&#x662F;/dev/bcache<N>&#x8FD9;&#x79CD;&#x8BBE;&#x5907;&#xFF0C;&#x6BCF;&#x4E2A;bcache<N>&#x8BBE;&#x5907;&#x90FD;&#x4E0E;&#x4E00;&#x4E2A;&#x540E;&#x7AEF;&#x7269;&#x7406;&#x76D8;&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;&#x7528;&#x6237;&#x5BF9;&#x4E0D;&#x540C;bcache&#x8BBE;&#x5907;&#x7684;io&#x4F1A;&#x7F13;&#x5B58;&#x5728;ssd&#x4E2D;&#xFF0C;&#x5237;&#x810F;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5199;&#x5230;&#x5404;&#x81EA;&#x5BF9;&#x5E94;&#x7684;&#x540E;&#x7AEF;&#x8BBE;&#x5907;&#x4E0A;&#x3002;&#x56E0;&#x6B64;&#xFF0C;bcache&#x6269;&#x5BB9;&#x5F88;&#x5BB9;&#x6613;&#xFF0C;&#x53EA;&#x8981;&#x6CE8;&#x518C;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7269;&#x7406;&#x8BBE;&#x5907;&#x5373;&#x53EF;&#x3002;<br></N></N></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/06/20/bcache-analysis/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -824,6 +973,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -840,13 +991,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/05/29/bcache-use/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -854,38 +1015,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/05/29/bcache-use/" itemprop="url">
-                  bcache使用
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/05/29/bcache-use/" itemprop="url">bcache使用</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-05-29T17:34:40+08:00" content="2014-05-29">
-              2014-05-29
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-05-29T17:34:40+08:00">
+                2014-05-29
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -893,7 +1058,6 @@
 
                 
                 
-
               
             </span>
           
@@ -903,15 +1067,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -923,15 +1089,21 @@
           <h1 id="1-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"><a href="#1-&#x7F16;&#x8BD1;&#x5B89;&#x88C5;" class="headerlink" title="1.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;"></a>1.&#x7F16;&#x8BD1;&#x5B89;&#x88C5;</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># git clone http://evilpiepirate.org/git/bcache-tools.git</span></span><br></pre></td></tr></table></figure>
 <p>&#x5B89;&#x88C5;&#x524D;&#x9700;&#x8981;&#x4E24;&#x4E2A;&#x4F9D;&#x8D56;&#x5305;pkg-config&#x548C;libblkid-dev<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apt-get install pkg-config libblkid-dev</span></span><br></pre></td></tr></table></figure></p>
 <p>&#x7136;&#x540E;&#x7F16;&#x8BD1;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># make</span></span><br><span class="line">cc -O2 -Wall -g `pkg-config --cflags uuid blkid` make-bcache.c bcache.o `pkg-config --libs uuid blkid` -o make-bcache</span><br><span class="line">cc -O2 -Wall -g `pkg-config --cflags uuid blkid` probe-bcache.c `pkg-config --libs uuid blkid` -o probe-bcache</span><br><span class="line">cc -O2 -Wall -g -std=gnu99 bcache-super-show.c bcache.o `pkg-config --libs uuid` -o bcache-super-show</span><br><span class="line"><span class="comment"># make install</span></span><br><span class="line">install -m0755 make-bcache bcache-super-show	/usr/sbin/</span><br><span class="line">install -m0755 probe-bcache bcache-register	 /lib/udev/</span><br><span class="line">install -m0644 69-bcache.rules	/lib/udev/rules.d/</span><br><span class="line">install -T -m0755 initramfs/hook	/usr/share/initramfs-tools/hooks/bcache</span><br><span class="line"><span class="keyword">if</span> [ <span class="_">-d</span> /lib/dracut/modules.d ]; \</span><br><span class="line"> <span class="keyword">then</span> install -D -m0755 dracut/module-setup.sh /lib/dracut/modules.d/90bcache/module-setup.sh; \</span><br><span class="line"> <span class="keyword">fi</span></span><br><span class="line">install -m0644 -- *.8 /usr/share/man/man8/</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/05/29/bcache-use/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -941,6 +1113,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -957,13 +1131,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/05/19/directio-merge/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -971,38 +1155,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/05/19/directio-merge/" itemprop="url">
-                  direct IO中io合并的奇怪现象分析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/05/19/directio-merge/" itemprop="url">direct IO中io合并的奇怪现象分析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-05-19T17:07:13+08:00" content="2014-05-19">
-              2014-05-19
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-05-19T17:07:13+08:00">
+                2014-05-19
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -1010,7 +1198,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1020,15 +1207,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1040,15 +1229,21 @@
           <p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x300A;&#x5757;&#x8BBE;&#x5907;&#x5185;&#x6838;&#x53C2;&#x6570;max_segments&#x548C;max_sectors_kb&#x89E3;&#x6790;&#x300B;&#x4ECB;&#x7ECD;&#x4E86;max_sectors_kb&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x5BF9;device mapper&#x8BBE;&#x5907;&#x548C;&#x8F6F;raid&#x8BBE;&#x5907;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x5B9E;&#x9645;&#x5728;&#x6D4B;&#x8BD5;&#x65F6;&#xFF0C;&#x53D1;&#x73B0;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x73B0;&#x8C61;&#xFF1A;&#x4E00;&#x5757;&#x7269;&#x7406;&#x76D8;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x76D8;&#x4E0A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;device mapper&#x8BBE;&#x5907;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x8FD9;&#x4E2A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;direct IO&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5927;&#x5757;&#x5199;&#x6216;&#x8005;&#x987A;&#x5E8F;&#x5927;&#x5757;&#x5199;&#xFF08;&#x968F;&#x673A;&#x8BFB;&#x548C;&#x987A;&#x5E8F;&#x8BFB;&#x6CA1;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x8981;&#x5927;&#x4E8E;dm&#x8BBE;&#x5907;&#x7684;max_sectors_kb&#xFF0C;&#x4F46;&#x662F;&#x5C0F;&#x4E8E;dm&#x5E95;&#x5C42;&#x8BBE;&#x5907;&#xFF08;&#x8FD9;&#x91CC;&#x662F;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF09;&#x7684;max_sectors_kb&#xFF0C;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x53D1;&#x73B0;&#x5728;3.2&#x5185;&#x6838;&#x91CC;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x5E76;&#x6CA1;&#x6709;&#x5408;&#x5E76;&#xFF0C;&#x4F46;&#x662F;&#x5728;3.10&#x5185;&#x6838;&#x4E0B;&#x843D;&#x5230;&#x7269;&#x7406;&#x76D8;&#x4E0A;&#x7684;io&#x786E;&#x662F;&#x5408;&#x5E76;&#x4E86;&#xFF08;&#x5408;&#x5E76;&#x540E;&#x7684;&#x5927;&#x5C0F;&#x4E3A;&#x7528;&#x6237;&#x53D1;&#x7684;io&#x5757;&#x5927;&#x5C0F;&#xFF09;&#x3002;&#x5177;&#x4F53;&#x73B0;&#x8C61;&#x4E0B;&#x9762;&#x4EE5;&#x4F8B;&#x5B50;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#x3002;</p>
 <h1 id="1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"><a href="#1-&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;" class="headerlink" title="1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;"></a>1.&#x4E0D;&#x540C;&#x5185;&#x6838;&#x4E0B;&#x7684;&#x8868;&#x73B0;</h1><p>&#x8FD9;&#x91CC;&#x9009;&#x53D6;3.2.57&#x5185;&#x6838;&#x548C;3.10.11&#x5185;&#x6838;&#x4F5C;&#x4E3A;&#x5BF9;&#x6BD4;&#x3002;</p>
 <h2 id="1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"><a href="#1-1-3-2-57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;" class="headerlink" title="1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;"></a>1.1  3.2.57&#x5185;&#x6838;&#x4E0B;&#x6D4B;&#x8BD5;</h2><p>&#x7269;&#x7406;&#x76D8;sdg&#xFF0C;&#x5728;&#x5176;&#x4E0A;&#x521B;&#x5EFA;&#x7684;10G&#x7684;device mapper&#x8BBE;&#x5907;dmtest1&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x8BBE;&#x5907;&#x4E3A;dm-71<br>1&#xFF09;&#x9ED8;&#x8BA4;&#x7684;&#x53C2;&#x6570;&#x8BBE;&#x7F6E;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/sdg/queue/max_segments</span></span><br><span class="line">128</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_sectors_kb</span></span><br><span class="line">512</span><br><span class="line"><span class="comment"># cat /sys/block/dm-71/queue/max_segments</span></span><br><span class="line">128</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/05/19/directio-merge/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1058,6 +1253,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1074,13 +1271,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/05/12/max-seg-max-sec/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -1088,38 +1295,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/05/12/max-seg-max-sec/" itemprop="url">
-                  块设备内核参数max_segments和max_sectors_kb解析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/05/12/max-seg-max-sec/" itemprop="url">块设备内核参数max_segments和max_sectors_kb解析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-05-12T16:47:03+08:00" content="2014-05-12">
-              2014-05-12
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-05-12T16:47:03+08:00">
+                2014-05-12
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -1127,7 +1338,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1137,15 +1347,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1158,15 +1370,21 @@
 <p>&#x4F7F;&#x7528;DMA&#x7F13;&#x51B2;&#x533A;&#x7684;&#x4E3B;&#x8981;&#x95EE;&#x9898;&#x662F;&#xFF1A;&#x5F53;&#x5927;&#x4E8E;&#x4E00;&#x9875;&#x65F6;&#xFF0C;&#x5B83;&#x4EEC;&#x5FC5;&#x987B;&#x5360;&#x636E;&#x8FDE;&#x63A5;&#x7684;&#x7269;&#x7406;&#x9875;&#xFF0C;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x8BBE;&#x5907;&#x4F7F;&#x7528;ISA&#x6216;&#x8005;PCI&#x7CFB;&#x7EDF;&#x603B;&#x7EBF;&#x4F20;&#x8F93;&#x6570;&#x636E;&#xFF0C;&#x800C;&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;&#x7684;&#x90FD;&#x662F;&#x7269;&#x7406;&#x5730;&#x5740;</p>
 <p>linux&#x5757;&#x8BBE;&#x5907;&#x5728;&#x5904;&#x7406;io&#x65F6;&#x4F1A;&#x53D7;&#x5230;&#x4E00;&#x4E9B;&#x53C2;&#x6570;&#xFF08;&#x8BBE;&#x5907;&#x7684;queue limits&#x53C2;&#x6570;&#xFF0C;&#x4EE5;&#x4E0B;&#x7B80;&#x79F0;limits&#x53C2;&#x6570;&#xFF09;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x6BD4;&#x5982;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x4E2D;&#x5141;&#x8BB8;&#x7684;&#x6700;&#x5927;&#x6247;&#x533A;&#x6570;&#xFF0C;&#x6700;&#x5927;segment&#x6570;&#x7B49;&#x3002;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x53EF;&#x4EE5;&#x5728;/sys/block/<device>/queue/&#x4E0B;&#x67E5;&#x770B;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x5728;&#x521D;&#x59CB;&#x5316;&#x65F6;&#x4F1A;&#x8BBE;&#x7F6E;&#x9ED8;&#x8BA4;&#x503C;&#x3002;&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x5206;&#x6790;max_segments&#x548C;max_sectors_kb&#x3002;</device></p>
 <h1 id="1-&#x57FA;&#x672C;&#x6982;&#x5FF5;"><a href="#1-&#x57FA;&#x672C;&#x6982;&#x5FF5;" class="headerlink" title="1.&#x57FA;&#x672C;&#x6982;&#x5FF5;"></a>1.&#x57FA;&#x672C;&#x6982;&#x5FF5;</h1><h2 id="1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"><a href="#1-1&#x6BB5;&#x7684;&#x6982;&#x5FF5;" class="headerlink" title="1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;"></a>1.1&#x6BB5;&#x7684;&#x6982;&#x5FF5;</h2><p>&#x9996;&#x5148;&#x5C31;&#x9700;&#x8981;&#x4E86;&#x89E3;&#x4E00;&#x4E0B;&#x4EC0;&#x4E48;&#x662F;&#x6BB5;&#xFF08;segment&#xFF09;&#x3002;<br>&#x4E00;&#x4E2A;&#x6BB5;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x9875;&#x6216;&#x8005;&#x5185;&#x5B58;&#x9875;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5B83;&#x4EEC;&#x5305;&#x542B;&#x78C1;&#x76D8;&#x4E0A;&#x7269;&#x7406;&#x76F8;&#x90BB;&#x7684;&#x6570;&#x636E;&#x5757;&#x3002;<br>&#x78C1;&#x76D8;&#x7684;&#x6BCF;&#x4E2A;io&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x78C1;&#x76D8;&#x4E0E;&#x4E00;&#x4E9B;RAM&#x5355;&#x5143;&#x4E4B;&#x95F4;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x4E00;&#x4E9B;&#x76F8;&#x90BB;&#x6247;&#x533A;&#x7684;&#x5185;&#x5BB9;&#x3002;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x91C7;&#x7528;DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x6570;&#x636E;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x53EA;&#x8981;&#x5411;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x53D1;&#x9001;&#x9002;&#x5F53;&#x7684;&#x547D;&#x4EE4;&#x5C31;&#x53EF;&#x4EE5;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x4E00;&#x65E6;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x4F20;&#x9001;&#xFF0C;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x5C31;&#x4F1A;&#x53D1;&#x51FA;&#x4E00;&#x4E2A;&#x4E2D;&#x65AD;&#x901A;&#x77E5;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x3002;<br>DMA&#x65B9;&#x5F0F;&#x4F20;&#x9001;&#x7684;&#x662F;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x867D;&#x7136;&#x4E5F;&#x5141;&#x8BB8;&#x4F20;&#x9001;&#x4E0D;&#x76F8;&#x90BB;&#x7684;&#x6247;&#x533A;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;&#x6BD4;&#x8F83;&#x4F4E;&#x6548;&#xFF0C;&#x56E0;&#x4E3A;&#x78C1;&#x5934;&#x79FB;&#x52A8;&#x6162;&#x3002;<br>&#x8001;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x4EC5;&#x4EC5;&#x652F;&#x6301;&#x201C;&#x7B80;&#x5355;&#x201D;&#x7684;DMA&#x65B9;&#x5F0F;&#xFF1A;&#x78C1;&#x76D8;&#x5FC5;&#x987B;&#x4E0E;RAM&#x4E2D;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x5355;&#x5143;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;&#x4F46;&#x662F;&#x65B0;&#x7684;&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;&#xFF08;scatter-gather&#xFF09;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x78C1;&#x76D8;&#x53EF;&#x4EE5;&#x4E0E;&#x4E00;&#x4E9B;&#x975E;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x76F8;&#x4E92;&#x4F20;&#x9001;&#x6570;&#x636E;&#x3002;<br>&#x4E3A;&#x4E86;&#x652F;&#x6301;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x65B9;&#x5F0F;&#xFF0C;&#x5757;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x5FC5;&#x987B;&#x80FD;&#x591F;&#x5904;&#x7406;&#x79F0;&#x4E3A;&#x6BB5;&#x7684;&#x6570;&#x636E;&#x5B58;&#x50A8;&#x5355;&#x5143;&#xFF0C;&#x4E00;&#x6B21;&#x5206;&#x6563;&#x805A;&#x96C6;DMA&#x53EF;&#x4EE5;&#x4F20;&#x9001;&#x51E0;&#x4E2A;&#x6BB5;&#x3002;<br>&#x5982;&#x679C;&#x4E0D;&#x540C;&#x7684;&#x6BB5;&#x5728;RAM&#x4E2D;&#x76F8;&#x5E94;&#x7684;&#x9875;&#x6846;&#x6B63;&#x597D;&#x662F;&#x8FDE;&#x7EED;&#x7684;&#x5E76;&#x4E14;&#x5728;&#x78C1;&#x76D8;&#x4E0A;&#x76F8;&#x5E94;&#x7684;&#x6570;&#x636E;&#x4E5F;&#x662F;&#x76F8;&#x90BB;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x901A;&#x7528;&#x5757;&#x5C42;&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#xFF0C;&#x8FD9;&#x79CD;&#x5408;&#x5E76;&#x65B9;&#x5F0F;&#x4EA7;&#x751F;&#x7684;&#x66F4;&#x5927;&#x7684;&#x5185;&#x5B58;&#x533A;&#x57DF;&#x5C31;&#x79F0;&#x4E3A;&#x7269;&#x7406;&#x6BB5;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/05/12/max-seg-max-sec/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1176,6 +1394,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1192,13 +1412,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/05/10/flashcachegroup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -1206,38 +1436,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/05/10/flashcachegroup/" itemprop="url">
-                  flashcachegroup浅析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/05/10/flashcachegroup/" itemprop="url">flashcachegroup浅析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-05-10T16:02:35+08:00" content="2014-05-10">
-              2014-05-10
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-05-10T16:02:35+08:00">
+                2014-05-10
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -1245,7 +1479,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1255,15 +1488,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1277,15 +1512,21 @@
 <p>&#x5207;&#x6362;&#x5230;&#x7A33;&#x5B9A;&#x7248;stable_v3.1.1<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#git checkout stable_v3.1.1</span></span><br></pre></td></tr></table></figure></p>
 <p>flashcache&#x7F16;&#x8BD1;&#x9700;&#x8981;&#x4F9D;&#x8D56;KERNE_TREE<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#make KERNEL_TREE=/usr/src/linux-headers-3.10.11-openstack-amd64/</span></span><br><span class="line"><span class="comment">#make install</span></span><br></pre></td></tr></table></figure></p>
 <p>&#x52A0;&#x8F7D;flashcache&#x6A21;&#x5757;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#modprobe flashcache</span></span><br><span class="line"><span class="comment">#lsmod | grep flashcache</span></span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/05/10/flashcachegroup/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1295,6 +1536,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1311,13 +1554,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/05/01/systemtap-analysis-mdraid-io/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -1325,38 +1578,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2014/05/01/systemtap-analysis-mdraid-io/" itemprop="url">
-                  systemtap分析软raid io拆分问题
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2014/05/01/systemtap-analysis-mdraid-io/" itemprop="url">systemtap分析软raid io拆分问题</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-05-01T19:02:02+08:00" content="2014-05-01">
-              2014-05-01
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2014-05-01T19:02:02+08:00">
+                2014-05-01
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -1364,7 +1621,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1374,15 +1630,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1396,15 +1654,21 @@
 <p>&#x4F7F;&#x7528;fio&#x5BF9;&#x8BE5;raid1&#x8FDB;&#x884C;&#x968F;&#x673A;&#x5199;&#x64CD;&#x4F5C;&#xFF08;&#x987A;&#x5E8F;&#x5199;&#x4E5F;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF09;&#xFF0C;&#x5757;&#x5927;&#x5C0F;&#x4E3A;64KB&#xFF0C;fio&#x7684;&#x914D;&#x7F6E;&#x5982;&#x4E0B;:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">rw=randwrite</span><br><span class="line">direct=1</span><br><span class="line">numjobs=1</span><br><span class="line">ioengine=sync</span><br><span class="line">bsrange=64k-64k</span><br><span class="line">rate_iops=60</span><br><span class="line">time_based</span><br><span class="line">runtime=120</span><br><span class="line">group_reporting</span><br><span class="line">[disk00]</span><br><span class="line">filename=/dev/md127</span><br></pre></td></tr></table></figure></p>
 <p>fio&#x5199;io&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x4F7F;&#x7528;iostat&#x67E5;&#x770B;&#x8BBE;&#x5907;&#x7684;io<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#iostat -mx 2 md127 vdb vdc</span></span><br></pre></td></tr></table></figure></p>
 <p><img src="/2014/05/01/systemtap-analysis-mdraid-io/con1-iostat.png" alt="con1-iostat"><br>&#x53EF;&#x4EE5;&#x770B;&#x5230;avgrq-sz&#x4E3A;128&#xFF0C;&#x5355;&#x4F4D;&#x662F;&#x6247;&#x533A;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;64KB&#xFF0C;&#x8BF4;&#x660E;io&#x5E76;&#x6CA1;&#x6709;&#x8FDB;&#x884C;&#x62C6;&#x5206;&#x3002;</p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2014/05/01/systemtap-analysis-mdraid-io/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1414,6 +1678,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1461,25 +1727,32 @@
 
       
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
                alt="Wu Dong" />
           <p class="site-author-name" itemprop="name">Wu Dong</p>
-          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+           
+              <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+          
         </div>
         <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">32</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
-          </div>
 
           
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
             <div class="site-state-item site-state-categories">
-              <a href="/categories">
+              <a href="/categories/index.html">
                 <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">分类</span>
               </a>
@@ -1487,8 +1760,10 @@
           
 
           
+            
+            
             <div class="site-state-item site-state-tags">
-              <a href="/tags">
+              <a href="/tags/index.html">
                 <span class="site-state-item-count">27</span>
                 <span class="site-state-item-name">标签</span>
               </a>
@@ -1516,7 +1791,12 @@
         
         
 
+        
+
+
       </section>
+
+      
 
       
 
@@ -1540,8 +1820,9 @@
   <span class="author" itemprop="copyrightHolder">Wu Dong</span>
 </div>
 
+
 <div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
 </div>
 
 <div class="theme-info">
@@ -1551,31 +1832,40 @@
   </a>
 </div>
 
+
         
-
 <div class="busuanzi-count">
-
   <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
   
-    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
   
 
   
-    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
-  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
   
 </div>
-
 
 
         
       </div>
     </footer>
 
-    <div class="back-to-top">
-      <i class="fa fa-arrow-up"></i>
-    </div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
   </div>
 
   
@@ -1598,56 +1888,102 @@
 
 
 
-  
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
 
 
 
   
-  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
 
   
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
   
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
 
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   
 
 
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
 
   
 
 
 
+
+	
+
+
+
+
+
   
+
+
+
+
+
   
+    
+
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
   
 
   

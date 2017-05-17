@@ -5,11 +5,14 @@
   
 
 
-<html class="theme-next mist use-motion">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
 
 
 
@@ -27,7 +30,12 @@
 
 
 
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -59,9 +67,11 @@
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -75,7 +85,7 @@
 
 
 
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
 
 
 
@@ -94,21 +104,37 @@
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
+    root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"left","display":"post"},
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
     duoshuo: {
-      userId: 0,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     }
   };
 </script>
 
-  <title> System Notes </title>
+
+
+  <link rel="canonical" href="http://yoursite.com/"/>
+
+
+
+
+
+  <title>System Notes</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -117,15 +143,20 @@
 
 
 
+
+
   <script type="text/javascript">
     var _hmt = _hmt || [];
     (function() {
       var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
+      hm.src = "https://hm.baidu.com/hm.js?6958d5097bd406d16931b3fa137c6a9f";
       var s = document.getElementsByTagName("script")[0];
       s.parentNode.insertBefore(hm, s);
     })();
   </script>
+
+
+
 
 
 
@@ -139,31 +170,35 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
+  <div class="container sidebar-position-left 
    page-home 
  ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-meta ">
-  
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-  <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <span class="site-title">System Notes</span>
-      <span class="logo-line-after"><i></i></span>
-    </a>
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">System Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
-  <p class="site-subtitle"></p>
-</div>
 
-<div class="site-nav-toggle">
-  <button>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-    <span class="btn-bar"></span>
-  </button>
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
 </div>
 
 <nav class="site-nav">
@@ -176,7 +211,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
           </a>
@@ -186,7 +221,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
             
-              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
             
             分类
           </a>
@@ -196,7 +231,7 @@
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
             
-              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
             关于
           </a>
@@ -206,7 +241,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
-              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
           </a>
@@ -216,7 +251,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
             
-              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
             
             标签
           </a>
@@ -229,6 +264,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -243,13 +280,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/21/three-iscsitargets-io-flow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -257,38 +304,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2017/04/21/three-iscsitargets-io-flow/" itemprop="url">
-                  图解三种iscsi target软件的IO框架
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2017/04/21/three-iscsitargets-io-flow/" itemprop="url">图解三种iscsi target软件的IO框架</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-04-21T19:45:22+08:00" content="2017-04-21">
-              2017-04-21
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-21T19:45:22+08:00">
+                2017-04-21
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -298,9 +349,8 @@
                 
                   ， 
                 
-
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/iscsi/" itemprop="url" rel="index">
                     <span itemprop="name">iscsi</span>
                   </a>
@@ -308,7 +358,6 @@
 
                 
                 
-
               
             </span>
           
@@ -318,15 +367,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -351,7 +402,11 @@
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -361,6 +416,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -377,13 +434,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/15/iscsiadm-affect-reconnect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -391,38 +458,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2017/03/15/iscsiadm-affect-reconnect/" itemprop="url">
-                  频繁执行iscsiadm导致iscsid不进行target的重连
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2017/03/15/iscsiadm-affect-reconnect/" itemprop="url">频繁执行iscsiadm导致iscsid不进行target的重连</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-03-15T16:29:59+08:00" content="2017-03-15">
-              2017-03-15
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-15T16:29:59+08:00">
+                2017-03-15
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/iscsi/" itemprop="url" rel="index">
                     <span itemprop="name">iscsi</span>
                   </a>
@@ -430,7 +501,6 @@
 
                 
                 
-
               
             </span>
           
@@ -440,15 +510,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -461,15 +533,21 @@
 <h2 id="&#x89C2;&#x5BDF;&#x5230;&#x7684;&#x73B0;&#x8C61;"><a href="#&#x89C2;&#x5BDF;&#x5230;&#x7684;&#x73B0;&#x8C61;" class="headerlink" title="&#x89C2;&#x5BDF;&#x5230;&#x7684;&#x73B0;&#x8C61;"></a>&#x89C2;&#x5BDF;&#x5230;&#x7684;&#x73B0;&#x8C61;</h2><p>&#x5F53;target&#x5F02;&#x5E38;&#x65F6;&#xFF0C;strace&#x8DDF;&#x8E2A;iscsid&#x8FDB;&#x7A0B;&#x4F1A;&#x53D1;&#x73B0;&#x4E00;&#x76F4;&#x5C1D;&#x8BD5;&#x91CD;&#x8FDE;&#xFF0C;&#x4E0D;&#x8FC7;&#x4E00;&#x76F4;&#x5931;&#x8D25;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ sudo strace -e connect -p 28022 -t</span><br><span class="line">Process 28022 attached - interrupt to quit</span><br><span class="line">15:19:31 connect(10, {sa_family=AF_INET, sin_port=htons(3260), sin_addr=inet_addr(&quot;10.180.0.30&quot;)}, 128) = -1 EINPROGRESS (Operation now in progress)</span><br><span class="line">15:19:34 connect(10, {sa_family=AF_INET, sin_port=htons(3260), sin_addr=inet_addr(&quot;10.180.0.30&quot;)}, 128) = -1 EINPROGRESS (Operation now in progress)</span><br><span class="line">15:19:37 connect(10, {sa_family=AF_INET, sin_port=htons(3260), sin_addr=inet_addr(&quot;10.180.0.30&quot;)}, 128) = -1 EINPROGRESS (Operation now in progress)</span><br><span class="line">15:19:40 connect(10, {sa_family=AF_INET, sin_port=htons(3260), sin_addr=inet_addr(&quot;10.180.0.30&quot;)}, 128) = -1 EINPROGRESS (Operation now in progress)</span><br></pre></td></tr></table></figure></p>
 <p>&#x6A21;&#x62DF;&#x9891;&#x7E41;&#x6267;&#x884C;iscsiadm&#x7684;&#x547D;&#x4EE4;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ for i in {1..10000};do sudo iscsiadm -m session -P3 2&amp;&gt; /dev/null;done</span><br></pre></td></tr></table></figure></p>
 <p>&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x53BB;strace&#x8DDF;&#x8E2A;&#x4F1A;&#x53D1;&#x73B0;&#x6CA1;&#x6709;&#x53BB;&#x91CD;&#x8FDE;target&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x53CD;&#x800C;&#x662F;&#x4E00;&#x4E9B;&#x5947;&#x602A;&#x7684;&#x8BB0;&#x5F55;&#x3002;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">17:24:12 connect(9, {sa_family=AF_FILE, path=&quot;/var/run/nscd/socket&quot;}, 110) = -1 ENOENT (No such file or directory)</span><br><span class="line">17:24:13 connect(9, {sa_family=AF_FILE, path=&quot;/var/run/nscd/socket&quot;}, 110) = -1 ENOENT (No such file or directory)</span><br><span class="line">17:24:14 connect(9, {sa_family=AF_FILE, path=&quot;/var/run/nscd/socket&quot;}, 110) = -1 ENOENT (No such file or directory)</span><br><span class="line">17:24:14 connect(9, {sa_family=AF_FILE, path=&quot;/var/run/nscd/socket&quot;}, 110) = -1 ENOENT (No such file or directory)</span><br><span class="line">17:24:15 connect(9, {sa_family=AF_FILE, path=&quot;/var/run/nscd/socket&quot;}, 110) = -1 ENOENT (No such file or directory)</span><br></pre></td></tr></table></figure></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2017/03/15/iscsiadm-affect-reconnect/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -479,6 +557,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -495,13 +575,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/15/error-disk-cause-iohang2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -509,38 +599,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2017/03/15/error-disk-cause-iohang2/" itemprop="url">
-                  坏盘导致IO hang问题分析（续）
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2017/03/15/error-disk-cause-iohang2/" itemprop="url">坏盘导致IO hang问题分析（续）</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-03-15T16:21:22+08:00" content="2017-03-15">
-              2017-03-15
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-15T16:21:22+08:00">
+                2017-03-15
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -548,7 +642,6 @@
 
                 
                 
-
               
             </span>
           
@@ -558,15 +651,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -578,15 +673,21 @@
           <p>&#x7ECF;&#x8FC7;&#x524D;&#x9762;&#x7684;&#x5206;&#x6790;&#x6D4B;&#x8BD5;&#xFF0C;&#x4F7F;&#x7528;fio&#x76F4;&#x63A5;&#x6D4B;&#x8BD5;&#x88F8;&#x76D8;&#xFF08;direct=1&#xFF09;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C06;&#x540E;&#x7AEF;&#x8BBE;&#x5907;suspend&#x4F4F;&#x540E;&#xFF0C;fio&#x7684;IO hang&#x7684;&#x65F6;&#x95F4;&#x8DDF;&#x524D;&#x9762;&#x8BA1;&#x7B97;&#x7684;&#x4E00;&#x81F4;&#xFF1B;&#x4F46;&#x662F;&#x5F53;&#x5728;&#x865A;&#x62DF;&#x673A;&#x91CC;&#x5BF9;&#x8FD9;&#x5757;&#x76D8;&#x505A;&#x4E86;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x7136;&#x540E;fio&#x6D4B;&#x8BD5;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF08;direct=1&#xFF09;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C06;&#x540E;&#x7AEF;&#x8BBE;&#x5907;suspend&#x4F4F;&#x540E;&#xFF0C;fio&#x7684;IO hang&#x7684;&#x65F6;&#x95F4;&#x591A;&#x4E86;20~30s&#x3002;</p>
 <h2 id="&#x521D;&#x6B65;&#x5206;&#x6790;"><a href="#&#x521D;&#x6B65;&#x5206;&#x6790;" class="headerlink" title="&#x521D;&#x6B65;&#x5206;&#x6790;"></a>&#x521D;&#x6B65;&#x5206;&#x6790;</h2><p>&#x4E00;&#x5F00;&#x59CB;&#x6000;&#x7591;&#x662F;&#x7531;&#x4E8E;&#x865A;&#x62DF;&#x673A;&#x8FD9;&#x5C42;&#x7684;&#x4F5C;&#x7528;&#xFF0C;&#x56E0;&#x6B64;&#x8FD8;&#x8C03;&#x6574;&#x8FC7;KVM&#x4F7F;&#x7528;&#x7684;&#x76D8;&#x7684;&#x7F13;&#x5B58;&#x7B56;&#x7565;&#xFF08;none&#x3001;writethrough&#x3001;directsync&#xFF09;&#xFF0C;&#x540C;&#x6837;&#x7684;&#x6D4B;&#x8BD5;&#xFF0C;&#x4ECD;&#x7136;&#x662F;IO hang&#x6BD4;&#x9884;&#x671F;&#x7684;&#x591A;20~30s&#x3002;</p>
 <p>&#x6253;&#x5F00;iscsi session debug&#x5F00;&#x5173;&#xFF0C;&#x5F00;&#x542F;scsi error&#x548C;timeout&#x7684;&#x65E5;&#x5FD7;&#xFF0C;&#x7136;&#x540E;&#x5206;&#x6790;&#x8FD9;&#x6837;&#x6D4B;&#x8BD5;&#x8FC7;&#x7A0B;&#x4E2D;&#x7684;&#x65E5;&#x5FD7;&#x4FE1;&#x606F;&#x3002;&#x4E0B;&#x9762;&#x622A;&#x53D6;&#x90E8;&#x5206;&#x65E5;&#x5FD7;&#xFF0C;&#x53D1;&#x73B0;&#x6709;3&#x4E2A;&#x65F6;&#x95F4;&#x70B9;&#xFF1A;16:45:21&#x3001;16:45:31&#x3001;16:45:41&#x6BD4;&#x8F83;&#x5947;&#x602A;&#xFF0C;&#x6CA1;&#x6709;&#x8FDE;&#x7EED;&#x7684;&#x65E5;&#x5FD7;&#xFF0C;&#x90FD;&#x6709;10s&#x7684;&#x7A7A;&#x767D;&#x671F;&#x3002;&#x800C;&#x4E14;&#x4ECE;16:45:41&#x5230;16:45:51&#x540E;&#xFF0C;&#x5C31;&#x662F;&#x201D;Device offlined - not ready after error recovery&#x201D;&#xFF0C;&#x800C;&#x4E4B;&#x524D;&#x4ECE;&#x88F8;&#x76D8;&#x4E0A;&#x6D4B;&#x8BD5;&#x65F6;&#x662F;&#x6CA1;&#x6709;&#x8FD9;&#x51E0;&#x6B21;10s&#x7684;&#x7A7A;&#x767D;&#x671F;&#xFF0C;&#x800C;&#x4E14;&#x662F;I/O error&#xFF0C;&#x800C;&#x4E0D;&#x662F;device offlined&#x540E;&#x518D;I/O error&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2017/03/15/error-disk-cause-iohang2/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -596,6 +697,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -612,13 +715,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/15/error-disk-cause-iohang/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -626,38 +739,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2017/03/15/error-disk-cause-iohang/" itemprop="url">
-                  坏盘导致IO hang问题分析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2017/03/15/error-disk-cause-iohang/" itemprop="url">坏盘导致IO hang问题分析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-03-15T16:09:40+08:00" content="2017-03-15">
-              2017-03-15
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-15T16:09:40+08:00">
+                2017-03-15
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/storage/" itemprop="url" rel="index">
                     <span itemprop="name">storage</span>
                   </a>
@@ -665,7 +782,6 @@
 
                 
                 
-
               
             </span>
           
@@ -675,15 +791,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -697,15 +815,21 @@
 <p>2&#xFF09;&#x53E6;&#x5916;&#x4E00;&#x79CD;&#x60C5;&#x51B5;&#x662F;&#x574F;&#x76D8;&#x540E;&#xFF0C;&#x5C06;&#x574F;&#x76D8;&#x4ECE;raid&#x5361;&#x4E2D;&#x5254;&#x9664;&#xFF08;&#x505A;&#x7684;&#x5355;&#x76D8;raid0&#xFF0C;&#x9ED8;&#x8BA4;WB&#x7F13;&#x5B58;&#x7B56;&#x7565;&#xFF0C;&#x76D8;&#x574F;&#x540E;&#x9700;&#x8981;&#x4ECE;raid&#x5361;&#x91CC;&#x5220;&#x9664;&#x903B;&#x8F91;&#x5377;&#xFF09;&#xFF0C;&#x8FD9;&#x53F0;&#x673A;&#x5668;&#x4E0A;&#x7684;&#x7269;&#x7406;&#x76D8;&#x90FD;io&#x5361;&#x4F4F;&#x4E00;&#x4F1A;&#xFF0C;&#x5E76;&#x4E14;megacli&#x547D;&#x4EE4;&#x4E5F;&#x5361;&#x4F4F;&#x3002;&#x4ECE;&#x800C;&#x4E5F;&#x5BFC;&#x81F4;&#x90E8;&#x5206;&#x7528;&#x6237;&#x7684;&#x5377;io util 100%&#x8F83;&#x957F;&#x65F6;&#x95F4;&#xFF1B;</p>
 <p>&#x60C5;&#x51B5;1&#xFF09;&#x901A;&#x8FC7;&#x6536;&#x96C6;&#x65E5;&#x5FD7;&#x53CD;&#x9988;&#x7ED9;&#x5382;&#x5BB6;&#x786E;&#x8BA4;&#x662F;&#x7531;&#x4E8E;&#x7EBF;&#x4E0A;&#x673A;&#x5668;&#x7684;raid&#x5361;&#x7684;&#x56FA;&#x4EF6;&#x7248;&#x672C;&#x6BD4;&#x8F83;&#x4F4E;&#xFF0C;&#x9700;&#x8981;&#x5347;&#x7EA7;raid&#x5361;&#x56FA;&#x4EF6;&#xFF1B;<br>&#x60C5;&#x51B5;2&#xFF09;&#x56E0;&#x4E3A;&#x574F;&#x76D8;&#x540E;&#xFF0C;raid&#x5361;&#x5C31;&#x8FDB;&#x5165;&#x4FDD;&#x62A4;&#x6A21;&#x5F0F;&#xFF0C;&#x7269;&#x7406;&#x76D8;&#x7684;&#x7F13;&#x5B58;&#x7B56;&#x7565;&#x90FD;&#x4ECE;writeback&#x53D8;&#x6210;writethrough&#xFF0C;&#x7136;&#x540E;&#x5254;&#x9664;&#x574F;&#x76D8;&#x65F6;&#xFF0C;&#x5C31;&#x4F1A;&#x5C06;raid&#x5361;&#x7F13;&#x5B58;&#x91CC;&#x7684;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x56DE;&#x5237;&#x5230;&#x78C1;&#x76D8;&#x4E0A;&#xFF0C;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x4E2D;&#x662F;&#x4F1A;&#x6709;&#x77ED;&#x65F6;&#x95F4;&#x7684;&#x7269;&#x7406;&#x76D8;io&#x5361;&#x4F4F;&#xFF1B;</p>
 <p>&#x4E0A;&#x9762;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#xFF0C;&#x7269;&#x7406;&#x76D8;&#x7684;io&#x5361;&#x4F4F;&#x90FD;&#x5728;1&#x5206;&#x949F;&#x5185;&#xFF0C;&#x53EF;&#x662F;&#x4ECE;&#x7528;&#x6237;&#x53CD;&#x9988;&#x6765;&#x770B;&#x7528;&#x6237;&#x5377;&#x7684;io&#x5361;&#x4E86;&#x597D;&#x51E0;&#x5206;&#x949F;&#xFF0C;&#x6BD4;&#x7269;&#x7406;&#x76D8;&#x5361;&#x7684;&#x65F6;&#x95F4;&#x957F;&#x4E0D;&#x5C11;&#x3002;&#x53E6;&#x5916;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x4E2A;&#x7EBF;&#x4E0A;&#x73AF;&#x5883;&#x7684;&#x5757;&#x5B58;&#x50A8;&#x91C7;&#x7528;&#x7684;2&#x526F;&#x672C;&#xFF0C;&#x6709;&#x4E9B;&#x5377;&#x7684;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x526F;&#x672C;&#x843D;&#x5728;&#x574F;&#x76D8;&#x7684;&#x673A;&#x5668;&#x4E0A;&#xFF0C;&#x5361;&#x4E86;&#x8FD9;&#x4E48;&#x4E45;&#x4E3A;&#x4EC0;&#x4E48;&#x6CA1;&#x6709;&#x526F;&#x672C;&#x964D;&#x7EA7;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2017/03/15/error-disk-cause-iohang/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -715,6 +839,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -731,13 +857,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/29/ceph-io-sequence/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -745,38 +881,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/08/29/ceph-io-sequence/" itemprop="url">
-                  ceph中对象读写的顺序性及并发性保证
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2016/08/29/ceph-io-sequence/" itemprop="url">ceph中对象读写的顺序性及并发性保证</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-29T19:54:23+08:00" content="2016-08-29">
-              2016-08-29
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-29T19:54:23+08:00">
+                2016-08-29
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/ceph/" itemprop="url" rel="index">
                     <span itemprop="name">ceph</span>
                   </a>
@@ -784,7 +924,6 @@
 
                 
                 
-
               
             </span>
           
@@ -794,15 +933,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -814,15 +955,21 @@
           <p>&#x5206;&#x5E03;&#x5F0F;&#x7CFB;&#x7EDF;&#x4E2D;&#x7ECF;&#x5E38;&#x9700;&#x8981;&#x8003;&#x8651;&#x5BF9;&#x8C61;&#xFF08;&#x6216;&#x8005;&#x8BB0;&#x5F55;&#x3001;&#x6587;&#x4EF6;&#x3001;&#x6570;&#x636E;&#x5757;&#x7B49;&#xFF09;&#x7684;&#x8BFB;&#x5199;&#x7684;&#x987A;&#x5E8F;&#x4EE5;&#x53CA;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x95EE;&#x9898;&#x3002;&#x901A;&#x5E38;&#x6765;&#x8BF4;&#xFF0C;&#x5982;&#x679C;&#x4E24;&#x4E2A;&#x5BF9;&#x8C61;&#x6CA1;&#x6709;&#x5171;&#x4EAB;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x5E76;&#x53D1;&#x7684;&#x8BBF;&#x95EE;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x5171;&#x4EAB;&#x7684;&#x90E8;&#x5206;&#xFF0C;&#x5C31;&#x9700;&#x8981;&#x5BF9;&#x8FD9;&#x90E8;&#x5206;&#x8D44;&#x6E90;&#x8FDB;&#x884C;&#x52A0;&#x9501;&#xFF1B;&#x800C;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x8BFB;&#x5199;&#xFF08;&#x5C24;&#x5176;&#x662F;&#x5E76;&#x53D1;&#x5199;&#x66F4;&#x65B0;&#x65F6;&#xFF09;&#xFF0C;&#x5C31;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x987A;&#x5E8F;&#x6027;&#x4EE5;&#x53CA;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x7684;&#x63A7;&#x5236;&#xFF0C;&#x4EE5;&#x514D;&#x6570;&#x636E;&#x9519;&#x4E71;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5BF9;ceph&#x4E2D;&#x5BF9;&#x8C61;&#x8BFB;&#x5199;&#x7684;&#x987A;&#x5E8F;&#x53CA;&#x5E76;&#x53D1;&#x6027;&#x4FDD;&#x8BC1;&#x673A;&#x5236;&#x8FDB;&#x884C;&#x4ECB;&#x7ECD;&#x3002;</p>
 <h1 id="PG&#x7684;&#x6982;&#x5FF5;"><a href="#PG&#x7684;&#x6982;&#x5FF5;" class="headerlink" title="PG&#x7684;&#x6982;&#x5FF5;"></a>PG&#x7684;&#x6982;&#x5FF5;</h1><p>ceph&#x4E2D;&#x5F15;&#x5165;PG&#xFF08;Placement Group&#xFF09;&#x7684;&#x6982;&#x5FF5;&#xFF0C;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x903B;&#x8F91;&#x4E0A;&#x7684;&#x7EC4;&#xFF0C;&#x901A;&#x8FC7;crush&#x7B97;&#x6CD5;&#x6620;&#x5C04;&#x5230;&#x4E00;&#x7EC4;OSD&#x4E0A;&#xFF0C;&#x6BCF;&#x4E2A;PG&#x91CC;&#x5305;&#x542B;&#x5B8C;&#x6574;&#x7684;&#x526F;&#x672C;&#x5173;&#x7CFB;&#xFF0C;&#x6BD4;&#x5982;3&#x4E2A;&#x6570;&#x636E;&#x526F;&#x672C;&#x5206;&#x5E03;&#x5230;&#x4E00;&#x4E2A;PG&#x91CC;&#x7684;3&#x4E2A;&#x4E0D;&#x540C;&#x7684;OSD&#x4E0A;&#x3002;&#x4E0B;&#x9762;&#x5F15;&#x7528;ceph&#x8BBA;&#x6587;&#x4E2D;&#x7684;&#x4E00;&#x5F20;&#x56FE;&#x5C31;&#x53EF;&#x4EE5;&#x6BD4;&#x8F83;&#x76F4;&#x89C2;&#x7684;&#x7406;&#x89E3;&#x4E86;&#x3002;&#x5C06;&#x6587;&#x4EF6;&#x6309;&#x7167;&#x6307;&#x5B9A;&#x7684;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#x5206;&#x5272;&#x6210;&#x591A;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x6BCF;&#x4E2A;&#x5BF9;&#x8C61;&#x6839;&#x636E;hash&#x6620;&#x5C04;&#x5230;&#x67D0;&#x4E2A;pg&#xFF0C;&#x7136;&#x540E;&#x518D;&#x6839;&#x636E;crush&#x7B97;&#x6CD5;&#x6620;&#x5C04;&#x5230;&#x540E;&#x7AEF;&#x7684;&#x67D0;&#x51E0;&#x4E2A;osd&#x4E0A;&#x3002;<br><img src="/2016/08/29/ceph-io-sequence/pg.png" alt="ceph-io-sequence"></p>
 <h1 id="&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;"><a href="#&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;" class="headerlink" title="&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;"></a>&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#x7684;&#x5E76;&#x53D1;&#x63A7;&#x5236;</h1><p>&#x4E0D;&#x540C;&#x7684;&#x5BF9;&#x8C61;&#x6709;&#x53EF;&#x80FD;&#x843D;&#x5230;&#x540C;&#x4E00;&#x4E2A;pg&#x91CC;&#xFF0C;ceph&#x5B9E;&#x73B0;&#x91CC;&#xFF0C;&#x5728;OSD&#x7684;&#x5904;&#x7406;&#x7EBF;&#x7A0B;&#x4E2D;&#x5C31;&#x4F1A;&#x7ED9;PG&#x52A0;&#x9501;&#xFF0C;&#x4E00;&#x76F4;&#x5230;queue_transactions&#x91CC;&#x628A;&#x4E8B;&#x52A1;&#x653E;&#x5230;journal&#x7684;&#x961F;&#x5217;&#x91CC;&#xFF08;&#x4EE5;filestore&#x4E3A;&#x4F8B;&#xFF09;&#x624D;&#x91CA;&#x653E;PG&#x7684;&#x9501;&#x3002;&#x4ECE;&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x5BF9;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;PG&#x91CC;&#x7684;&#x4E0D;&#x540C;&#x5BF9;&#x8C61;&#xFF0C;&#x662F;&#x901A;&#x8FC7;PG&#x9501;&#x6765;&#x8FDB;&#x884C;&#x5E76;&#x53D1;&#x7684;&#x63A7;&#x5236;&#xFF0C;&#x597D;&#x5728;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x4E2D;&#x6CA1;&#x6709;&#x6D89;&#x53CA;&#x5230;&#x5BF9;&#x8C61;&#x7684;I/O&#xFF0C;&#x4E0D;&#x4F1A;&#x592A;&#x5F71;&#x54CD;&#x6548;&#x7387;&#xFF1B;&#x5BF9;&#x4E8E;&#x4E0D;&#x540C;PG&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8FDB;&#x884C;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2016/08/29/ceph-io-sequence/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -832,6 +979,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -848,13 +997,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/25/bluestore-work-flow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -862,38 +1021,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/08/25/bluestore-work-flow/" itemprop="url">
-                  ceph bluestore工作流程
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2016/08/25/bluestore-work-flow/" itemprop="url">ceph bluestore工作流程</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-25T15:46:12+08:00" content="2016-08-25">
-              2016-08-25
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-25T15:46:12+08:00">
+                2016-08-25
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/ceph/" itemprop="url" rel="index">
                     <span itemprop="name">ceph</span>
                   </a>
@@ -901,7 +1064,6 @@
 
                 
                 
-
               
             </span>
           
@@ -911,15 +1073,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -930,15 +1094,21 @@
         
           <p>&#x524D;&#x4E00;&#x7BC7;&#x300A;ceph&#x5B58;&#x50A8;&#x5F15;&#x64CE;bluestore&#x89E3;&#x6790;&#x300B;&#x5DF2;&#x7ECF;&#x5BF9;bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;&#x548C;I/O&#x6620;&#x5C04;&#x903B;&#x8F91;&#x8FDB;&#x884C;&#x4E86;&#x9610;&#x8FF0;&#xFF0C;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x4ECE;bluestore&#x7684;&#x5DE5;&#x4F5C;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x8FDB;&#x884C;&#x89E3;&#x6790;&#x3002;</p>
 <h1 id="1-&#x6574;&#x4F53;&#x6D41;&#x7A0B;"><a href="#1-&#x6574;&#x4F53;&#x6D41;&#x7A0B;" class="headerlink" title="1.&#x6574;&#x4F53;&#x6D41;&#x7A0B;"></a>1.&#x6574;&#x4F53;&#x6D41;&#x7A0B;</h1><p><img src="/2016/08/25/bluestore-work-flow/state-machine.png" alt="bluestore-work-flow"><br>&#x56FE;&#x4E2D;&#x5C55;&#x793A;&#x4E86;&#x6D41;&#x7A0B;&#x4E2D;&#x7684;&#x5173;&#x952E;&#x8DEF;&#x5F84;&#x53CA;&#x6D89;&#x53CA;&#x5230;&#x7684;&#x7EBF;&#x7A0B;&#x4E0E;&#x961F;&#x5217;&#x3002;&#x4E0B;&#x9762;&#x8BE6;&#x7EC6;&#x9610;&#x8FF0;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2016/08/25/bluestore-work-flow/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -948,6 +1118,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -964,13 +1136,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/19/ceph-bluestore/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -978,38 +1160,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/08/19/ceph-bluestore/" itemprop="url">
-                  ceph存储引擎bluestore解析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2016/08/19/ceph-bluestore/" itemprop="url">ceph存储引擎bluestore解析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-19T18:21:56+08:00" content="2016-08-19">
-              2016-08-19
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-19T18:21:56+08:00">
+                2016-08-19
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/ceph/" itemprop="url" rel="index">
                     <span itemprop="name">ceph</span>
                   </a>
@@ -1017,7 +1203,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1027,15 +1212,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1047,15 +1234,21 @@
           <p>ceph&#x540E;&#x7AEF;&#x652F;&#x6301;&#x591A;&#x79CD;&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#xFF0C;&#x4EE5;&#x63D2;&#x4EF6;&#x5F0F;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x8FDB;&#x884C;&#x7BA1;&#x7406;&#x4F7F;&#x7528;&#xFF0C;&#x76EE;&#x524D;&#x652F;&#x6301;filestore&#xFF0C;kvstore&#xFF0C;memstore&#x4EE5;&#x53CA;&#x6700;&#x65B0;&#x7684;bluestore&#xFF0C;&#x76EE;&#x524D;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;&#x7684;filestore&#xFF0C;&#x4F46;&#x662F;&#x56E0;&#x4E3A;filestore&#x5728;&#x5199;&#x6570;&#x636E;&#x524D;&#x9700;&#x8981;&#x5148;&#x5199;journal&#xFF0C;&#x4F1A;&#x6709;&#x4E00;&#x500D;&#x7684;&#x5199;&#x653E;&#x5927;&#xFF0C;&#x5E76;&#x4E14;filestore&#x4E00;&#x5F00;&#x59CB;&#x53EA;&#x662F;&#x5BF9;&#x4E8E;&#x673A;&#x68B0;&#x76D8;&#x8FDB;&#x884C;&#x8BBE;&#x8BA1;&#x7684;&#xFF0C;&#x6CA1;&#x6709;&#x4E13;&#x95E8;&#x9488;&#x5BF9;ssd&#x505A;&#x4F18;&#x5316;&#x8003;&#x8651;&#xFF0C;&#x56E0;&#x6B64;&#x8BDE;&#x751F;&#x7684;bluestore&#x521D;&#x8877;&#x5C31;&#x662F;&#x4E3A;&#x4E86;&#x51CF;&#x5C11;&#x5199;&#x653E;&#x5927;&#xFF0C;&#x5E76;&#x9488;&#x5BF9;ssd&#x505A;&#x4F18;&#x5316;&#xFF0C;&#x800C;&#x4E14;&#x76F4;&#x63A5;&#x7BA1;&#x7406;&#x88F8;&#x76D8;&#xFF0C;&#x4ECE;&#x7406;&#x8BBA;&#x4E0A;&#x8FDB;&#x4E00;&#x6B65;&#x51CF;&#x5C11;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5982;ext4/xfs&#x7B49;&#x90E8;&#x5206;&#x7684;&#x5F00;&#x9500;&#xFF0C;&#x76EE;&#x524D;bluestore&#x8FD8;&#x5904;&#x4E8E;&#x5F00;&#x53D1;&#x4F18;&#x5316;&#x9636;&#x6BB5;&#xFF0C;&#x5728;jewel&#x7248;&#x672C;&#x8FD8;&#x662F;&#x8BD5;&#x7528;&#x7248;&#x672C;&#xFF0C;&#x5E76;&#x4E14;&#x6700;&#x65B0;&#x7684;master&#x76F8;&#x6BD4;jewel&#x5DF2;&#x7ECF;&#x505A;&#x4E86;&#x5927;&#x7684;&#x91CD;&#x6784;&#xFF0C;&#x9884;&#x671F;&#x4F1A;&#x5728;&#x540E;&#x7EED;&#x7684;&#x5927;&#x7248;&#x672C;&#x4E2D;&#x7A33;&#x5B9A;&#x4E0B;&#x6765;&#x6210;&#x4E3A;&#x9ED8;&#x8BA4;&#x7684;&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x3002;&#x672C;&#x6587;&#x57FA;&#x4E8E;master&#x5206;&#x652F;&#x5BF9;bluestore&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;</p>
 <h1 id="bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;"><a href="#bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;" class="headerlink" title="bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;"></a>bluestore&#x6574;&#x4F53;&#x67B6;&#x6784;</h1><p><img src="/2016/08/19/ceph-bluestore/arch.png" alt="ceph-bluestore"></p>
 <p>bluestore&#x76F4;&#x63A5;&#x7BA1;&#x7406;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x629B;&#x5F03;&#x4E86;ext4/xfs&#x7B49;&#x672C;&#x5730;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;BlockDevice&#x5B9E;&#x73B0;&#x5728;&#x7528;&#x6237;&#x6001;&#x4E0B;&#x4F7F;&#x7528;linux aio&#x76F4;&#x63A5;&#x5BF9;&#x88F8;&#x8BBE;&#x5907;&#x8FDB;&#x884C;I/O&#x64CD;&#x4F5C;&#x3002;&#x65E2;&#x7136;&#x662F;&#x76F4;&#x63A5;&#x7BA1;&#x7406;&#x88F8;&#x8BBE;&#x5907;&#x5C31;&#x5FC5;&#x7136;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x88F8;&#x8BBE;&#x5907;&#x7684;&#x7A7A;&#x95F4;&#x7BA1;&#x7406;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F;Allocator&#xFF0C;&#x76EE;&#x524D;&#x652F;&#x6301;StupidAllocator&#x548C;BitmapAllocator&#x4E24;&#x79CD;&#x5206;&#x914D;&#x5668;&#x3002;&#x76F8;&#x5173;&#x7684;&#x5143;&#x6570;&#x636E;&#x4EE5;kv&#x7684;&#x5F62;&#x5F0F;&#x4FDD;&#x5B58;&#x5230;kv&#x6570;&#x636E;&#x5E93;&#x91CC;&#xFF0C;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;&#x7684;&#x662F;rocksdb&#xFF0C;&#x7531;&#x4E8E;rocksdb&#x672C;&#x8EAB;&#x662F;&#x57FA;&#x4E8E;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#xFF0C;&#x4E0D;&#x662F;&#x76F4;&#x63A5;&#x64CD;&#x4F5C;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x4F46;&#x662F;rocksdb&#x4E5F;&#x6BD4;&#x8F83;&#x7075;&#x6D3B;&#xFF0C;&#x5C06;&#x7CFB;&#x7EDF;&#x76F8;&#x5173;&#x7684;&#x5904;&#x7406;&#x62BD;&#x8C61;&#x6210;Env&#xFF0C;&#x7528;&#x6237;&#x53EF;&#x7528;&#x5B9E;&#x73B0;&#x76F8;&#x5E94;&#x7684;&#x63A5;&#x53E3;&#xFF0C;rocksdb&#x9ED8;&#x8BA4;&#x7684;Env&#x662F;PosixEnv&#xFF0C;&#x76F4;&#x63A5;&#x5BF9;&#x63A5;&#x672C;&#x5730;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x4E3A;&#x6B64;&#xFF0C;bluestore&#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x4E2A;BlueRocksEnv&#xFF0C;&#x7EE7;&#x627F;&#x81EA;EnvWrapper&#xFF0C;&#x6765;&#x4E3A;rocksdb&#x63D0;&#x4F9B;&#x5E95;&#x5C42;&#x7CFB;&#x7EDF;&#x7684;&#x5C01;&#x88C5;&#xFF0C;&#x4E3A;&#x4E86;&#x5BF9;&#x63A5;BlueRocksEnv&#xFF0C;&#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x4E2A;&#x5C0F;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;BlueFS&#xFF0C;&#x53EA;&#x5B9E;&#x73B0;rocksdb Env&#x9700;&#x8981;&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x5728;&#x7CFB;&#x7EDF;&#x542F;&#x52A8;mount&#x8FD9;&#x4E2A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x65F6;&#x5019;&#x5C06;&#x6240;&#x6709;&#x7684;&#x5143;&#x6570;&#x636E;&#x90FD;&#x52A0;&#x8F7D;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;BluesFS&#x7684;&#x6570;&#x636E;&#x548C;&#x65E5;&#x5FD7;&#x6587;&#x4EF6;&#x90FD;&#x901A;&#x8FC7;BlockDevice&#x4FDD;&#x5B58;&#x5230;&#x88F8;&#x8BBE;&#x5907;&#x4E0A;&#xFF0C;BlueFS&#x548C;BlueStore&#x53EF;&#x4EE5;&#x5171;&#x4EAB;&#x88F8;&#x8BBE;&#x5907;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x5206;&#x522B;&#x6307;&#x5B9A;&#x4E0D;&#x540C;&#x7684;&#x8BBE;&#x5907;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2016/08/19/ceph-bluestore/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1065,6 +1258,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1081,13 +1276,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/02/ceph-recover-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -1095,38 +1300,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/08/02/ceph-recover-optimize/" itemprop="url">
-                  ceph恢复优化
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2016/08/02/ceph-recover-optimize/" itemprop="url">ceph恢复优化</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-02T19:46:23+08:00" content="2016-08-02">
-              2016-08-02
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-02T19:46:23+08:00">
+                2016-08-02
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/ceph/" itemprop="url" rel="index">
                     <span itemprop="name">ceph</span>
                   </a>
@@ -1134,7 +1343,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1144,15 +1352,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1163,15 +1373,21 @@
         
           <h1 id="1-&#x80CC;&#x666F;"><a href="#1-&#x80CC;&#x666F;" class="headerlink" title="1.&#x80CC;&#x666F;"></a>1.&#x80CC;&#x666F;</h1><p>&#x5728;&#x5BF9;ceph&#x5757;&#x5B58;&#x50A8;&#x8FDB;&#x884C;&#x6027;&#x80FD;&#x6D4B;&#x8BD5;&#x65F6;&#x53D1;&#x73B0;&#xFF0C;&#x5F53;&#x6709;osd&#x91CD;&#x542F;&#x6216;&#x8005;&#x5B58;&#x50A8;&#x673A;&#x91CD;&#x542F;&#x65F6;&#xFF0C;I/O&#x6027;&#x80FD;&#x4F1A;&#x6025;&#x5267;&#x4E0B;&#x964D;&#xFF0C;&#x5C24;&#x5176;&#x5728;&#x968F;&#x673A;&#x5199;&#x7684;&#x8D1F;&#x8F7D;&#x4E0B;&#xFF0C;&#x4E0B;&#x964D;&#x5E45;&#x5EA6;&#x8FBE;&#x5230;90%&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x6301;&#x7EED;&#x4E00;&#x6BB5;&#x65F6;&#x5019;&#x624D;&#x6162;&#x6162;&#x6062;&#x590D;&#x5230;&#x6B63;&#x5E38;&#x6C34;&#x5E73;&#x3002;&#x4E00;&#x5F00;&#x59CB;&#x6211;&#x4EEC;&#x4E5F;&#x5C1D;&#x8BD5;&#x5C06;&#x6062;&#x590D;&#x76F8;&#x5173;&#x7684;&#x53C2;&#x6570;&#x8C03;&#x4F4E;&#xFF08;osd_recovery_max_active=1&#x3001;osd_recovery_max_chunk=131072&#x3001;osd_max_backfills=1&#xFF09;&#xFF0C;&#x4EE5;&#x53CA;&#x8C03;&#x6574;&#x6B63;&#x5E38;I/O&#x548C;&#x6062;&#x590D;I/O&#x7684;&#x4F18;&#x5148;&#x7EA7;&#xFF08;osd_recovery_op_priority=10&#x3001;osd_client_op_priority=63&#xFF09;&#xFF0C;&#x4F46;&#x662F;&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;&#x6765;&#x770B;&#xFF0C;&#x8FD9;&#x4E9B;&#x53C2;&#x6570;&#x7684;&#x8C03;&#x6574;&#x6CA1;&#x6709;&#x591A;&#x5927;&#x7684;&#x6548;&#x679C;&#xFF0C;&#x968F;&#x673A;&#x5199;&#x8D1F;&#x8F7D;&#x4E0B;&#x6027;&#x80FD;&#x4E0B;&#x964D;&#x4ECD;&#x7136;&#x5F88;&#x5927;&#x3002;</p>
 <h1 id="2-&#x539F;&#x56E0;&#x5206;&#x6790;"><a href="#2-&#x539F;&#x56E0;&#x5206;&#x6790;" class="headerlink" title="2.&#x539F;&#x56E0;&#x5206;&#x6790;"></a>2.&#x539F;&#x56E0;&#x5206;&#x6790;</h1><p>&#x5728;&#x300A;ceph&#x57FA;&#x4E8E;pglog&#x7684;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#x300B;&#x4E00;&#x6587;&#x4E2D;&#x5206;&#x6790;&#x4E86;ceph&#x7684;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#xFF0C;&#x4ECE;&#x4E2D;&#x6211;&#x4EEC;&#x5F97;&#x77E5;&#x5728;osd&#x91CD;&#x542F;&#x3001;&#x5B58;&#x50A8;&#x673A;&#x91CD;&#x542F;&#x7B49;&#x573A;&#x666F;&#x4E0B;&#x57FA;&#x4E8E;pglog&#x7684;&#x6062;&#x590D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5728;peering&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x6839;&#x636E;pglog&#x6765;&#x6784;&#x5EFA;&#x51FA;missing&#x5217;&#x8868;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x6062;&#x590D;&#x65F6;&#x6839;&#x636E;missing&#x5217;&#x8868;&#x9010;&#x4E2A;&#x8FDB;&#x884C;&#x6062;&#x590D;&#xFF0C;&#x6062;&#x590D;&#x7684;&#x7C92;&#x5EA6;&#x662F;&#x6574;&#x4E2A;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#xFF08;&#x9ED8;&#x8BA4;4MB&#xFF0C;&#x6709;&#x53EF;&#x80FD;&#x6709;&#x7684;&#x5BF9;&#x8C61;&#x4E0D;&#x8DB3;4MB&#xFF0C;&#x5C31;&#x6309;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#xFF09;&#xFF0C;&#x5373;&#x4F7F;&#x53EA;&#x4FEE;&#x6539;&#x4E86;&#x4E00;&#x4E2A;4KB&#xFF0C;&#x4E5F;&#x9700;&#x8981;&#x5C06;4MB&#x7684;&#x5BF9;&#x8C61;&#x62F7;&#x8D1D;&#x8FC7;&#x6765;&#xFF0C;&#x8FD9;&#x6837;100&#x4E2A;io&#x5C31;&#x4F1A;&#x8FBE;&#x5230;400MB&#x7684;&#x5E26;&#x5BBD;&#xFF0C;&#x5BF9;&#x7F51;&#x7EDC;&#x53CA;&#x78C1;&#x76D8;&#x4EA7;&#x751F;&#x8F83;&#x5927;&#x7684;&#x5F71;&#x54CD;&#x3002;&#x5F53;&#x5199;io&#x547D;&#x4E2D;&#x6B63;&#x5728;&#x4FEE;&#x590D;&#x7684;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x4E5F;&#x662F;&#x5148;&#x4FEE;&#x590D;&#x539F;&#x6765;4MB&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x5373;&#x9700;&#x8981;&#x5C06;4MB&#x7684;&#x6570;&#x636E;&#x901A;&#x8FC7;&#x7F51;&#x7EDC;&#x62F7;&#x8D1D;&#x8FC7;&#x6765;&#xFF0C;&#x5EF6;&#x8FDF;&#x5C31;&#x4F1A;&#x589E;&#x52A0;&#x5F88;&#x591A;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x5165;&#x6570;&#x636E;&#xFF0C;&#x5BF9;&#x4E8E;&#x968F;&#x673A;&#x5199;&#x7684;&#x573A;&#x666F;&#x5C24;&#x5176;&#x4E25;&#x91CD;&#xFF0C;&#x57FA;&#x672C;&#x90FD;&#x662F;&#x547D;&#x4E2D;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5E26;&#x6765;&#x76F8;&#x5F53;&#x5927;&#x7684;&#x5EF6;&#x8FDF;&#xFF0C;&#x4ECE;&#x800C;iops&#x4E0B;&#x964D;&#xFF08;&#x4E0B;&#x964D;&#x5E45;&#x5EA6;80%~90%&#xFF09;&#x3002;&#x8FD9;&#x4E2A;&#x5F71;&#x54CD;&#x65F6;&#x95F4;&#x53D6;&#x51B3;&#x4E8E;&#x4E0A;&#x5C42;&#x7684;&#x4E1A;&#x52A1;&#x91CF;&#x548C;osd&#x505C;&#x670D;&#x7684;&#x65F6;&#x95F4;&#x3002;<br><img src="/2016/08/02/ceph-recover-optimize/recover-whole.png" alt="ceph-recover-optimize"><br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2016/08/02/ceph-recover-optimize/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1181,6 +1397,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1197,13 +1415,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/02/28/ceph-rbd-snap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -1211,38 +1439,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/02/28/ceph-rbd-snap/" itemprop="url">
-                  ceph rbd快照原理解析
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2016/02/28/ceph-rbd-snap/" itemprop="url">ceph rbd快照原理解析</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-02-28T16:37:11+08:00" content="2016-02-28">
-              2016-02-28
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-28T16:37:11+08:00">
+                2016-02-28
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/ceph/" itemprop="url" rel="index">
                     <span itemprop="name">ceph</span>
                   </a>
@@ -1250,7 +1482,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1260,15 +1491,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1280,15 +1513,21 @@
           <p>&#x524D;&#x6BB5;&#x65F6;&#x95F4;&#x4E00;&#x76F4;&#x5728;&#x7814;&#x7A76;ceph&#x7684;&#x5FEB;&#x7167;&#x4EE5;&#x53CA;&#x5176;&#x6240;&#x6D89;&#x53CA;&#x7684;&#x6545;&#x969C;&#x6062;&#x590D;&#x903B;&#x8F91;&#xFF0C;ceph&#x5728;&#x8FD9;&#x90E8;&#x5206;&#x7684;&#x5B9E;&#x73B0;&#x633A;&#x7CBE;&#x5999;&#x7684;&#xFF0C;&#x867D;&#x7136;&#x4E5F;&#x662F;&#x57FA;&#x4E8E;COW&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x7EC6;&#x7EC6;&#x54C1;&#x6765;&#xFF0C;&#x5176;&#x5728;&#x5FEB;&#x7167;&#x7684;&#x5143;&#x6570;&#x636E;&#x7BA1;&#x7406;&#x4EE5;&#x53CA;&#x7236;&#x5B50;&#x5173;&#x7CFB;&#x7684;&#x7EF4;&#x62A4;&#x4E0A;&#x6709;&#x72EC;&#x5230;&#x4E4B;&#x5904;&#xFF0C;&#x672C;&#x6587;&#x5C06;&#x8BE6;&#x7EC6;&#x9610;&#x8FF0;&#x5FEB;&#x7167;&#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x4EE5;&#x53CA;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#x5728;&#x6062;&#x590D;&#x65F6;&#x5982;&#x4F55;&#x81F3;&#x5173;&#x91CD;&#x8981;&#x7684;&#x4F5C;&#x7528;&#x3002;</p>
 <h1 id="1-rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;"><a href="#1-rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;" class="headerlink" title="1.rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;"></a>1.rbd&#x5FEB;&#x7167;&#x7684;&#x76F4;&#x89C2;&#x7406;&#x89E3;</h1><p>ceph&#x7684;rbd&#x5377;&#x53EF;&#x7528;&#x505A;&#x591A;&#x6B21;&#x5FEB;&#x7167;&#xFF0C;&#x6BCF;&#x6B21;&#x505A;&#x5B8C;&#x5FEB;&#x7167;&#x540E;&#x518D;&#x5BF9;&#x5377;&#x8FDB;&#x884C;&#x5199;&#x5165;&#x65F6;&#x5C31;&#x4F1A;&#x89E6;&#x53D1;COW&#x64CD;&#x4F5C;&#xFF0C;&#x5373;&#x5148;&#x62F7;&#x8D1D;&#x51FA;&#x539F;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x636E;&#x51FA;&#x6765;&#x751F;&#x6210;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x539F;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x8FDB;&#x884C;&#x5199;&#x5165;&#x3002;&#x76F4;&#x89C2;&#x56FE;&#x89E3;&#x5982;&#x4E0B;&#xFF1A;<br><img src="/2016/02/28/ceph-rbd-snap/rbd-flow.png" alt="rbd-flow"><br>&#x505A;&#x5FEB;&#x7167;&#x7684;&#x64CD;&#x4F5C;&#x662F;&#x5F88;&#x5FEB;&#x7684;&#xFF0C;&#x56E0;&#x4E3A;&#x53EA;&#x66F4;&#x65B0;&#x4E86;&#x5377;&#x7684;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x6DFB;&#x52A0;&#x4E86;&#x4E00;&#x4E9B;&#x5FEB;&#x7167;&#x4FE1;&#x606F;&#xFF08;&#x5305;&#x62EC;&#x8BE5;&#x5377;&#x6709;&#x54EA;&#x4E9B;&#x5FEB;&#x7167;&#xFF0C;&#x5FEB;&#x7167;id&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x4E2A;&#x5377;&#x662F;&#x514B;&#x9686;&#x51FA;&#x6765;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x8FD8;&#x5305;&#x62EC;parent&#x4FE1;&#x606F;&#xFF09;&#x3002;&#x6BCF;&#x4E2A;rbd&#x5377;&#x5728;rados&#x91CC;&#x90FD;&#x6709;&#x4E00;&#x4E2A;<strong>rbd_header</strong>&#x5BF9;&#x8C61;&#xFF0C;&#x8FD9;&#x4E2A;rbd_header&#x5BF9;&#x8C61;&#x91CC;&#x9762;&#x6CA1;&#x6570;&#x636E;&#xFF0C;&#x5377;&#x7684;&#x5143;&#x6570;&#x636E;&#x90FD;&#x662F;&#x4F5C;&#x4E3A;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5C5E;&#x6027;&#x4EE5;omap&#x65B9;&#x5F0F;&#x8BB0;&#x5F55;&#x5230;leveldb&#x91CC;&#xFF08;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;rados -p <pool> listomapvals rbd_header.<id>&#x6765;&#x83B7;&#x5F97;&#x5FEB;&#x7167;&#x76F8;&#x5173;&#x7684;&#x5143;&#x6570;&#x636E;&#x4FE1;&#x606F;&#xFF09;&#x3002;</id></pool></p>
 <p>&#x5F53;&#x505A;&#x5B8C;&#x5FEB;&#x7167;&#x540E;&#xFF0C;&#x5982;&#x679C;&#x5BF9;&#x539F;&#x5377;&#x8FDB;&#x884C;&#x5199;&#x5165;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C31;&#x4F1A;&#x5148;&#x62F7;&#x8D1D;&#x6570;&#x636E;&#x51FA;&#x6765;&#x751F;&#x6210;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#xFF08;&#x5728;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x91CC;&#x5C31;&#x662F;&#x4E00;&#x4E2A;clone&#x64CD;&#x4F5C;&#xFF09;&#xFF0C;&#x62F7;&#x8D1D;&#x7684;&#x65F6;&#x5019;&#x662F;&#x6574;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x6570;&#x636E;&#xFF08;&#x6709;&#x53EF;&#x80FD;&#x8FD9;&#x4E2A;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x4E0D;&#x662F;&#x9ED8;&#x8BA4;&#x7684;4MB&#x5927;&#x5C0F;&#xFF0C;&#x90A3;&#x4E48;&#x6709;&#x591A;&#x5927;&#x62F7;&#x591A;&#x5927;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5199;&#x5165;&#x65B0;&#x6570;&#x636E;&#x3002;&#x5728;ceph&#x91CC;&#xFF0C;&#x5377;&#x7684;&#x539F;&#x5BF9;&#x8C61;&#x53EB;&#x505A;<strong>head&#x5BF9;&#x8C61;</strong>&#xFF0C;&#x800C;&#x5377;&#x4F5C;&#x4E3A;&#x5FEB;&#x7167;&#x540E;&#x901A;&#x8FC7;cow&#x62F7;&#x8D1D;&#x51FA;&#x6765;&#x7684;&#x5FEB;&#x7167;&#x5BF9;&#x8C61;&#x79F0;&#x4E3A;<strong>snap&#x5BF9;&#x8C61;</strong>&#x3002;<br>&#x56E0;&#x4E3A;ceph&#x91CC;&#x5BF9;&#x8C61;&#x662F;&#x5199;&#x65F6;&#x5206;&#x914D;&#x7684;&#xFF0C;&#x4E00;&#x4E2A;&#x65B0;&#x521B;&#x5EFA;&#x7684;&#x5377;&#x5982;&#x679C;&#x6BCF;&#x4E00;&#x5199;&#x8FC7;&#x6570;&#x636E;&#xFF0C;&#x5728;rados&#x91CC;&#x662F;&#x6CA1;&#x6709;&#x751F;&#x6210;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x7684;&#xFF0C;&#x53EA;&#x6709;&#x5F53;&#x6570;&#x636E;&#x5199;&#x5165;&#x65F6;&#xFF0C;&#x624D;&#x5206;&#x914D;&#x51FA;&#x6570;&#x636E;&#x5BF9;&#x8C61;&#x6765;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2016/02/28/ceph-rbd-snap/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1298,6 +1537,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1314,13 +1555,23 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/02/15/ceph-consistency/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wu Dong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="System Notes">
+    </span>
 
     
       <header class="post-header">
@@ -1328,38 +1579,42 @@
         
         
           <h1 class="post-title" itemprop="name headline">
-            
-            
-              
                 
-                <a class="post-title-link" href="/2016/02/15/ceph-consistency/" itemprop="url">
-                  ceph基于pglog的一致性协议
-                </a>
-              
-            
-          </h1>
+                <a class="post-title-link" href="/2016/02/15/ceph-consistency/" itemprop="url">ceph基于pglog的一致性协议</a></h1>
         
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-02-15T16:30:31+08:00" content="2016-02-15">
-              2016-02-15
-            </time>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-15T16:30:31+08:00">
+                2016-02-15
+              </time>
+            
+
+            
+
+            
           </span>
 
           
             <span class="post-category" >
-              &nbsp; | &nbsp;
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/ceph/" itemprop="url" rel="index">
                     <span itemprop="name">ceph</span>
                   </a>
@@ -1367,7 +1622,6 @@
 
                 
                 
-
               
             </span>
           
@@ -1377,15 +1631,17 @@
           
 
           
-
-          
           
 
           
+
+          
+
+          
+
         </div>
       </header>
     
-
 
     <div class="post-body" itemprop="articleBody">
 
@@ -1397,15 +1653,21 @@
           <p>&#x5206;&#x5E03;&#x5F0F;&#x5B58;&#x50A8;&#x7CFB;&#x7EDF;&#x901A;&#x5E38;&#x91C7;&#x7528;&#x591A;&#x526F;&#x672C;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x4FDD;&#x8BC1;&#x7CFB;&#x7EDF;&#x7684;&#x53EF;&#x9760;&#x6027;&#xFF0C;&#x800C;&#x591A;&#x526F;&#x672C;&#x4E4B;&#x95F4;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7684;&#x4E00;&#x81F4;&#x6027;&#x5C31;&#x662F;&#x7CFB;&#x7EDF;&#x7684;&#x6838;&#x5FC3;&#x3002;ceph&#x53F7;&#x79F0;&#x7EDF;&#x4E00;&#x5B58;&#x50A8;&#xFF0C;&#x5176;&#x6838;&#x5FC3;RADOS&#x65E2;&#x652F;&#x6301;&#x591A;&#x526F;&#x672C;&#xFF0C;&#x4E5F;&#x652F;&#x6301;&#x7EA0;&#x5220;&#x7801;&#x3002;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x5206;&#x6790;ceph&#x7684;&#x591A;&#x526F;&#x672C;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#x3002;</p>
 <h1 id="1-pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;"><a href="#1-pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;" class="headerlink" title="1.pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;"></a>1.pglog&#x53CA;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;</h1><p>ceph&#x4F7F;&#x7528;pglog&#x6765;&#x4FDD;&#x8BC1;&#x591A;&#x526F;&#x672C;&#x4E4B;&#x95F4;&#x7684;&#x4E00;&#x81F4;&#x6027;&#xFF0C;pglog&#x7684;&#x793A;&#x610F;&#x56FE;&#x5982;&#x4E0B;&#xFF1A;pglog&#x4E3B;&#x8981;&#x662F;&#x7528;&#x6765;&#x8BB0;&#x5F55;&#x505A;&#x4E86;&#x4EC0;&#x4E48;&#x64CD;&#x4F5C;&#xFF0C;&#x6BD4;&#x5982;&#x4FEE;&#x6539;&#xFF0C;&#x5220;&#x9664;&#x7B49;&#xFF0C;&#x800C;&#x6BCF;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#x91CC;&#x5305;&#x542B;&#x4E86;&#x5BF9;&#x8C61;&#x4FE1;&#x606F;&#xFF0C;&#x8FD8;&#x6709;&#x7248;&#x672C;&#x3002;<br>ceph&#x4F7F;&#x7528;&#x7248;&#x672C;&#x63A7;&#x5236;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x6807;&#x8BB0;&#x4E00;&#x4E2A;PG&#x5185;&#x7684;&#x6BCF;&#x4E00;&#x6B21;&#x66F4;&#x65B0;&#xFF0C;&#x6BCF;&#x4E2A;&#x7248;&#x672C;&#x5305;&#x62EC;&#x4E00;&#x4E2A;(epoch&#xFF0C;version)&#x6765;&#x7EC4;&#x6210;&#xFF1A;&#x5176;&#x4E2D;epoch&#x662F;osdmap&#x7684;&#x7248;&#x672C;&#xFF0C;&#x6BCF;&#x5F53;&#x6709;OSD&#x72B6;&#x6001;&#x53D8;&#x5316;&#x5982;&#x589E;&#x52A0;&#x5220;&#x9664;&#x7B49;&#x65F6;&#xFF0C;epoch&#x5C31;&#x9012;&#x589E;&#xFF1B;version&#x662F;PG&#x5185;&#x6BCF;&#x6B21;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;&#x7684;&#x7248;&#x672C;&#x53F7;&#xFF0C;&#x9012;&#x589E;&#x7684;&#xFF0C;&#x7531;PG&#x5185;&#x7684;Primary OSD&#x8FDB;&#x884C;&#x5206;&#x914D;&#x7684;&#x3002;<br><img src="/2016/02/15/ceph-consistency/pglog-entry.png" alt="pglog-entry"><br>&#x6BCF;&#x4E2A;&#x526F;&#x672C;&#x4E0A;&#x90FD;&#x7EF4;&#x62A4;&#x4E86;pglog&#xFF0C;pglog&#x91CC;&#x6700;&#x91CD;&#x8981;&#x7684;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x5C31;&#x662F;last_complete&#x548C;last_update&#xFF0C;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6BCF;&#x4E2A;&#x526F;&#x672C;&#x4E0A;&#x8FD9;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x90FD;&#x6307;&#x5411;&#x540C;&#x4E00;&#x4E2A;&#x4F4D;&#x7F6E;&#xFF0C;&#x5F53;&#x51FA;&#x73B0;&#x673A;&#x5668;&#x91CD;&#x542F;&#x3001;&#x7F51;&#x7EDC;&#x4E2D;&#x65AD;&#x7B49;&#x6545;&#x969C;&#x65F6;&#xFF0C;&#x6545;&#x969C;&#x526F;&#x672C;&#x7684;&#x8FD9;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x5C31;&#x4F1A;&#x6709;&#x6240;&#x533A;&#x522B;&#xFF0C;&#x4EE5;&#x4FBF;&#x4E8E;&#x6765;&#x8BB0;&#x5F55;&#x526F;&#x672C;&#x95F4;&#x7684;&#x5DEE;&#x5F02;&#x3002;</p>
 <p>&#x4E3A;&#x4E86;&#x4FBF;&#x4E8E;&#x8BF4;&#x660E;ceph&#x7684;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;&#xFF0C;&#x5148;&#x7B80;&#x8981;&#x63CF;&#x8FF0;&#x4E00;&#x4E0B;ceph&#x7684;&#x8BFB;&#x5199;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#x3002;<br>&#x5199;&#x5904;&#x7406;&#x6D41;&#x7A0B;&#xFF1A;<br>1&#xFF09;client&#x628A;&#x5199;&#x8BF7;&#x6C42;&#x53D1;&#x5230;Primary OSD&#x4E0A;&#xFF0C;Primary OSD&#x4E0A;&#x5C06;&#x5199;&#x8BF7;&#x6C42;&#x5E8F;&#x5217;&#x5316;&#x5230;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D;&#xFF08;&#x5728;&#x5185;&#x5B58;&#x91CC;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x6784;&#x9020;&#x4E00;&#x6761;pglog&#x8BB0;&#x5F55;&#xFF0C;&#x4E5F;&#x5E8F;&#x5217;&#x5316;&#x5230;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x4EE5;directIO&#x7684;&#x65B9;&#x5F0F;&#x5F02;&#x6B65;&#x5199;&#x5165;journal&#xFF0C;&#x540C;&#x65F6;Primary OSD&#x628A;&#x5199;&#x8BF7;&#x6C42;&#x548C;pglog(pglog_entry&#x662F;&#x7531;primary&#x751F;&#x6210;)&#x53D1;&#x9001;&#x5230;Replicas&#x4E0A;&#xFF1B;<br>2&#xFF09;&#x5728;Primary OSD&#x5C06;&#x4E8B;&#x52A1;&#x5199;&#x5230;journal&#x4E0A;&#x540E;&#xFF0C;&#x4F1A;&#x901A;&#x8FC7;&#x4E00;&#x7CFB;&#x5217;&#x7684;&#x7EBF;&#x7A0B;&#x548C;&#x56DE;&#x8C03;&#x5904;&#x7406;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#x7684;&#x6570;&#x636E;&#x5199;&#x5165;filesystem&#xFF08;&#x53EA;&#x662F;&#x5199;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x7F13;&#x5B58;&#x91CC;&#xFF0C;&#x4F1A;&#x6709;&#x7EBF;&#x7A0B;&#x5B9A;&#x671F;&#x5237;&#x6570;&#x636E;&#xFF09;&#xFF0C;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#x7684;pglog&#x8BB0;&#x5F55;&#xFF08;&#x4E5F;&#x5305;&#x62EC;pginfo&#x7684;last_complete&#x548C;last_update&#xFF09;&#x4F1A;&#x5199;&#x5230;leveldb&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x4E9B;&#x6269;&#x5C55;&#x5C5E;&#x6027;&#x76F8;&#x5173;&#x7684;&#x4E5F;&#x5728;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#xFF0C;&#x5728;&#x904D;&#x5386;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x65F6;&#x4E5F;&#x4F1A;&#x5199;&#x5230;leveldb&#xFF1B;<br>3&#xFF09;&#x5728;Replicas&#x4E0A;&#xFF0C;&#x4E5F;&#x662F;&#x8FDB;&#x884C;&#x7C7B;&#x4F3C;&#x4E8E;Primary&#x7684;&#x52A8;&#x4F5C;&#xFF0C;&#x5148;&#x5199;journal&#xFF0C;&#x5199;&#x6210;&#x529F;&#x4F1A;&#x7ED9;Primary&#x53D1;&#x9001;&#x4E00;&#x4E2A;committed ack&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x4E8B;&#x52A1;&#x91CC;&#x7684;&#x6570;&#x636E;&#x5199;&#x5230;filesystem&#xFF0C;pglog&#x4E0E;pginfo&#x5199;&#x5230;leveldb&#x91CC;&#xFF0C;&#x5199;&#x5B8C;&#x540E;&#x4F1A;&#x7ED9;Primary&#x53D1;&#x9001;&#x53E6;&#x5916;&#x4E00;&#x4E2A;applied ack&#xFF1B;<br>4&#xFF09;Primary&#x5728;&#x81EA;&#x5DF1;&#x5B8C;&#x6210;journal&#x7684;&#x5199;&#x5165;&#x65F6;&#xFF0C;&#x4EE5;&#x53CA;&#x5728;&#x6536;&#x5230;Replica&#x7684;committed ack&#x65F6;&#x90FD;&#x4F1A;&#x68C0;&#x67E5;&#x662F;&#x5426;&#x591A;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x5199;&#x5165;journal&#x6210;&#x529F;&#x4E86;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5219;&#x5411;client&#x7AEF;&#x53D1;&#x9001;ack&#x901A;&#x77E5;&#x5199;&#x5B8C;&#x6210;&#xFF1B;Primary&#x5728;&#x81EA;&#x5DF1;&#x5B8C;&#x6210;&#x4E8B;&#x52A1;&#x5199;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x548C;leveldb&#x540E;&#xFF0C;&#x4EE5;&#x53CA;&#x5728;&#x6536;&#x5230;replica&#x7684;applied ack&#x65F6;&#x90FD;&#x4F1A;&#x68C0;&#x67E5;&#x662F;&#x5426;&#x591A;&#x4E2A;&#x526F;&#x672C;&#x90FD;&#x5199;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6210;&#x529F;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5219;&#x5411;client&#x7AEF;&#x53D1;&#x9001;ack&#x901A;&#x77E5;&#x6570;&#x636E;&#x53EF;&#x8BFB;&#xFF1B;<br>&#x5BF9;&#x8BFB;&#x6D41;&#x7A0B;&#x6765;&#x8BF4;&#xFF0C;&#x5C31;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x90FD;&#x662F;&#x7531;Primary&#x6765;&#x5904;&#x7406;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x591A;&#x8BF4;&#x4E86;&#x3002;<br></p>
-          <div class="post-more-link text-center">
+          <!--noindex-->
+          <div class="post-button text-center">
             <a class="btn" href="/2016/02/15/ceph-consistency/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
+          <!--/noindex-->
         
       
     </div>
-    
+
+    <div>
+      
+    </div>
+
     <div>
       
     </div>
@@ -1415,6 +1677,8 @@
     </div>
 
     <footer class="post-footer">
+      
+
       
 
       
@@ -1462,25 +1726,32 @@
 
       
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
                alt="Wu Dong" />
           <p class="site-author-name" itemprop="name">Wu Dong</p>
-          <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+           
+              <p class="site-description motion-element" itemprop="description">Diary Notebook</p>
+          
         </div>
         <nav class="site-state motion-element">
-          <div class="site-state-item site-state-posts">
-            <a href="/archives">
-              <span class="site-state-item-count">32</span>
-              <span class="site-state-item-name">日志</span>
-            </a>
-          </div>
 
           
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
             <div class="site-state-item site-state-categories">
-              <a href="/categories">
+              <a href="/categories/index.html">
                 <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">分类</span>
               </a>
@@ -1488,8 +1759,10 @@
           
 
           
+            
+            
             <div class="site-state-item site-state-tags">
-              <a href="/tags">
+              <a href="/tags/index.html">
                 <span class="site-state-item-count">27</span>
                 <span class="site-state-item-name">标签</span>
               </a>
@@ -1517,7 +1790,12 @@
         
         
 
+        
+
+
       </section>
+
+      
 
       
 
@@ -1541,8 +1819,9 @@
   <span class="author" itemprop="copyrightHolder">Wu Dong</span>
 </div>
 
+
 <div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
 </div>
 
 <div class="theme-info">
@@ -1552,31 +1831,40 @@
   </a>
 </div>
 
+
         
-
 <div class="busuanzi-count">
-
   <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
   
-    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
   
 
   
-    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
-  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
   
 </div>
-
 
 
         
       </div>
     </footer>
 
-    <div class="back-to-top">
-      <i class="fa fa-arrow-up"></i>
-    </div>
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
   </div>
 
   
@@ -1599,56 +1887,102 @@
 
 
 
-  
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
-  
 
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
 
 
 
   
-  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
 
   
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
   
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
 
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   
 
 
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
 
   
 
 
 
+
+	
+
+
+
+
+
   
+
+
+
+
+
   
+    
+
+    
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
   
 
   
